@@ -6,7 +6,7 @@ COPY package*.json nx.json ./
 COPY apps/website/package.json ./apps/website/package.json
 
 
-RUN pnpm install
+RUN pnpm recursive install
 
 COPY apps/website ./apps/website
 
