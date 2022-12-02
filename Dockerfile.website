@@ -11,5 +11,6 @@ RUN pnpm install
 COPY apps/website ./apps/website
 
 EXPOSE 3000
+RUN cd apps/website && pnpm install
 RUN cd apps/website && pnpm build
 CMD [ "pnpm", "start:website" ]
