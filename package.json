@@ -2,7 +2,9 @@
   "name": "prompto",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:website": "(cd apps/website && pnpm start)"
+  },
   "private": true,
   "dependencies": {},
   "devDependencies": {
@@ -11,6 +13,7 @@
     "prettier": "^2.6.2"
   },
   "workspaces": [
-    "packages/*"
+    "apps/*",
+    "libs/*"
   ]
 }

@@ -1,0 +1,15 @@
+FROM node:16.10
+RUN npm install -g pnpm
+
+WORKDIR /usr/src/app
+COPY package*.json nx.json ./
+COPY apps/website/package.json ./apps/website/package.json
+
+
+RUN pnpm install
+
+COPY apps/website ./apps/website
+
+EXPOSE 3000
+RUN pnpm nx run website:build
+CMD [ "pnpm", "start:website" ]
