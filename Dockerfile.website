@@ -10,8 +10,6 @@ RUN pnpm install
 
 COPY apps/website ./apps/website
 
-RUN pnpm install
-
 EXPOSE 3000
-RUN pnpm nx run website:build
+RUN cd apps/website && pnpm build
 CMD [ "pnpm", "start:website" ]
