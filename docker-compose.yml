@@ -21,7 +21,9 @@ services:
       - 'traefik.http.routers.prompto-editor.tls.certresolver=le'
       - 'traefik.http.routers.prompto-editor.entrypoints=websecure'
       - 'traefik.docker.network=traefik-external'
-
+    ports:
+      - '3000:80'
+      
 networks:
   traefik-external:
     external: true

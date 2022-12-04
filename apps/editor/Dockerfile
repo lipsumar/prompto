@@ -5,7 +5,8 @@ WORKDIR /usr/src/app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nx.json ./
 COPY apps/editor/package.json ./apps/editor/package.json
 RUN pnpm recursive install
-COPY . .
+
+COPY apps/editor ./apps/editor
 
 RUN pnpm nx run editor:build
 
