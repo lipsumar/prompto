@@ -1,0 +1,6 @@
+version: '2'
+services:
+  website:
+    build: 
+      context: .
+      dockerfile: Dockerfile.website
