@@ -10,6 +10,6 @@ RUN pnpm recursive install
 
 COPY apps/api ./apps/api
 
-EXPOSE 3000
+EXPOSE 4000
 RUN pnpm nx run api:build
 CMD [ "pnpm", "start:api" ]
