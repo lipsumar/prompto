@@ -1,7 +1,9 @@
 version: '2'
 services:
   website:
-    build: apps/website
+    build: 
+      context: .
+      dockerfile: apps/website/Dockerfile
     labels:
       - 'traefik.http.routers.prompto-website.rule=Host(`promp.to`)'
       - 'traefik.http.routers.prompto-website.tls.certresolver=le'
@@ -11,7 +13,9 @@ services:
       - traefik-external
 
   editor:
-    build: apps/editor
+    build: 
+      context: .
+      dockerfile: apps/editor/Dockerfile
     labels:
       - 'traefik.http.routers.prompto-editor.rule=Host(`editor.promp.to`)'
       - 'traefik.http.routers.prompto-editor.tls.certresolver=le'

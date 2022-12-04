@@ -3,4 +3,12 @@ services:
   website:
     build: 
       context: .
-      dockerfile: Dockerfile.website
+      dockerfile: apps/website/Dockerfile
+    
+  editor:
+    build: apps/editor
+    
+networks:
+  traefik-external:
+    external: true
+
