@@ -7,7 +7,7 @@ COPY apps/editor/package.json ./apps/editor/package.json
 RUN pnpm recursive install
 COPY . .
 
-RUN npm run build
+RUN pnpm nx run editor:build
 
 FROM nginx:1.21
 COPY --from=0 /usr/src/app/apps/editor/dist /usr/share/nginx/html

@@ -11,5 +11,5 @@ RUN pnpm recursive install
 COPY apps/website ./apps/website
 
 EXPOSE 3000
-RUN cd apps/website && pnpm build
+RUN pnpm nx run website:build
 CMD [ "pnpm", "start:website" ]
