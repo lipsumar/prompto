@@ -4,11 +4,14 @@ services:
     build: 
       context: .
       dockerfile: apps/website/Dockerfile
+    ports:
+      - "3000:3000"
     
   editor:
-    build: apps/editor
-    
-networks:
-  traefik-external:
-    external: true
+    build: 
+      context: .
+      dockerfile: apps/editor/Dockerfile
+    ports:
+      - "80:80"    
+
 
