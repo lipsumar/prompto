@@ -1,16 +1,22 @@
 version: '2'
 services:
   website:
-    build: 
-      context: .
-      dockerfile: Dockerfile.website
+    build: apps/website
     labels:
-      - 'traefik.http.routers.prompto.rule=Host(`promp.to`)'
-      - 'traefik.http.routers.prompto.tls.certresolver=le'
-      - 'traefik.http.routers.prompto.entrypoints=websecure'
+      - 'traefik.http.routers.prompto-website.rule=Host(`promp.to`)'
+      - 'traefik.http.routers.prompto-website.tls.certresolver=le'
+      - 'traefik.http.routers.prompto-website.entrypoints=websecure'
       - 'traefik.docker.network=traefik-external'
     networks:
       - traefik-external
+
+  editor:
+    build: apps/editor
+    labels:
+      - 'traefik.http.routers.prompto-editor.rule=Host(`editor.promp.to`)'
+      - 'traefik.http.routers.prompto-editor.tls.certresolver=le'
+      - 'traefik.http.routers.prompto-editor.entrypoints=websecure'
+      - 'traefik.docker.network=traefik-external'
 
 networks:
   traefik-external:

@@ -2,7 +2,7 @@ FROM node:18.2
 RUN npm install -g pnpm
 
 WORKDIR /usr/src/app
-COPY package*.json nx.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nx.json ./
 COPY apps/website/package.json ./apps/website/package.json
 
 
