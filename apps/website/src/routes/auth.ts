@@ -20,10 +20,12 @@ router.post('/login', async (req, res, next) => {
         expiresIn: '1d',
       });
       const oneDayMs = 86400000;
+      const { SITE_DOMAIN } = process.env;
       res.cookie('prompto-token', token, {
         maxAge: oneDayMs,
         httpOnly: true,
         secure: true,
+        domain: `.${SITE_DOMAIN}`,
       });
       res.redirect('/');
     } else {
