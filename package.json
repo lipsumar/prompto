@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start:website": "(cd apps/website && pnpm start)"
+    "dev": "nx run-many --target=dev --output-style=stream --parallel=99",
+    "start:website": "(cd apps/website && pnpm start)",
+    "start:api": "(cd apps/api && pnpm start)"
   },
   "private": true,
   "dependencies": {},

@@ -25,7 +25,7 @@ router.post('/login', async (req, res, next) => {
         maxAge: oneDayMs,
         httpOnly: true,
         secure: true,
-        domain: `.${SITE_DOMAIN}`,
+        domain: SITE_DOMAIN !== 'localhost' ? `.${SITE_DOMAIN}` : undefined,
       });
       res.redirect('/');
     } else {

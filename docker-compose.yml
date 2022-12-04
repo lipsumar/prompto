@@ -24,6 +24,18 @@ services:
     networks:
       - traefik-external
 
+  api:
+    build: 
+      context: .
+      dockerfile: apps/api/Dockerfile
+    labels:
+      - 'traefik.http.routers.prompto-api.rule=Host(`api.promp.to`)'
+      - 'traefik.http.routers.prompto-api.tls.certresolver=le'
+      - 'traefik.http.routers.prompto-api.entrypoints=websecure'
+      - 'traefik.docker.network=traefik-external'
+    networks:
+      - traefik-external
+
 networks:
   traefik-external:
     external: true
