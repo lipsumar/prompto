@@ -12,7 +12,6 @@ export function Root() {
       links: [
         httpBatchLink({
           url: `${import.meta.env.VITE_API_URL}/trpc`,
-          // optional
           fetch(url, options) {
             return fetch(url, {
               ...options,
