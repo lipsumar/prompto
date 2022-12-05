@@ -4,6 +4,7 @@ RUN npm install -g pnpm
 WORKDIR /usr/src/app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nx.json ./
 COPY apps/editor/package.json ./apps/editor/package.json
+COPY apps/api/package.json ./apps/api/package.json
 RUN pnpm recursive install
 
 COPY apps/editor ./apps/editor
