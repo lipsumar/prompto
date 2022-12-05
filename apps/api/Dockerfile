@@ -10,9 +10,9 @@ RUN pnpm recursive install
 
 
 COPY apps/api ./apps/api
-RUN cd apps/api && pnpm prisma generate && pnpm prisma migrate deploy
+RUN cd apps/api && pnpm prisma generate
 
 EXPOSE 4000
 ENV NODE_ENV=production
 RUN pnpm nx run api:build
-CMD [ "pnpm", "start:api" ]
+CMD [ "pnpm", "start:api:prod" ]
