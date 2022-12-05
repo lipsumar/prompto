@@ -6,7 +6,7 @@
     "dev": "nx run-many --target=dev --output-style=stream --parallel=99",
     "start:website": "(cd apps/website && pnpm start)",
     "start:api": "(cd apps/api && pnpm start)",
-    "start:api:prod": "(cd apps/api && prisma migrate deploy && pnpm start)",
+    "start:api:prod": "(cd apps/api && pnpm prisma migrate deploy && pnpm start)",
     "start:db": "docker-compose -f docker-compose.dev.yml run postgres"
   },
   "private": true,
