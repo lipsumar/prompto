@@ -7,6 +7,7 @@ COPY apps/editor/package.json ./apps/editor/package.json
 RUN pnpm recursive install
 
 COPY apps/editor ./apps/editor
+COPY apps/api ./apps/api
 
 RUN pnpm nx run editor:build
 
