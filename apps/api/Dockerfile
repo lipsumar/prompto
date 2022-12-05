@@ -10,7 +10,7 @@ RUN pnpm recursive install
 
 
 COPY apps/api ./apps/api
-RUN cd apps/api && pnpm prisma generate
+RUN cd apps/api && pnpm prisma generate && pnpm prisma migrate deploy
 
 EXPOSE 4000
 ENV NODE_ENV=production
