@@ -35,6 +35,7 @@ services:
       - 'traefik.docker.network=traefik-external'
     networks:
       - traefik-external
+      - internal
 
   postgres:
     image: postgres:15.1
