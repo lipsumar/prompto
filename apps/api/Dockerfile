@@ -7,6 +7,7 @@ COPY apps/api/package.json ./apps/api/package.json
 
 
 RUN pnpm recursive install
+RUN cd apps/api && pnpm prisma generate
 
 COPY apps/api ./apps/api
 
