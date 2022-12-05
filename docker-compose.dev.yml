@@ -14,4 +14,15 @@ services:
     ports:
       - "80:80"    
 
+  postgres:
+    image: postgres:15.1
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_PASSWORD=password
 
+volumes:
+  db-data:
+    driver: local

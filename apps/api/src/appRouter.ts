@@ -7,21 +7,21 @@ export const createContext = ({
   req,
   res,
 }: trpcExpress.CreateExpressContextOptions) => ({
-  token: res.locals.verifiedToken,
+  user: res.locals.user,
 });
 type Context = inferAsyncReturnType<typeof createContext>;
 const t = initTRPC.context<Context>().create();
 
 const isAuthed = t.middleware(({ next, ctx }) => {
-  if (!ctx.token) {
+  if (!ctx.user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
     });
   }
   return next({
     ctx: {
-      // Infers the `token` as non-nullable
-      token: ctx.token,
+      // Infers the `user` as non-nullable
+      user: ctx.user,
     },
   });
 });
@@ -33,10 +33,6 @@ export const appRouter = t.router({
   authOnly: t.procedure.use(isAuthed).query(() => {
     return 'you’re in';
   }),
-  // getUser: t.procedure.input(z.string()).query((req) => {
-  //   req.input; // string
-  //   return { id: req.input, name: 'Bilbo' };
-  // }),
 });
 
 // export type definition of API
