@@ -11,5 +11,6 @@ RUN pnpm recursive install
 COPY apps/api ./apps/api
 
 EXPOSE 4000
+ENV NODE_ENV=production
 RUN pnpm nx run api:build
 CMD [ "pnpm", "start:api" ]
