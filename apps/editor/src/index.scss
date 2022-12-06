@@ -1,0 +1,30 @@
+@import './node_modules/@blueprintjs/core/lib/scss/variables';
+
+html,
+body {
+  height: 100vh;
+}
+body {
+  background: $pt-dark-app-background-color;
+  color: $pt-dark-text-color;
+  overflow: hidden;
+}
+#root {
+  height: 100%;
+}
+
+.bp4-tree-node-label {
+  white-space: break-spaces;
+}
+.bp4-collapse-body .bp4-tree-node-content {
+  height: auto;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.multiline-ellipsis {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -5,6 +5,9 @@ import React, { useState } from 'react';
 import App from './components/App';
 import { trpc } from './lib/trpc';
 
+import 'normalize.css';
+import '@blueprintjs/core/lib/css/blueprint.css';
+
 export function Root() {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
