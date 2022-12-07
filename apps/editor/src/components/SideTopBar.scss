@@ -1,0 +1,16 @@
+@import '../../node_modules/@blueprintjs/core/lib/scss/variables';
+
+.side-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: $pt-grid-size * 3;
+  padding: $pt-grid-size/2;
+}
+
+.side-top-bar__title {
+  font-variant: small-caps;
+  font-weight: 600;
+  color: $pt-dark-text-color-disabled;
+  font-size: 1.1em;
+}

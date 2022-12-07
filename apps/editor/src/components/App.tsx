@@ -2,9 +2,26 @@ import { trpc } from '../lib/trpc';
 import { Button } from '@blueprintjs/core';
 import AppLayout from './AppLayout';
 import Side from './Side';
+import Projects from './Projects';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import Editor from './Editor';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Projects />,
+  },
+  {
+    path: '/project/:projectId',
+    element: <Editor />,
+  },
+]);
 
 export default function App() {
-  // const hello = trpc.hello.useQuery();
-  // if (!hello.data) return <div>Loading...</div>;
-  return <AppLayout side={<Side />} main={<div>main</div>} />;
+  return (
+    <div className="bp4-dark">
+      <RouterProvider router={router} />
+    </div>
+  );
 }

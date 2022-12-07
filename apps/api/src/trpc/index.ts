@@ -1,13 +1,13 @@
-import { z } from 'zod';
-import { inferAsyncReturnType, initTRPC, TRPCError } from '@trpc/server';
 import * as trpcExpress from '@trpc/server/adapters/express';
+import { inferAsyncReturnType, initTRPC, TRPCError } from '@trpc/server';
+import { User } from '@prisma/client';
 
 // created for each request
 export const createContext = ({
   req,
   res,
 }: trpcExpress.CreateExpressContextOptions) => ({
-  user: res.locals.user,
+  user: res.locals.user as User,
 });
 type Context = inferAsyncReturnType<typeof createContext>;
 const t = initTRPC.context<Context>().create();
@@ -26,14 +26,7 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   });
 });
 
-export const appRouter = t.router({
-  hello: t.procedure.query(({ ctx }) => {
-    return 'oh hi RPC! ' + JSON.stringify(ctx);
-  }),
-  authOnly: t.procedure.use(isAuthed).query(() => {
-    return 'you’re in';
-  }),
-});
-
-// export type definition of API
-export type AppRouter = typeof appRouter;
+export const middleware = t.middleware;
+export const router = t.router;
+export const publicProcedure = t.procedure;
+export const authedProcedure = t.procedure.use(isAuthed);

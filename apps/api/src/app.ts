@@ -4,7 +4,8 @@ import authUser from './middlewares/auth-user';
 import cors from 'cors';
 
 import * as trpcExpress from '@trpc/server/adapters/express';
-import { appRouter, createContext } from './appRouter';
+import { appRouter } from './trpc/appRouter';
+import { createContext } from './trpc';
 
 const app = express();
 

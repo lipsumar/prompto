@@ -19,6 +19,11 @@ export function Root() {
             return fetch(url, {
               ...options,
               credentials: 'include',
+            }).then((resp) => {
+              if (!resp.ok) {
+                throw new Error('Request failed with status ' + resp.status);
+              }
+              return resp;
             });
           },
         }),
