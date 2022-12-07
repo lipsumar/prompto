@@ -5,7 +5,7 @@
   justify-content: space-between;
   align-items: center;
   height: $pt-grid-size * 3;
-  padding: $pt-grid-size/2;
+  padding: calc($pt-grid-size / 2);
 }
 
 .side-top-bar__title {

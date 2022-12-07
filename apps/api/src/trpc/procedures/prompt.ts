@@ -14,9 +14,9 @@ export const promptRouter = router({
       });
       return prompts;
     }),
-  createPrompt: authedProcedure
+  create: authedProcedure
     .input(z.object({ projectId: z.string() }))
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const prompt = await prisma.prompt.create({
         data: { projectId: input.projectId },
       });

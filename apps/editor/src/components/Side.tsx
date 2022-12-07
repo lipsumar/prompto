@@ -4,10 +4,10 @@ import SideTopBar from './SideTopBar';
 
 export default function Side() {
   return (
-    <div>
+    <>
       <SideTopBar />
 
       <PromptTree />
-    </div>
+    </>
   );
 }

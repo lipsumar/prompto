@@ -1,7 +1,15 @@
-import { Classes, Icon, Intent, Tree, TreeNodeInfo } from '@blueprintjs/core';
-import { useCallback, useReducer } from 'react';
+import { Classes, NonIdealState, Tree, TreeNodeInfo } from '@blueprintjs/core';
+import { useCallback, useEffect, useReducer } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
+import { useEditor } from '../hooks/useProject';
 import { trpc } from '../lib/trpc';
+import Spinner from './Spinner';
+import { inferRouterOutputs } from '@trpc/server';
+import { AppRouter } from 'api';
+
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type PromptsInProject = Exclude<RouterOutput['prompt']['inProject'], null>;
+type Prompt = PromptsInProject[0];
 
 type NodePath = number[];
 type TreeAction =
@@ -13,7 +21,8 @@ type TreeAction =
   | {
       type: 'SET_IS_SELECTED';
       payload: { path: NodePath; isSelected: boolean };
-    };
+    }
+  | { type: 'SET_ALL'; payload: TreeNodeInfo[] };
 
 function forEachNode(
   nodes: TreeNodeInfo[] | undefined,
@@ -59,16 +68,44 @@ function treeExampleReducer(state: TreeNodeInfo[], action: TreeAction) {
         (node) => (node.isSelected = action.payload.isSelected)
       );
       return newState3;
+    case 'SET_ALL':
+      return cloneDeep(action.payload);
     default:
       return state;
   }
 }
 
+function promptToTreeNodeInfo(prompt: Prompt): TreeNodeInfo {
+  const label = prompt.name ||
+    prompt.promptVersions[0]?.content.substring(0, 100) || (
+      <span className={Classes.TEXT_MUTED}>&lt;Empty&gt;</span>
+    );
+  return {
+    id: prompt.id,
+    label,
+  };
+}
+
 const INITIAL_STATE: TreeNodeInfo[] = [];
 
 export default function PromptTree() {
+  const { project } = useEditor();
   const [nodes, dispatch] = useReducer(treeExampleReducer, INITIAL_STATE);
-  //trpc.prompt.inProject.useQuery({projectId});
+  const {
+    data: prompts,
+    isLoading,
+    isError,
+  } = trpc.prompt.inProject.useQuery(
+    { projectId: project.id },
+    {
+      onSuccess: (data) => {
+        dispatch({
+          type: 'SET_ALL',
+          payload: data.map(promptToTreeNodeInfo),
+        });
+      },
+    }
+  );
 
   const handleNodeCollapse = useCallback(
     (_node: TreeNodeInfo, nodePath: NodePath) => {
@@ -90,13 +127,35 @@ export default function PromptTree() {
     []
   );
 
+  if (isLoading) {
+    return <Spinner />;
+  }
+  if (isError) {
+    return (
+      <NonIdealState
+        title="Error"
+        description="Something went wrong"
+        icon="error"
+      />
+    );
+  }
+  if (prompts && prompts.length === 0) {
+    return (
+      <NonIdealState
+        title="Prompts"
+        description="Create a prompt to start"
+        icon="document-open"
+      />
+    );
+  }
+
   return (
     <Tree
       contents={nodes}
       // onNodeClick={handleNodeClick}
       onNodeCollapse={handleNodeCollapse}
       onNodeExpand={handleNodeExpand}
-      className={Classes.ELEVATION_0}
+      className={`${Classes.ELEVATION_0} height-100`}
     />
   );
 }
