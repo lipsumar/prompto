@@ -10,6 +10,7 @@ RUN pnpm recursive install
 COPY apps/editor ./apps/editor
 COPY apps/api ./apps/api
 
+RUN cd apps/api && pnpm prisma generate
 RUN pnpm nx run editor:build
 
 FROM nginx:1.21
