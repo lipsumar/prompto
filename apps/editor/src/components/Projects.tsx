@@ -1,6 +1,7 @@
-import { Button, NonIdealState, Spinner } from '@blueprintjs/core';
-import { useNavigate } from 'react-router-dom';
+import { Button, NonIdealState } from '@blueprintjs/core';
+import { Link, useNavigate } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
+import Spinner from './Spinner';
 
 export default function Projects() {
   const {
@@ -48,7 +49,9 @@ export default function Projects() {
     <div>
       <ul>
         {projects?.map((project) => (
-          <li key={project.id}>{project.name}</li>
+          <li key={project.id}>
+            <Link to={`/project/${project.id}`}>{project.name}</Link>
+          </li>
         ))}
       </ul>
     </div>

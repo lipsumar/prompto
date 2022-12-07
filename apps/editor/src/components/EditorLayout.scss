@@ -1,0 +1,15 @@
+@import '../../node_modules/@blueprintjs/core/lib/scss/variables';
+
+.editor-layout {
+  display: flex;
+  height: 100%;
+}
+
+.editor-layout__side {
+  width: 20%;
+}
+
+.editor-layout__main {
+  flex-grow: 1;
+  background-color: $dark-gray1;
+}

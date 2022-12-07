@@ -18,8 +18,25 @@ export const promptRouter = router({
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ input }) => {
       const prompt = await prisma.prompt.create({
-        data: { projectId: input.projectId },
+        data: {
+          projectId: input.projectId,
+          promptVersions: { create: [{ content: '' }] },
+        },
       });
       return prompt;
+    }),
+  get: authedProcedure.input(z.object({ id: z.string() })).query(({ input }) =>
+    prisma.prompt.findUnique({
+      where: { id: input.id },
+      include: { promptVersions: true },
+    })
+  ),
+  submit: authedProcedure
+    .input(z.object({ content: z.string(), promptVersionId: z.string() }))
+    .mutation(({ input }) => {
+      return prisma.promptVersion.update({
+        where: { id: input.promptVersionId },
+        data: { content: input.content },
+      });
     }),
 });

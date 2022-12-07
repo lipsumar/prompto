@@ -89,7 +89,7 @@ function promptToTreeNodeInfo(prompt: Prompt): TreeNodeInfo {
 const INITIAL_STATE: TreeNodeInfo[] = [];
 
 export default function PromptTree() {
-  const { project } = useEditor();
+  const { project, setCurrentPromptId } = useEditor();
   const [nodes, dispatch] = useReducer(treeExampleReducer, INITIAL_STATE);
   const {
     data: prompts,
@@ -127,6 +127,21 @@ export default function PromptTree() {
     []
   );
 
+  const handleNodeClick = useCallback(
+    (node: TreeNodeInfo, nodePath: NodePath) => {
+      setCurrentPromptId(node.id as string);
+      dispatch({ type: 'DESELECT_ALL' });
+      dispatch({
+        payload: {
+          path: nodePath,
+          isSelected: true,
+        },
+        type: 'SET_IS_SELECTED',
+      });
+    },
+    []
+  );
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -152,7 +167,7 @@ export default function PromptTree() {
   return (
     <Tree
       contents={nodes}
-      // onNodeClick={handleNodeClick}
+      onNodeClick={handleNodeClick}
       onNodeCollapse={handleNodeCollapse}
       onNodeExpand={handleNodeExpand}
       className={`${Classes.ELEVATION_0} height-100`}

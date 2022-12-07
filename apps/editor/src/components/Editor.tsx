@@ -2,7 +2,8 @@ import { NonIdealState } from '@blueprintjs/core';
 import { useParams } from 'react-router-dom';
 import { EditorContextProvider } from '../hooks/useProject';
 import { trpc } from '../lib/trpc';
-import AppLayout from './AppLayout';
+import EditorLayout from './EditorLayout';
+import PromptLayout from './PromptLayout';
 import Side from './Side';
 import Spinner from './Spinner';
 
@@ -22,7 +23,7 @@ export default function Editor() {
 
   return (
     <EditorContextProvider project={project}>
-      <AppLayout side={<Side />} main={<div>main</div>} />
+      <EditorLayout side={<Side />} main={<PromptLayout />} />
     </EditorContextProvider>
   );
 }

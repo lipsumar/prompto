@@ -1,7 +1,3 @@
-import { trpc } from '../lib/trpc';
-import { Button } from '@blueprintjs/core';
-import AppLayout from './AppLayout';
-import Side from './Side';
 import Projects from './Projects';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
