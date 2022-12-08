@@ -62,6 +62,7 @@ function treeExampleReducer(state: TreeNodeInfo[], action: TreeAction) {
       return newState2;
     case 'SET_IS_SELECTED':
       const newState3 = cloneDeep(state);
+      forEachNode(newState3, (node) => (node.isSelected = false));
       forNodeAtPath(
         newState3,
         action.payload.path,
@@ -75,21 +76,45 @@ function treeExampleReducer(state: TreeNodeInfo[], action: TreeAction) {
   }
 }
 
-function promptToTreeNodeInfo(prompt: Prompt): TreeNodeInfo {
+function promptToTreeNodeInfo(
+  prompt: Prompt,
+  currentPromptId: string | undefined
+): TreeNodeInfo {
   const label = prompt.name ||
-    prompt.promptVersions[0]?.content.substring(0, 100) || (
+    prompt.promptVersions[0]?.content
+      .substring(0, 100)
+      .replaceAll('\n', '↩') || (
       <span className={Classes.TEXT_MUTED}>&lt;Empty&gt;</span>
     );
   return {
     id: prompt.id,
     label,
+    isSelected: prompt.id === currentPromptId,
   };
+}
+
+function getNodePath(
+  nodeId: string,
+  tree: TreeNodeInfo[],
+  prevPath: NodePath = []
+): NodePath | null {
+  for (const [i, node] of tree.entries()) {
+    if (node.id === nodeId) {
+      prevPath.push(i);
+      return prevPath;
+    }
+    if (node.childNodes) {
+      prevPath.push(i);
+      return getNodePath(nodeId, node.childNodes, prevPath);
+    }
+  }
+  return null;
 }
 
 const INITIAL_STATE: TreeNodeInfo[] = [];
 
 export default function PromptTree() {
-  const { project, setCurrentPromptId } = useEditor();
+  const { project, setCurrentPromptId, currentPromptId } = useEditor();
   const [nodes, dispatch] = useReducer(treeExampleReducer, INITIAL_STATE);
   const {
     data: prompts,
@@ -101,11 +126,25 @@ export default function PromptTree() {
       onSuccess: (data) => {
         dispatch({
           type: 'SET_ALL',
-          payload: data.map(promptToTreeNodeInfo),
+          payload: data.map((node) =>
+            promptToTreeNodeInfo(node, currentPromptId)
+          ),
         });
       },
     }
   );
+  useEffect(() => {
+    if (typeof currentPromptId === 'undefined') return;
+    const path = getNodePath(currentPromptId, nodes);
+    if (!path) return;
+    dispatch({
+      payload: {
+        path,
+        isSelected: true,
+      },
+      type: 'SET_IS_SELECTED',
+    });
+  }, [currentPromptId]);
 
   const handleNodeCollapse = useCallback(
     (_node: TreeNodeInfo, nodePath: NodePath) => {
@@ -130,14 +169,6 @@ export default function PromptTree() {
   const handleNodeClick = useCallback(
     (node: TreeNodeInfo, nodePath: NodePath) => {
       setCurrentPromptId(node.id as string);
-      dispatch({ type: 'DESELECT_ALL' });
-      dispatch({
-        payload: {
-          path: nodePath,
-          isSelected: true,
-        },
-        type: 'SET_IS_SELECTED',
-      });
     },
     []
   );
