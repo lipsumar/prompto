@@ -6,6 +6,7 @@ import Prompt from './Prompt';
 import './PromptLayout.scss';
 export default function PromptLayout() {
   const { currentPromptId } = useEditor();
+  const trpcCtx = trpc.useContext();
   const { data: currentPrompt } = trpc.prompt.get.useQuery(
     {
       id: currentPromptId!,
@@ -18,7 +19,11 @@ export default function PromptLayout() {
       },
     }
   );
-  const submitPrompt = trpc.prompt.submit.useMutation();
+  const submitPrompt = trpc.prompt.submit.useMutation({
+    onSuccess: () => {
+      trpcCtx.prompt.inProject.invalidate();
+    },
+  });
   const [text, setText] = useState(
     currentPrompt?.promptVersions[0].content || ''
   );
@@ -33,12 +38,12 @@ export default function PromptLayout() {
       </div>
       <div className="prompt-layout__middle">
         <Button
-          onClick={() =>
+          onClick={() => {
             submitPrompt.mutate({
               content: text,
               promptVersionId: currentPrompt.promptVersions[0].id,
-            })
-          }
+            });
+          }}
         >
           Submit
         </Button>

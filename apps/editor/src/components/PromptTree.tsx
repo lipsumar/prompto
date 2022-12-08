@@ -83,6 +83,7 @@ function promptToTreeNodeInfo(
   const label = prompt.name ||
     prompt.promptVersions[0]?.content
       .substring(0, 100)
+      .trim()
       .replaceAll('\n', '↩') || (
       <span className={Classes.TEXT_MUTED}>&lt;Empty&gt;</span>
     );
