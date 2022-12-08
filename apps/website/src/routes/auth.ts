@@ -27,7 +27,7 @@ router.post('/login', async (req, res, next) => {
         secure: true,
         domain: SITE_DOMAIN !== 'localhost' ? `.${SITE_DOMAIN}` : undefined,
       });
-      res.redirect('/');
+      res.redirect(process.env.EDITOR_URL);
     } else {
       res.send('invalid credentials');
     }
