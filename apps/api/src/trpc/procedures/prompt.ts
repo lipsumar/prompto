@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { authedProcedure, router } from '..';
+import { gpt3Complete } from '../../lib/gpt3';
 import { prisma } from '../../lib/prisma';
 
 export const promptRouter = router({
@@ -33,10 +34,21 @@ export const promptRouter = router({
   ),
   submit: authedProcedure
     .input(z.object({ content: z.string(), promptVersionId: z.string() }))
-    .mutation(({ input }) => {
-      return prisma.promptVersion.update({
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user.gpt3ApiToken) {
+        throw new Error('MISSING_GPT3_TOKEN');
+      }
+      const promptVersion = await prisma.promptVersion.update({
         where: { id: input.promptVersionId },
         data: { content: input.content },
       });
+      const completion = await gpt3Complete(
+        input.content,
+        ctx.user.gpt3ApiToken
+      );
+      const output = await prisma.promptOutput.create({
+        data: { promptVersionId: promptVersion.id, content: completion || '' },
+      });
+      return { promptVersion, output };
     }),
 });

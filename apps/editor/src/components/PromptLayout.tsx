@@ -23,6 +23,11 @@ export default function PromptLayout() {
     onSuccess: () => {
       trpcCtx.prompt.inProject.invalidate();
     },
+    onError(err) {
+      if (err.message === 'MISSING_GPT3_TOKEN') {
+        alert('You need to set a GPT3 API token');
+      }
+    },
   });
   const [text, setText] = useState(
     currentPrompt?.promptVersions[0].content || ''

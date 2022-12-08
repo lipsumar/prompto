@@ -20,11 +20,8 @@ export function Root() {
               ...options,
               credentials: 'include',
             }).then((resp) => {
-              if (!resp.ok) {
-                if (resp.status === 401) {
-                  window.location.href = import.meta.env.VITE_LOGIN_URL;
-                }
-                throw new Error('Request failed with status ' + resp.status);
+              if (resp.status === 401) {
+                window.location.href = import.meta.env.VITE_LOGIN_URL;
               }
               return resp;
             });
