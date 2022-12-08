@@ -1,7 +1,7 @@
 import { Button, NonIdealState } from '@blueprintjs/core';
 import { useState } from 'react';
-import { useEditor } from '../hooks/useProject';
-import { trpc } from '../lib/trpc';
+import { useEditor } from '../../hooks/useProject';
+import { trpc } from '../../lib/trpc';
 import Prompt from './Prompt';
 import './PromptLayout.scss';
 export default function PromptLayout() {

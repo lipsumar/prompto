@@ -1,7 +1,7 @@
 import { Button, NonIdealState } from '@blueprintjs/core';
 import { Link, useNavigate } from 'react-router-dom';
-import { trpc } from '../lib/trpc';
-import Spinner from './Spinner';
+import { trpc } from '../../lib/trpc';
+import Spinner from '../Spinner';
 
 export default function Projects() {
   const {

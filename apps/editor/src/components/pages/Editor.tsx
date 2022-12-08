@@ -1,11 +1,11 @@
 import { NonIdealState } from '@blueprintjs/core';
 import { useParams } from 'react-router-dom';
-import { EditorContextProvider } from '../hooks/useProject';
-import { trpc } from '../lib/trpc';
-import EditorLayout from './EditorLayout';
-import PromptLayout from './PromptLayout';
-import Side from './Side';
-import Spinner from './Spinner';
+import { EditorContextProvider } from '../../hooks/useProject';
+import { trpc } from '../../lib/trpc';
+import EditorLayout from '../EditorLayout';
+import PromptLayout from '../main/PromptLayout';
+import Side from '../sidebar/Side';
+import Spinner from '../Spinner';
 
 export default function Editor() {
   const { projectId } = useParams();

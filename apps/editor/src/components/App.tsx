@@ -1,7 +1,7 @@
-import Projects from './Projects';
+import Projects from './pages/Projects';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import Editor from './Editor';
+import Editor from './pages/Editor';
 
 const router = createBrowserRouter([
   {

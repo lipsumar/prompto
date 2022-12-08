@@ -1,6 +1,6 @@
 import { Button, Icon } from '@blueprintjs/core';
-import { useEditor } from '../hooks/useProject';
-import { trpc } from '../lib/trpc';
+import { useEditor } from '../../hooks/useProject';
+import { trpc } from '../../lib/trpc';
 import './SideTopBar.scss';
 
 export default function SideTopBar() {
