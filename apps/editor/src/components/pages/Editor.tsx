@@ -1,6 +1,6 @@
 import { NonIdealState } from '@blueprintjs/core';
 import { useParams } from 'react-router-dom';
-import { EditorContextProvider } from '../../hooks/useProject';
+import { EditorContextProvider } from '../../hooks/useEditor';
 import { trpc } from '../../lib/trpc';
 import EditorLayout from '../EditorLayout';
 import PromptLayout from '../main/PromptLayout';

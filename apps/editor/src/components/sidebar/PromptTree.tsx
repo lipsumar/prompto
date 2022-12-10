@@ -1,7 +1,7 @@
 import { Classes, NonIdealState, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { useCallback, useEffect, useReducer } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
-import { useEditor } from '../../hooks/useProject';
+import { useEditor } from '../../hooks/useEditor';
 import { trpc } from '../../lib/trpc';
 import Spinner from '../Spinner';
 import { inferRouterOutputs } from '@trpc/server';

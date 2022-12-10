@@ -1,5 +1,5 @@
 import { Button, Icon } from '@blueprintjs/core';
-import { useEditor } from '../../hooks/useProject';
+import { useEditor } from '../../hooks/useEditor';
 import { trpc } from '../../lib/trpc';
 import './SideTopBar.scss';
 
