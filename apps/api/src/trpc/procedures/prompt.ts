@@ -23,6 +23,9 @@ export const promptRouter = router({
           projectId: input.projectId,
           promptVersions: { create: [{ content: '' }] },
         },
+        include: {
+          promptVersions: true,
+        },
       });
       return prompt;
     }),

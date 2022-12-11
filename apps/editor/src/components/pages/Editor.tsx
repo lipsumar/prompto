@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { EditorContextProvider } from '../../hooks/useEditor';
 import { trpc } from '../../lib/trpc';
 import EditorLayout from '../EditorLayout';
-import PromptLayout from '../main/PromptLayout';
+import Main from '../main/Main';
 import Side from '../sidebar/Side';
 import Spinner from '../Spinner';
 
@@ -23,7 +23,7 @@ export default function Editor() {
 
   return (
     <EditorContextProvider project={project}>
-      <EditorLayout side={<Side />} main={<PromptLayout />} />
+      <EditorLayout side={<Side />} main={<Main />} />
     </EditorContextProvider>
   );
 }

@@ -4,12 +4,12 @@ import { trpc } from '../../lib/trpc';
 import './SideTopBar.scss';
 
 export default function SideTopBar() {
-  const { project, setCurrentPromptId } = useEditor();
+  const { project, addPrompt, setCurrentPrompt } = useEditor();
   const trpcCtx = trpc.useContext();
   const createPrompt = trpc.prompt.create.useMutation({
     onSuccess: (newPrompt) => {
-      setCurrentPromptId(newPrompt.id);
-      trpcCtx.prompt.inProject.invalidate();
+      addPrompt(newPrompt);
+      setCurrentPrompt(newPrompt);
     },
   });
   return (

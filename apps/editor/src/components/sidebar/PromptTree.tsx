@@ -115,29 +115,36 @@ function getNodePath(
 const INITIAL_STATE: TreeNodeInfo[] = [];
 
 export default function PromptTree() {
-  const { project, setCurrentPromptId, currentPromptId } = useEditor();
-  const [nodes, dispatch] = useReducer(treeExampleReducer, INITIAL_STATE);
   const {
-    data: prompts,
-    isLoading,
-    isError,
-  } = trpc.prompt.inProject.useQuery(
+    project,
+    setCurrentPrompt,
+    getPromptById,
+    currentPrompt,
+    setPrompts,
+    prompts,
+  } = useEditor();
+  const [nodes, dispatch] = useReducer(treeExampleReducer, INITIAL_STATE);
+  const { isLoading, isError } = trpc.prompt.inProject.useQuery(
     { projectId: project.id },
     {
       onSuccess: (data) => {
+        setPrompts(data);
         dispatch({
           type: 'SET_ALL',
           payload: data.map((node) =>
-            promptToTreeNodeInfo(node, currentPromptId)
+            promptToTreeNodeInfo(node, currentPrompt?.id)
           ),
         });
       },
     }
   );
   useEffect(() => {
-    if (typeof currentPromptId === 'undefined') return;
-    const path = getNodePath(currentPromptId, nodes);
-    if (!path) return;
+    if (typeof currentPrompt === 'undefined') return;
+    const path = getNodePath(currentPrompt.id, nodes);
+    if (!path) {
+      console.log('oh no! no path for currentPromptId');
+      return;
+    }
     dispatch({
       payload: {
         path,
@@ -145,7 +152,7 @@ export default function PromptTree() {
       },
       type: 'SET_IS_SELECTED',
     });
-  }, [currentPromptId]);
+  }, [currentPrompt?.id]);
 
   const handleNodeCollapse = useCallback(
     (_node: TreeNodeInfo, nodePath: NodePath) => {
@@ -169,9 +176,9 @@ export default function PromptTree() {
 
   const handleNodeClick = useCallback(
     (node: TreeNodeInfo, nodePath: NodePath) => {
-      setCurrentPromptId(node.id as string);
+      setCurrentPrompt(getPromptById(node.id as string));
     },
-    []
+    [getPromptById]
   );
 
   if (isLoading) {
@@ -186,6 +193,7 @@ export default function PromptTree() {
       />
     );
   }
+
   if (prompts && prompts.length === 0) {
     return (
       <NonIdealState
