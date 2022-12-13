@@ -54,4 +54,16 @@ export const promptRouter = router({
       });
       return { promptVersion, output };
     }),
+  outputs: authedProcedure
+    .input(z.object({ promptId: z.string() }))
+    .query(async ({ input }) => {
+      const promptVersions = await prisma.promptVersion.findMany({
+        where: { promptId: input.promptId },
+        select: { id: true },
+      });
+      const promptVersionIds = promptVersions.map((pv) => pv.id);
+      return prisma.promptOutput.findMany({
+        where: { promptVersionId: { in: promptVersionIds } },
+      });
+    }),
 });

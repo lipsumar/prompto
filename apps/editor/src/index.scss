@@ -44,3 +44,12 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.text-mono {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono,
+    Courier New, monospace;
+}
+
+.space-after {
+  margin-bottom: $pt-grid-size;
+}

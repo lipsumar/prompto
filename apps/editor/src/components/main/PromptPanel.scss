@@ -5,9 +5,11 @@
   flex-direction: column;
   height: 100%;
 }
+
 .prompt-layout__top,
 .prompt-layout__bottom {
   flex-grow: 1;
+  height: 50%;
 }
 .prompt-layout__middle {
   padding: $pt-grid-size;
@@ -27,4 +29,9 @@
 }
 .prompt-layout__top textarea:focus {
   outline: none;
+}
+
+.prompt-layout__bottom {
+  padding-left: $pt-grid-size;
+  overflow-y: auto;
 }

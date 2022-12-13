@@ -4,14 +4,23 @@ import { Prompt } from '../../hooks/useEditor';
 import { trpc } from '../../lib/trpc';
 import PromptEditor from './PromptEditor';
 import './PromptPanel.scss';
+import { AppRouter } from 'api';
+import type { inferRouterOutputs } from '@trpc/server';
+import OutputPanel from './OutputPanel';
 
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type SubmitOutput = RouterOutput['prompt']['submit'];
+export type PromptOutput = SubmitOutput['output'];
 type PromptPanelOptions = {
   prompt: Prompt;
 };
 
 export default function PromptPanel({ prompt }: PromptPanelOptions) {
+  const [currentOutput, setCurrentOutput] = useState<PromptOutput | null>(null);
   const submitPrompt = trpc.prompt.submit.useMutation({
-    onSuccess: () => {},
+    onSuccess: ({ output }) => {
+      setCurrentOutput(output);
+    },
     onError(err) {
       if (err.message === 'MISSING_GPT3_TOKEN') {
         alert('You need to set a GPT3 API token');
@@ -37,7 +46,13 @@ export default function PromptPanel({ prompt }: PromptPanelOptions) {
           Submit
         </Button>
       </div>
-      <div className="prompt-layout__bottom"></div>
+      <div className="prompt-layout__bottom">
+        <OutputPanel
+          currentOutput={currentOutput}
+          working={submitPrompt.isLoading}
+          currentPrompt={prompt}
+        />
+      </div>
     </div>
   );
 }

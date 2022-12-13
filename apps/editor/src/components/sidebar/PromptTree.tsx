@@ -41,7 +41,7 @@ function forEachNode(
 function forNodeAtPath(
   nodes: TreeNodeInfo[],
   path: NodePath,
-  callback: (node: TreeNodeInfo) => void
+  callback: (node: TreeNodeInfo<unknown>) => void
 ) {
   callback(Tree.nodeFromPath(path, nodes));
 }
@@ -76,6 +76,7 @@ function treeExampleReducer(state: TreeNodeInfo[], action: TreeAction) {
   }
 }
 
+const zeroWidthSpace = '​';
 function promptToTreeNodeInfo(
   prompt: Prompt,
   currentPromptId: string | undefined
@@ -84,12 +85,12 @@ function promptToTreeNodeInfo(
     prompt.promptVersions[0]?.content
       .substring(0, 100)
       .trim()
-      .replaceAll('\n', '↩') || (
+      .replaceAll('\n', '↩' + zeroWidthSpace) || (
       <span className={Classes.TEXT_MUTED}>&lt;Empty&gt;</span>
     );
   return {
     id: prompt.id,
-    label,
+    label: <div className="multiline-ellipsis">{label}</div>,
     isSelected: prompt.id === currentPromptId,
   };
 }
