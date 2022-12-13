@@ -124,6 +124,7 @@ export default function PromptTree() {
     setPrompts,
     prompts,
   } = useEditor();
+  const trpcCtx = trpc.useContext();
   const [nodes, dispatch] = useReducer(treeExampleReducer, INITIAL_STATE);
   const { isLoading, isError } = trpc.prompt.inProject.useQuery(
     { projectId: project.id },
@@ -144,6 +145,7 @@ export default function PromptTree() {
     const path = getNodePath(currentPrompt.id, nodes);
     if (!path) {
       console.log('oh no! no path for currentPromptId');
+      trpcCtx.prompt.inProject.invalidate();
       return;
     }
     dispatch({
