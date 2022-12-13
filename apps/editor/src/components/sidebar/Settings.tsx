@@ -14,7 +14,7 @@ export default function Settings() {
 
   return (
     <div className="settings">
-      <Button onClick={() => promptForToken}>
+      <Button onClick={() => promptForToken()}>
         <Icon icon="cog" />
       </Button>
     </div>
