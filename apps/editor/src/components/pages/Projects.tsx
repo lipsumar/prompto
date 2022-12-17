@@ -16,6 +16,16 @@ export default function Projects() {
     },
   });
 
+  const createProjectButton = (
+    <Button
+      intent="primary"
+      text="Create project"
+      onClick={() => createProject.mutate()}
+      disabled={createProject.isLoading}
+      loading={createProject.isLoading}
+    />
+  );
+
   if (isLoading) return <Spinner />;
   if (isError) return <div>Error</div>;
   if (projects && projects.length === 0) {
@@ -24,15 +34,7 @@ export default function Projects() {
         title="You don’t have any projects yet"
         icon="folder-open"
         description="Create a project to get started"
-        action={
-          <Button
-            intent="primary"
-            text="Create project"
-            onClick={() => createProject.mutate()}
-            disabled={createProject.isLoading}
-            loading={createProject.isLoading}
-          />
-        }
+        action={createProjectButton}
         children={
           createProject.error && (
             <p>
@@ -54,6 +56,7 @@ export default function Projects() {
           </li>
         ))}
       </ul>
+      {createProjectButton}
     </div>
   );
 }
