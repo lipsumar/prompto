@@ -1,9 +1,7 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import type { AppRouter } from "api";
-import type { inferRouterOutputs } from "@trpc/server";
-
-type RouterOutput = inferRouterOutputs<AppRouter>;
-type d = RouterOutput["project"]["forUser"];
+// for some reason this import makes it all work
+import type {} from "@trpc/server";
 
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
@@ -23,4 +21,3 @@ export const trpc = createTRPCProxyClient<AppRouter>({
     }),
   ],
 });
-trpc.project.forUser.query().then((reps) => {});
