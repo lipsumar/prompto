@@ -6,7 +6,7 @@ import type {} from "@trpc/server";
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: "http://localhost:4000/trpc",
+      url: `${import.meta.env.VITE_API_URL}/trpc`,
       fetch(url, options) {
         return fetch(url, {
           ...options,
