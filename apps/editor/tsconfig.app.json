@@ -7,6 +7,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
+      // "@trpc/server/*": [
+      //   "../../../../node_modules/.pnpm/@trpc+server@10.4.3/node_modules/@trpc/server/*"
+      // ],
+      //"@prisma/client/*": ["../api/node_modules/@prisma/client/*"],
+      //"api": ["../api/*"]
     }
+    //"preserveSymlinks": true
   }
 }

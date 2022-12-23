@@ -1,12 +1,16 @@
 import { authedProcedure, router } from '..';
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
+import { someFunc } from '../someType';
 
 export const projectRouter = router({
   forUser: authedProcedure.query(({ ctx }) => {
     return prisma.project.findMany({
       where: { userId: ctx.user.id },
     });
+    //return { ohcest: 'pasca' };
+    //return someFunc();
+    //return {} as typeof prisma.project;
   }),
   create: authedProcedure
     .input(
