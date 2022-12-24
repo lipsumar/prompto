@@ -29,6 +29,7 @@ const { mutate: renamePrompt } = useMutation(
     trpc.prompt.rename.mutate(data),
   {
     onSuccess() {
+      console.log("just ranmed!");
       promptsStore.update();
     },
   }

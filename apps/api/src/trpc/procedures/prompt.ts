@@ -40,6 +40,14 @@ export const promptRouter = router({
       where: { id: input.id },
     })
   ),
+  versions: authedProcedure
+    .input(z.object({ promptId: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.promptVersion.findMany({
+        where: { promptId: input.promptId },
+        orderBy: { createdAt: 'desc' },
+      });
+    }),
   submit: authedProcedure
     .input(z.object({ content: z.string(), promptVersionId: z.string() }))
     .mutation(async ({ input, ctx }) => {
