@@ -17,11 +17,12 @@
     "@trpc/client": "10.4.3",
     "@trpc/server": "10.4.3",
     "add": "^2.0.6",
+    "api": "workspace:*",
+    "click-outside-vue3": "^4.0.1",
     "pinia": "^2.0.28",
     "vue": "^3.2.45",
     "vue-query": "^1.26.0",
-    "vue-router": "^4.1.6",
-    "api": "workspace:*"
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.28.1",

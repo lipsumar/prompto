@@ -9,9 +9,7 @@ export const promptRouter = router({
     .query(async ({ input }) => {
       const prompts = await prisma.prompt.findMany({
         where: { projectId: input.projectId },
-        include: {
-          promptVersions: true,
-        },
+        orderBy: { name: 'asc' },
       });
       return prompts;
     }),
@@ -29,10 +27,17 @@ export const promptRouter = router({
       });
       return prompt;
     }),
+  rename: authedProcedure
+    .input(z.object({ promptId: z.string(), name: z.string() }))
+    .mutation(async ({ input }) => {
+      return prisma.prompt.update({
+        where: { id: input.promptId },
+        data: { name: input.name },
+      });
+    }),
   get: authedProcedure.input(z.object({ id: z.string() })).query(({ input }) =>
     prisma.prompt.findUnique({
       where: { id: input.id },
-      include: { promptVersions: true },
     })
   ),
   submit: authedProcedure

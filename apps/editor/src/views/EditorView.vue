@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import EditorSidebar from "@/components/editor/EditorSidebar.vue";
 import EditorMain from "@/components/editor/EditorMain.vue";
+import { onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { usePromptsStore } from "@/stores/prompts";
+
+const route = useRoute();
+const promptsStore = usePromptsStore();
+
+onMounted(async () => {
+  promptsStore.init(route.params.projectId as string);
+});
 </script>
 
 <template>

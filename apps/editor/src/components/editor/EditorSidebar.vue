@@ -2,8 +2,12 @@
 import {
   ArrowLeftIcon,
   DocumentPlusIcon,
-  FolderOpenIcon,
-} from "@heroicons/vue/20/solid";
+  FolderPlusIcon,
+} from "@heroicons/vue/24/outline";
+import NavItem from "./sidebar/NavItem.vue";
+import { usePromptsStore } from "@/stores/prompts";
+
+const promptsStore = usePromptsStore();
 </script>
 
 <template>
@@ -13,29 +17,39 @@ import {
       Project name
     </h1>
   </div>
-  <div class="pr-4 pt-4">
-    <div
-      class="flex items-center justify-between ml-4 text-slate-200 border-b-2 border-b-slate-400 font-semibold"
-    >
-      Prompts
-      <DocumentPlusIcon class="w-4 h-4 text-white" />
+  <div class="pr-4 pt-2">
+    <div class="flex items-center ml-4 text-sm text-slate-300">
+      <div class="flex-1">Prompts</div>
+
+      <button
+        class="ml-1 p-1 flex items-center justify-center rounded hover:bg-slate-200 hover:text-slate-800 text-white"
+      >
+        <FolderPlusIcon class="w-4 h-4" />
+      </button>
+      <button
+        class="ml-1 p-1 flex items-center justify-center rounded hover:bg-slate-200 hover:text-slate-800 text-white"
+      >
+        <DocumentPlusIcon class="w-4 h-4" />
+      </button>
     </div>
-    <ul class="mt-3">
-      <li class="mb-2 pl-4">First prompt</li>
-      <li class="mb-2 pl-4">Second prompt</li>
-      <li class="mb-2 pl-4">Third prompt</li>
-      <li class="mb-2 pl-4">
+    <ul class="mt-1">
+      <NavItem
+        :text="prompt.name"
+        v-for="prompt of promptsStore.prompts"
+        :key="prompt.id"
+        :prompt-id="prompt.id"
+      />
+
+      <!-- <li class="mb-2 pl-4">
         <div class="flex items-center mb-2">
           <FolderOpenIcon class="w-4 h-4" />
           <div class="ml-2">Some folder</div>
         </div>
         <ul class="ml-4">
-          <li class="mb-2 pl-4 bg-slate-300 text-slate-600 rounded-full">
-            A nested prompt
-          </li>
-          <li class="mb-2 pl-4">Another prompt</li>
+          <NavItem text="The active prompt" :isActive="true" />
+          <NavItem text="Another prompt" />
         </ul>
-      </li>
+      </li> -->
     </ul>
   </div>
 </template>

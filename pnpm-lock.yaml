@@ -72,6 +72,7 @@ importers:
       add: ^2.0.6
       api: workspace:*
       autoprefixer: ^10.4.13
+      click-outside-vue3: ^4.0.1
       eslint: ^8.22.0
       eslint-plugin-vue: ^9.3.0
       jsdom: ^20.0.3
@@ -93,6 +94,7 @@ importers:
       '@trpc/server': 10.4.3
       add: 2.0.6
       api: link:../api
+      click-outside-vue3: 4.0.1
       pinia: 2.0.28_e7lp6ggkpgyi5vqd44m2kxvk6i
       vue: 3.2.45
       vue-query: 1.26.0_vue@3.2.45
@@ -1358,6 +1360,11 @@ packages:
     resolution: {integrity: sha512-x/5fWmGMnbKQAaNwN+UZlV79qBLM9JFnJuJ03gIi5whrob0xV0ofNVHy9DhwGdsMJQc2OKv0oGmLzvaqvAVv+g==}
     engines: {node: '>=6'}
     dev: true
+
+  /click-outside-vue3/4.0.1:
+    resolution: {integrity: sha512-sbplNecrup5oGqA3o4bo8XmvHRT6q9fvw21Z67aDbTqB9M6LF7CuYLTlLvNtOgKU6W3zst5H5zJuEh4auqA34g==}
+    engines: {node: '>=6'}
+    dev: false
 
   /cliui/7.0.4:
     resolution: {integrity: sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==}
