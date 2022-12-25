@@ -12,10 +12,11 @@ const currentPromptStore = useCurrentPromptStore();
       :key="output.id"
       class="p-2 bg-slate-600 rounded flex mb-2"
     >
-      <div class="pr-2">
+      <div class="pr-2" v-if="output.id !== 'pending'">
         <ChevronDownIcon class="w-4 h-4 mt-1" />
       </div>
-      <div>{{ output.content }}</div>
+      <div v-if="output.id !== 'pending'">{{ output.content }}</div>
+      <div v-else>Loading...</div>
     </div>
   </div>
 </template>

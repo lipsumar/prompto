@@ -15,7 +15,6 @@ export const useCurrentPromptStore = defineStore("currentPrompt", () => {
   const outputs = ref<PromptOutput[] | null>(null);
 
   async function setPrompt(promptId: string) {
-    console.log("set", promptId);
     const promptData = await trpc.prompt.get.query({ id: promptId });
     prompt.value = promptData;
     const promptVersionsData = await trpc.prompt.versions.query({ promptId });
@@ -26,5 +25,29 @@ export const useCurrentPromptStore = defineStore("currentPrompt", () => {
     outputs.value = outputsData;
   }
 
-  return { prompt, setPrompt, versions, currentVersion, outputs };
+  function addPendingOutput() {
+    if (!currentVersion.value) return;
+
+    outputs.value?.unshift({
+      content: "",
+      createdAt: "",
+      id: "pending",
+      promptVersionId: currentVersion.value.id,
+    });
+  }
+  function resolvePendingOutput(output: PromptOutput) {
+    if (!outputs.value) return;
+
+    outputs.value[0] = output;
+  }
+
+  return {
+    prompt,
+    setPrompt,
+    versions,
+    currentVersion,
+    outputs,
+    addPendingOutput,
+    resolvePendingOutput,
+  };
 });

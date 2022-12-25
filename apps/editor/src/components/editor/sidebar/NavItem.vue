@@ -53,7 +53,7 @@ function focusAndSelect(input: HTMLInputElement) {
     "
   >
     <div
-      class="group flex items-center w-full pl-1 py-1 rounded-lg"
+      class="group flex items-center w-full pl-1 py-1 rounded-lg cursor-pointer"
       :class="{
         'bg-slate-300': isActive,
         'text-slate-600': isActive,

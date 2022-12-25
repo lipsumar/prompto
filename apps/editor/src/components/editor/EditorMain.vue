@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useRoute } from "vue-router";
 import PromptEditor from "./main/PromptEditor.vue";
 import PromptOutputs from "./main/PromptOutputs.vue";
-const route = useRoute();
 </script>
 
 <template>

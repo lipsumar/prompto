@@ -77,6 +77,7 @@ export const promptRouter = router({
       const promptVersionIds = promptVersions.map((pv) => pv.id);
       return prisma.promptOutput.findMany({
         where: { promptVersionId: { in: promptVersionIds } },
+        orderBy: { createdAt: 'desc' },
       });
     }),
 });
