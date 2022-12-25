@@ -29,7 +29,6 @@ const { mutate: renamePrompt } = useMutation(
     trpc.prompt.rename.mutate(data),
   {
     onSuccess() {
-      console.log("just ranmed!");
       promptsStore.update();
     },
   }
@@ -53,7 +52,7 @@ function focusAndSelect(input: HTMLInputElement) {
       }
     "
   >
-    <button
+    <div
       class="group flex items-center w-full pl-1 py-1 rounded-lg"
       :class="{
         'bg-slate-300': isActive,
@@ -116,6 +115,6 @@ function focusAndSelect(input: HTMLInputElement) {
           Delete
         </button>
       </div>
-    </button>
+    </div>
   </li>
 </template>
