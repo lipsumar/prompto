@@ -40,6 +40,12 @@ function focusAndSelect(input: HTMLInputElement) {
     input.select();
   }, 2);
 }
+
+function deletePrompt(promptId: string) {
+  trpc.prompt.delete.mutate({ id: promptId }).then(() => {
+    promptsStore.update();
+  });
+}
 </script>
 
 <template>
@@ -96,7 +102,7 @@ function focusAndSelect(input: HTMLInputElement) {
         class="absolute bg-slate-50 p-1 border rounded-lg ml-[100%] top-0 w-48 shadow-md text-slate-800 text-left"
       >
         <button
-          class="flex items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"
+          class="flex text-sm items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"
           @click.stop="
             () => {
               state.isMenuOpen = false;
@@ -109,7 +115,13 @@ function focusAndSelect(input: HTMLInputElement) {
           Rename
         </button>
         <button
-          class="flex items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"
+          class="flex text-sm items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"
+          @click.stop="
+            () => {
+              state.isMenuOpen = false;
+              deletePrompt(promptId);
+            }
+          "
         >
           <TrashIcon class="w-4 h4 mr-2" />
           Delete

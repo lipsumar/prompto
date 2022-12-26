@@ -40,6 +40,12 @@ export const promptRouter = router({
       where: { id: input.id },
     })
   ),
+  delete: authedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ input }) => {
+      // @todo - also delete versions and outputs?
+      return prisma.prompt.delete({ where: { id: input.id } });
+    }),
   versions: authedProcedure
     .input(z.object({ promptId: z.string() }))
     .query(async ({ input }) => {
