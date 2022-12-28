@@ -5,10 +5,10 @@ import PromptOutputs from "./main/PromptOutputs.vue";
 
 <template>
   <div class="min-h-screen overflow-hidden">
-    <div class="h-[60vh]">
+    <div class="h-[50vh]">
       <PromptEditor />
     </div>
-    <div class="h-[40vh] bg-slate-800 text-slate-100">
+    <div class="h-[50vh]">
       <PromptOutputs />
     </div>
   </div>

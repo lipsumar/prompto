@@ -1,24 +1,26 @@
 <script setup lang="ts">
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
-import { ChevronDownIcon } from "@heroicons/vue/20/solid";
 
 const currentPromptStore = useCurrentPromptStore();
 </script>
 
 <template>
-  <div class="p-4 h-full overflow-y-auto">
-    <div
-      v-for="output of currentPromptStore.outputs"
-      :key="output.id"
-      class="p-2 bg-slate-600 rounded flex mb-2"
-    >
-      <div class="pr-2" v-if="output.id !== 'pending'">
-        <ChevronDownIcon class="w-4 h-4 mt-1" />
+  <div class="h-full bg-slate-50 border-t-2 border-t-blue-600">
+    <div class="pt-6 h-full overflow-y-auto w-1/2 mx-auto">
+      <div
+        v-for="(output, i) in currentPromptStore.outputs"
+        :key="output.id"
+        class="mb-6 pb-4 border-b-2 border-dashed border-b-slate-300"
+      >
+        <div
+          v-if="output.id !== 'pending'"
+          class="whitespace-pre-wrap text-slate-500"
+          :class="{ 'text-lg': i === 0, 'text-black': i === 0 }"
+        >
+          {{ output.content }}
+        </div>
+        <div v-else>Loading...</div>
       </div>
-      <div v-if="output.id !== 'pending'" class="whitespace-pre-wrap">
-        {{ output.content }}
-      </div>
-      <div v-else>Loading...</div>
     </div>
   </div>
 </template>
