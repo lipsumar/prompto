@@ -55,7 +55,13 @@ export const promptRouter = router({
       });
     }),
   submit: authedProcedure
-    .input(z.object({ content: z.string(), promptVersionId: z.string() }))
+    .input(
+      z.object({
+        content: z.string(),
+        promptVersionId: z.string(),
+        temperature: z.number(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       if (!ctx.user.gpt3ApiToken) {
         throw new Error('MISSING_GPT3_TOKEN');
@@ -66,8 +72,12 @@ export const promptRouter = router({
       });
       const completion = await gpt3Complete(
         input.content,
-        ctx.user.gpt3ApiToken
+        ctx.user.gpt3ApiToken,
+        {
+          temperature: input.temperature,
+        }
       );
+
       const output = await prisma.promptOutput.create({
         data: { promptVersionId: promptVersion.id, content: completion || '' },
       });

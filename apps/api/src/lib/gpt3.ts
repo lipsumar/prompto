@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
 import type { CreateCompletionResponse } from 'openai';
 
 function getFirstChoiceText(data: CreateCompletionResponse): string | null {
@@ -10,18 +10,17 @@ function getFirstChoiceText(data: CreateCompletionResponse): string | null {
 
 export async function gpt3Complete(
   prompt: string,
-  apiKey: string
+  apiKey: string,
+  request: Partial<CreateCompletionRequest>
 ): Promise<string | null> {
   const configuration = new Configuration({ apiKey });
   const openai = new OpenAIApi(configuration);
   const response = await openai.createCompletion({
     model: 'text-davinci-003',
     prompt,
-    temperature: 0.89,
+    temperature: 0.7,
     max_tokens: 256,
-    top_p: 1,
-    frequency_penalty: 0.3,
-    presence_penalty: 0.11,
+    ...request,
   });
   const maybeText = getFirstChoiceText(response.data);
   return maybeText ? maybeText.trim() : null;
