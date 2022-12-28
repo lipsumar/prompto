@@ -15,7 +15,9 @@ const currentPromptStore = useCurrentPromptStore();
       <div class="pr-2" v-if="output.id !== 'pending'">
         <ChevronDownIcon class="w-4 h-4 mt-1" />
       </div>
-      <div v-if="output.id !== 'pending'">{{ output.content }}</div>
+      <div v-if="output.id !== 'pending'" class="whitespace-pre-wrap">
+        {{ output.content }}
+      </div>
       <div v-else>Loading...</div>
     </div>
   </div>
