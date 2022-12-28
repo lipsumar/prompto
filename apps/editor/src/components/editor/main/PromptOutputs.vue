@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
 
 const currentPromptStore = useCurrentPromptStore();
@@ -19,7 +20,9 @@ const currentPromptStore = useCurrentPromptStore();
         >
           {{ output.content }}
         </div>
-        <div v-else>Loading...</div>
+        <div v-else>
+          <SpinnerLoader />
+        </div>
       </div>
     </div>
   </div>
