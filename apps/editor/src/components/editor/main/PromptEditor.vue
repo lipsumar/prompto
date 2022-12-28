@@ -2,9 +2,10 @@
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
 import { trpc } from "@/trpc";
 import { FireIcon } from "@heroicons/vue/24/outline";
-import { reactive, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 
 const currentPromptStore = useCurrentPromptStore();
+const textareaRef = ref<HTMLTextAreaElement | undefined>();
 
 const state = reactive<{
   text: string;
@@ -21,8 +22,15 @@ watch(
   () => {
     state.text = currentPromptStore.currentVersion?.content || "";
     state.isSubmitting = false;
+    setTimeout(() => {
+      resizeTextarea(textareaRef.value);
+    });
   }
 );
+
+onMounted(() => {
+  resizeTextarea(textareaRef.value);
+});
 
 async function submit() {
   if (!currentPromptStore.currentVersion) return;
@@ -37,16 +45,30 @@ async function submit() {
   currentPromptStore.resolvePendingOutput(res.output);
   state.isSubmitting = false;
 }
+
+function resizeTextarea(el?: HTMLTextAreaElement) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
 </script>
 
 <template>
-  <div class="bg-slate-50 pt-6 h-full">
-    <div class="w-editor-content px-6 mx-auto h-full flex flex-col">
-      <textarea
-        class="bg-transparent w-full h-full resize-none focus:outline-none text-lg"
-        v-model="state.text"
-      ></textarea>
-      <div class="py-4 flex">
+  <div class="bg-slate-50 h-full">
+    <div class="h-full flex flex-col">
+      <div class="overflow-y-auto h-full pt-6 px-6">
+        <textarea
+          class="w-editor-content px-6 mx-auto overflow-hidden bg-transparent block w-full resize-none focus:outline-none text-lg min-h-full"
+          v-model="state.text"
+          ref="textareaRef"
+          @input="
+          (e) => {
+            resizeTextarea((e.target as HTMLTextAreaElement))
+          }
+        "
+        ></textarea>
+      </div>
+      <div class="py-4 flex w-editor-content px-6 mx-auto w-full">
         <button
           class="flex-grow-0 bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold disabled:opacity-75"
           @click="submit"
