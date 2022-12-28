@@ -1,5 +1,5 @@
-import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
-import type { CreateCompletionResponse } from 'openai';
+import { Configuration, OpenAIApi } from 'openai';
+import type { CreateCompletionResponse, CreateCompletionRequest } from 'openai';
 
 function getFirstChoiceText(data: CreateCompletionResponse): string | null {
   if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
