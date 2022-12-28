@@ -9,9 +9,13 @@ import { usePromptsStore } from "@/stores/prompts";
 import { trpc } from "@/trpc";
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
 import { RouterLink } from "vue-router";
+import { ref } from "vue";
 
 const promptsStore = usePromptsStore();
 const currentPromptStore = useCurrentPromptStore();
+const projectNameRef = ref<HTMLInputElement | null>(null);
+
+let projectName = ref(promptsStore.project?.name || "");
 
 function createPrompt() {
   trpc.prompt.create
@@ -21,14 +25,27 @@ function createPrompt() {
       currentPromptStore.setPrompt(prompt.id);
     });
 }
+
+function saveProjectName() {
+  trpc.project.rename
+    .mutate({ id: promptsStore.projectId, name: projectName.value })
+    .then(() => {
+      projectNameRef.value?.blur();
+    });
+}
 </script>
 
 <template>
-  <div class="p-4 flex items-center">
-    <RouterLink to="/"> <ArrowLeftIcon class="w-4 h-4 mr-4" /></RouterLink>
-    <h1 class="uppercase text-sm font-bold tracking-wider text-slate-200">
-      Project name
-    </h1>
+  <div class="p-4 pt-2 flex items-center">
+    <RouterLink to="/"> <ArrowLeftIcon class="w-4 h-4 mr-2" /></RouterLink>
+    <input
+      type="text"
+      class="w-full uppercase text-sm font-bold tracking-wider text-slate-200 bg-transparent outline outline-transparent rounded p-1 hover:outline-slate-300 focus:outline-slate-300"
+      v-model="projectName"
+      @keyup.enter="() => saveProjectName()"
+      @focus="(e) => (e.target as HTMLInputElement).select()"
+      ref="projectNameRef"
+    />
   </div>
   <div class="pr-4 pt-2">
     <div class="flex items-center ml-4 text-sm text-slate-300">

@@ -41,6 +41,13 @@ export const useCurrentPromptStore = defineStore("currentPrompt", () => {
     outputs.value[0] = output;
   }
 
+  function reset() {
+    prompt.value = null;
+    versions.value = [];
+    currentVersion.value = null;
+    outputs.value = null;
+  }
+
   return {
     prompt,
     setPrompt,
@@ -49,5 +56,6 @@ export const useCurrentPromptStore = defineStore("currentPrompt", () => {
     outputs,
     addPendingOutput,
     resolvePendingOutput,
+    reset,
   };
 });
