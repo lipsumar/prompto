@@ -6,13 +6,26 @@ import {
 } from "@heroicons/vue/24/outline";
 import NavItem from "./sidebar/NavItem.vue";
 import { usePromptsStore } from "@/stores/prompts";
+import { trpc } from "@/trpc";
+import { useCurrentPromptStore } from "@/stores/currentPrompt";
+import { RouterLink } from "vue-router";
 
 const promptsStore = usePromptsStore();
+const currentPromptStore = useCurrentPromptStore();
+
+function createPrompt() {
+  trpc.prompt.create
+    .mutate({ projectId: promptsStore.projectId })
+    .then((prompt) => {
+      promptsStore.update();
+      currentPromptStore.setPrompt(prompt.id);
+    });
+}
 </script>
 
 <template>
   <div class="p-4 flex items-center">
-    <ArrowLeftIcon class="w-4 h-4 mr-4" />
+    <RouterLink to="/"> <ArrowLeftIcon class="w-4 h-4 mr-4" /></RouterLink>
     <h1 class="uppercase text-sm font-bold tracking-wider text-slate-200">
       Project name
     </h1>
@@ -21,13 +34,14 @@ const promptsStore = usePromptsStore();
     <div class="flex items-center ml-4 text-sm text-slate-300">
       <div class="flex-1">Prompts</div>
 
-      <button
+      <!-- <button
         class="ml-1 p-1 flex items-center justify-center rounded hover:bg-slate-200 hover:text-slate-800 text-white"
       >
         <FolderPlusIcon class="w-4 h-4" />
-      </button>
+      </button> -->
       <button
         class="ml-1 p-1 flex items-center justify-center rounded hover:bg-slate-200 hover:text-slate-800 text-white"
+        @click="() => createPrompt()"
       >
         <DocumentPlusIcon class="w-4 h-4" />
       </button>
