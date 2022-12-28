@@ -41,7 +41,7 @@ async function submit() {
 
 <template>
   <div class="bg-slate-50 pt-6 h-full">
-    <div class="w-1/2 mx-auto h-full flex flex-col">
+    <div class="w-editor-content px-6 mx-auto h-full flex flex-col">
       <textarea
         class="bg-transparent w-full h-full resize-none focus:outline-none text-lg"
         v-model="state.text"
