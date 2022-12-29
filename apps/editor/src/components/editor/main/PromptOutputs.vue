@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
+import { useEditorSettingsStore } from "@/stores/editorSettings";
 
 const currentPromptStore = useCurrentPromptStore();
+const editorSettings = useEditorSettingsStore();
 </script>
 
 <template>
-  <div class="h-full bg-slate-50 border-t-2 border-t-blue-600 overflow-y-auto">
+  <div
+    class="h-full bg-slate-50 border-t-2 border-t-blue-600"
+    :class="{
+      'overflow-y-auto': editorSettings.editorLayout === 'split-horizontal',
+    }"
+  >
     <div class="w-editor-content px-6 pt-6 h-full mx-auto">
       <div
         v-for="(output, i) in currentPromptStore.outputs"

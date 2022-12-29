@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
+import { useEditorSettingsStore } from "@/stores/editorSettings";
 import { trpc } from "@/trpc";
 import { FireIcon } from "@heroicons/vue/24/outline";
 import { onMounted, reactive, ref, watch } from "vue";
 
 const currentPromptStore = useCurrentPromptStore();
+const editorSettings = useEditorSettingsStore();
 const textareaRef = ref<HTMLTextAreaElement | undefined>();
 
 const state = reactive<{
@@ -55,9 +57,18 @@ function resizeTextarea(el?: HTMLTextAreaElement) {
 <template>
   <div class="bg-slate-50 h-full">
     <div class="h-full flex flex-col">
-      <div class="overflow-y-auto h-full pt-6 px-6">
+      <div
+        class="h-full pt-6 px-6"
+        :class="{
+          'overflow-y-auto': editorSettings.editorLayout === 'split-horizontal',
+        }"
+      >
         <textarea
-          class="w-editor-content px-6 mx-auto overflow-hidden bg-transparent block w-full resize-none focus:outline-none text-lg min-h-full"
+          class="w-editor-content px-6 mx-auto overflow-hidden bg-transparent block w-full resize-none focus:outline-none text-lg"
+          :class="{
+            'min-h-full': editorSettings.editorLayout === 'split-horizontal',
+            'min-h-[30vh]': editorSettings.editorLayout === 'page',
+          }"
           v-model="state.text"
           ref="textareaRef"
           @input="

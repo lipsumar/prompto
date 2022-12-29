@@ -5,12 +5,15 @@ import { onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { usePromptsStore } from "@/stores/prompts";
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
+import { Cog6ToothIcon, type CogIcon } from "@heroicons/vue/24/outline";
+import { useEditorSettingsStore } from "@/stores/editorSettings";
 
 const route = useRoute();
 const promptsStore = usePromptsStore();
 const currentPromptStore = useCurrentPromptStore();
 
 const state = reactive({ ready: false });
+const editorSettings = useEditorSettingsStore();
 
 onMounted(async () => {
   currentPromptStore.reset();
@@ -18,6 +21,12 @@ onMounted(async () => {
     .init(route.params.projectId as string)
     .then(() => (state.ready = true));
 });
+
+function switchLayout() {
+  editorSettings.setEditorLayout(
+    editorSettings.editorLayout === "page" ? "split-horizontal" : "page"
+  );
+}
 </script>
 
 <template>
@@ -29,4 +38,11 @@ onMounted(async () => {
       <EditorMain :key="(route.params.projectId as string)" />
     </main>
   </div>
+  <button
+    class="absolute top-4 right-4 rounded bg-slate-200 text-slate-400 text-sm p-1"
+    @click="() => switchLayout()"
+    title="Switch editor layout"
+  >
+    <Cog6ToothIcon class="w-4 h-4" />
+  </button>
 </template>
