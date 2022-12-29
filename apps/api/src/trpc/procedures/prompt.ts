@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { authedProcedure, router } from '..';
 import { gpt3Complete } from '../../lib/gpt3';
 import { prisma } from '../../lib/prisma';
+import { createHash } from 'crypto';
 
 export const promptRouter = router({
   inProject: authedProcedure
@@ -19,10 +20,6 @@ export const promptRouter = router({
       const prompt = await prisma.prompt.create({
         data: {
           projectId: input.projectId,
-          promptVersions: { create: [{ content: '' }] },
-        },
-        include: {
-          promptVersions: true,
         },
       });
       return prompt;
@@ -58,7 +55,7 @@ export const promptRouter = router({
     .input(
       z.object({
         content: z.string(),
-        promptVersionId: z.string(),
+        promptId: z.string(),
         temperature: z.number(),
       })
     )
@@ -66,10 +63,37 @@ export const promptRouter = router({
       if (!ctx.user.gpt3ApiToken) {
         throw new Error('MISSING_GPT3_TOKEN');
       }
-      const promptVersion = await prisma.promptVersion.update({
-        where: { id: input.promptVersionId },
-        data: { content: input.content },
+
+      let lastPromptVersion = await prisma.promptVersion.findFirst({
+        where: { promptId: input.promptId },
+        orderBy: { createdAt: 'desc' },
       });
+      if (!lastPromptVersion) {
+        lastPromptVersion = await prisma.promptVersion.create({
+          data: {
+            content: input.content,
+            promptId: input.promptId,
+          },
+        });
+      }
+      const lastHash = createHash('sha256')
+        .update(lastPromptVersion.content)
+        .digest('hex');
+      const currentHash = createHash('sha256')
+        .update(input.content)
+        .digest('hex');
+
+      let promptVersion = lastPromptVersion;
+      if (lastHash !== currentHash) {
+        promptVersion = await prisma.promptVersion.create({
+          data: {
+            content: input.content,
+            promptId: input.promptId,
+            previousVersionId: lastPromptVersion.id,
+          },
+        });
+      }
+
       const completion = await gpt3Complete(
         input.content,
         ctx.user.gpt3ApiToken,

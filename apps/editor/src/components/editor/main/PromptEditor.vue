@@ -33,13 +33,12 @@ onMounted(() => {
 });
 
 async function submit() {
-  if (!currentPromptStore.currentVersion) return;
   if (state.isSubmitting) return;
   state.isSubmitting = true;
   currentPromptStore.addPendingOutput();
   const res = await trpc.prompt.submit.mutate({
     content: state.text,
-    promptVersionId: currentPromptStore.currentVersion.id,
+    promptId: currentPromptStore.prompt!.id,
     temperature: state.temperature,
   });
   currentPromptStore.resolvePendingOutput(res.output);

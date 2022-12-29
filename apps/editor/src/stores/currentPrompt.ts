@@ -26,13 +26,11 @@ export const useCurrentPromptStore = defineStore("currentPrompt", () => {
   }
 
   function addPendingOutput() {
-    if (!currentVersion.value) return;
-
     outputs.value?.unshift({
       content: "",
       createdAt: "",
       id: "pending",
-      promptVersionId: currentVersion.value.id,
+      promptVersionId: "pending",
     });
   }
   function resolvePendingOutput(output: PromptOutput) {
