@@ -76,6 +76,7 @@ function resizeTextarea(el?: HTMLTextAreaElement) {
             resizeTextarea((e.target as HTMLTextAreaElement))
           }
         "
+          placeholder="Enter your pompt here..."
         ></textarea>
       </div>
       <div class="py-4 flex w-editor-content px-6 mx-auto w-full">
