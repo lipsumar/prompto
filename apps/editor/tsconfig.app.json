@@ -1,0 +1,18 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "exclude": ["src/**/__tests__/*"],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+      // "@trpc/server/*": [
+      //   "../../../../node_modules/.pnpm/@trpc+server@10.4.3/node_modules/@trpc/server/*"
+      // ],
+      //"@prisma/client/*": ["../api/node_modules/@prisma/client/*"],
+      //"api": ["../api/*"]
+    }
+    //"preserveSymlinks": true
+  }
+}

@@ -1,6 +1,7 @@
-import * as trpcExpress from '@trpc/server/adapters/express';
-import { inferAsyncReturnType, initTRPC, TRPCError } from '@trpc/server';
-import { User } from '@prisma/client';
+import type * as trpcExpress from '@trpc/server/adapters/express';
+import { initTRPC, TRPCError } from '@trpc/server';
+import type { inferAsyncReturnType } from '@trpc/server';
+import type { User } from '@prisma/client';
 
 // created for each request
 export const createContext = ({

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { authedProcedure, router } from '..';
 import { gpt3Complete } from '../../lib/gpt3';
 import { prisma } from '../../lib/prisma';
+import { createHash } from 'crypto';
 
 export const promptRouter = router({
   inProject: authedProcedure
@@ -9,9 +10,7 @@ export const promptRouter = router({
     .query(async ({ input }) => {
       const prompts = await prisma.prompt.findMany({
         where: { projectId: input.projectId },
-        include: {
-          promptVersions: true,
-        },
+        orderBy: { name: 'asc' },
       });
       return prompts;
     }),
@@ -21,34 +20,88 @@ export const promptRouter = router({
       const prompt = await prisma.prompt.create({
         data: {
           projectId: input.projectId,
-          promptVersions: { create: [{ content: '' }] },
-        },
-        include: {
-          promptVersions: true,
         },
       });
       return prompt;
     }),
+  rename: authedProcedure
+    .input(z.object({ promptId: z.string(), name: z.string() }))
+    .mutation(async ({ input }) => {
+      return prisma.prompt.update({
+        where: { id: input.promptId },
+        data: { name: input.name },
+      });
+    }),
   get: authedProcedure.input(z.object({ id: z.string() })).query(({ input }) =>
     prisma.prompt.findUnique({
       where: { id: input.id },
-      include: { promptVersions: true },
     })
   ),
+  delete: authedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ input }) => {
+      // @todo - also delete versions and outputs?
+      return prisma.prompt.delete({ where: { id: input.id } });
+    }),
+  versions: authedProcedure
+    .input(z.object({ promptId: z.string() }))
+    .query(async ({ input }) => {
+      return prisma.promptVersion.findMany({
+        where: { promptId: input.promptId },
+        orderBy: { createdAt: 'desc' },
+      });
+    }),
   submit: authedProcedure
-    .input(z.object({ content: z.string(), promptVersionId: z.string() }))
+    .input(
+      z.object({
+        content: z.string(),
+        promptId: z.string(),
+        temperature: z.number(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       if (!ctx.user.gpt3ApiToken) {
         throw new Error('MISSING_GPT3_TOKEN');
       }
-      const promptVersion = await prisma.promptVersion.update({
-        where: { id: input.promptVersionId },
-        data: { content: input.content },
+
+      let lastPromptVersion = await prisma.promptVersion.findFirst({
+        where: { promptId: input.promptId },
+        orderBy: { createdAt: 'desc' },
       });
+      if (!lastPromptVersion) {
+        lastPromptVersion = await prisma.promptVersion.create({
+          data: {
+            content: input.content,
+            promptId: input.promptId,
+          },
+        });
+      }
+      const lastHash = createHash('sha256')
+        .update(lastPromptVersion.content)
+        .digest('hex');
+      const currentHash = createHash('sha256')
+        .update(input.content)
+        .digest('hex');
+
+      let promptVersion = lastPromptVersion;
+      if (lastHash !== currentHash) {
+        promptVersion = await prisma.promptVersion.create({
+          data: {
+            content: input.content,
+            promptId: input.promptId,
+            previousVersionId: lastPromptVersion.id,
+          },
+        });
+      }
+
       const completion = await gpt3Complete(
         input.content,
-        ctx.user.gpt3ApiToken
+        ctx.user.gpt3ApiToken,
+        {
+          temperature: input.temperature,
+        }
       );
+
       const output = await prisma.promptOutput.create({
         data: { promptVersionId: promptVersion.id, content: completion || '' },
       });
@@ -64,6 +117,7 @@ export const promptRouter = router({
       const promptVersionIds = promptVersions.map((pv) => pv.id);
       return prisma.promptOutput.findMany({
         where: { promptVersionId: { in: promptVersionIds } },
+        orderBy: { createdAt: 'desc' },
       });
     }),
 });

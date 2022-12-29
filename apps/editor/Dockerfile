@@ -16,4 +16,3 @@ RUN pnpm nx run editor:build
 FROM nginx:1.21
 COPY --from=0 /usr/src/app/apps/editor/dist /usr/share/nginx/html
 COPY --from=0 /usr/src/app/apps/editor/nginx.conf /etc/nginx/conf.d/default.conf
-
