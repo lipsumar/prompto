@@ -3,6 +3,7 @@ import {
   ArrowLeftIcon,
   DocumentPlusIcon,
   FolderPlusIcon,
+  PlusIcon,
 } from "@heroicons/vue/24/outline";
 import NavItem from "./sidebar/NavItem.vue";
 import { usePromptsStore } from "@/stores/prompts";
@@ -10,9 +11,13 @@ import { trpc } from "@/trpc";
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
 import { RouterLink } from "vue-router";
 import { ref } from "vue";
+import { useChainsStore } from "@/stores/chains";
+import { useEditorStore } from "@/stores/editor";
 
 const promptsStore = usePromptsStore();
+const chainsStore = useChainsStore();
 const currentPromptStore = useCurrentPromptStore();
+const editorStore = useEditorStore();
 const projectNameRef = ref<HTMLInputElement | null>(null);
 
 let projectName = ref(promptsStore.project?.name || "");
@@ -22,7 +27,19 @@ function createPrompt() {
     .mutate({ projectId: promptsStore.projectId })
     .then((prompt) => {
       promptsStore.update();
-      currentPromptStore.setPrompt(prompt.id);
+      editorStore.setActiveElement({ type: "prompt", id: prompt.id });
+    });
+}
+
+function createChain() {
+  trpc.chain.create
+    .mutate({
+      projectId: promptsStore.projectId,
+      name: "Untitled",
+    })
+    .then((chain) => {
+      chainsStore.update();
+      editorStore.setActiveElement({ type: "chain", id: chain.id });
     });
 }
 
@@ -68,19 +85,29 @@ function saveProjectName() {
         :text="prompt.name"
         v-for="prompt of promptsStore.prompts"
         :key="prompt.id"
-        :prompt-id="prompt.id"
+        :id="prompt.id"
+        type="prompt"
       />
-
-      <!-- <li class="mb-2 pl-4">
-        <div class="flex items-center mb-2">
-          <FolderOpenIcon class="w-4 h-4" />
-          <div class="ml-2">Some folder</div>
-        </div>
-        <ul class="ml-4">
-          <NavItem text="The active prompt" :isActive="true" />
-          <NavItem text="Another prompt" />
-        </ul>
-      </li> -->
+    </ul>
+  </div>
+  <div class="pr-4 pt-2">
+    <div class="flex items-center ml-4 text-sm text-slate-300">
+      <div class="flex-1">Chains</div>
+      <button
+        class="ml-1 p-1 flex items-center justify-center rounded hover:bg-slate-200 hover:text-slate-800 text-white"
+        @click="() => createChain()"
+      >
+        <PlusIcon class="w-4 h-4" />
+      </button>
+    </div>
+    <ul class="mt-1">
+      <NavItem
+        :text="chain.name"
+        v-for="chain of chainsStore.chains"
+        :key="chain.id"
+        :id="chain.id"
+        type="chain"
+      />
     </ul>
   </div>
 </template>

@@ -11,17 +11,19 @@ import { useMutation } from "vue-query";
 import type { AppRouter } from "api";
 import type { inferRouterInputs } from "@trpc/server";
 import { usePromptsStore } from "@/stores/prompts";
-import { useCurrentPromptStore } from "@/stores/currentPrompt";
+import { useEditorStore } from "@/stores/editor";
 
-const props = defineProps(["text", "promptId"]);
+const props = defineProps(["text", "type", "id"]);
 
 const state = reactive({ isMenuOpen: false, isRenaming: false });
 const input = ref<HTMLInputElement>();
 const promptsStore = usePromptsStore();
-const currentPromptStore = useCurrentPromptStore();
+const editorStore = useEditorStore();
 
 const isActive = computed(
-  () => currentPromptStore.prompt?.id === props.promptId
+  () =>
+    editorStore.activeElement?.type === props.type &&
+    editorStore.activeElement?.id === props.id
 );
 
 const { mutate: renamePrompt } = useMutation(
@@ -67,7 +69,7 @@ function deletePrompt(promptId: string) {
       }"
       @click="
         () => {
-          currentPromptStore.setPrompt(promptId);
+          editorStore.setActiveElement({ type: props.type, id: props.id });
         }
       "
     >
@@ -85,7 +87,7 @@ function deletePrompt(promptId: string) {
             () => {
               state.isRenaming = false;
               if (input) {
-                renamePrompt({ promptId, name: input.value });
+                renamePrompt({ promptId: props.id, name: input.value });
               }
             }
           "
@@ -119,7 +121,7 @@ function deletePrompt(promptId: string) {
           @click.stop="
             () => {
               state.isMenuOpen = false;
-              deletePrompt(promptId);
+              deletePrompt(props.id);
             }
           "
         >

@@ -1,0 +1,68 @@
+<!-- eslint-disable vue/multi-word-component-names -->
+<template>
+  <span class="port">
+    <slot></slot>
+  </span>
+</template>
+
+<script lang="ts">
+/**
+ * Offsets edges to its position when placed inside a node
+ */
+export default {
+  props: {
+    id: String, // optional id
+    startOffset: Object, // {x, y}, contents center if null
+    edgesFrom: {
+      type: Array,
+      default: () => [],
+    },
+    edgesTo: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  data() {
+    return {
+      offset: { x: 0, y: 0 },
+    };
+  },
+  mounted() {
+    this.updatePosition();
+  },
+  methods: {
+    /**
+     * Calculate html offset of this element
+     * and update edges anchors to this element offset
+     */
+    updatePosition() {
+      let el = this.$el;
+      (this as any).offset = this.startOffset || {
+        x: el.offsetWidth / 2,
+        y: el.offsetHeight / 2,
+      };
+      while (el && !el.classList.contains("content")) {
+        this.offset.x += el.offsetLeft || 0;
+        this.offset.y += el.offsetTop || 0;
+        el = el.offsetParent;
+      }
+      this.edgesFrom.forEach((edge: any) => {
+        Object.assign(edge.fromAnchor, this.offset);
+      });
+      this.edgesTo.forEach((edge: any) => {
+        Object.assign(edge.toAnchor, this.offset);
+      });
+    },
+  },
+  watch: {
+    edgesFrom: "updatePosition",
+    edgesTo: "updatePosition",
+  },
+};
+</script>
+
+<style>
+.port {
+  position: relative;
+}
+</style>

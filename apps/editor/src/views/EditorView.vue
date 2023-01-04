@@ -5,21 +5,26 @@ import { onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { usePromptsStore } from "@/stores/prompts";
 import { useCurrentPromptStore } from "@/stores/currentPrompt";
-import { Cog6ToothIcon, type CogIcon } from "@heroicons/vue/24/outline";
+import { Cog6ToothIcon } from "@heroicons/vue/24/outline";
 import { useEditorSettingsStore } from "@/stores/editorSettings";
+import { useEditorStore } from "@/stores/editor";
+import { useChainsStore } from "@/stores/chains";
 
 const route = useRoute();
 const promptsStore = usePromptsStore();
-const currentPromptStore = useCurrentPromptStore();
+const chainsStore = useChainsStore();
+const editorStore = useEditorStore();
 
 const state = reactive({ ready: false });
 const editorSettings = useEditorSettingsStore();
 
 onMounted(async () => {
-  currentPromptStore.reset();
-  promptsStore
-    .init(route.params.projectId as string)
-    .then(() => (state.ready = true));
+  editorStore.reset();
+
+  Promise.all([
+    promptsStore.init(route.params.projectId as string),
+    chainsStore.init(route.params.projectId as string),
+  ]).then(() => (state.ready = true));
 });
 
 function switchLayout() {
