@@ -7,12 +7,18 @@ import {
   type InitGraphData,
   type GraphData,
 } from "../../stores/graphEditor";
-import { defineProps, onMounted, ref } from "vue";
+import { defineProps, onMounted, reactive, ref } from "vue";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 import invariant from "tiny-invariant";
+import { createDrag, getEventClientPos } from "@/lib/drag";
+import GraphLine from "./GraphLine.vue";
 
 const props = defineProps<{ graph: InitGraphData }>();
 const viewport = ref<InstanceType<typeof GraphViewport>>();
+const state = reactive({
+  connecting: false,
+  connectingEdgeFrom: { x: 0, y: 0 },
+});
 
 const editorStore = useGraphEditorStore();
 editorStore.init(props.graph);
@@ -67,6 +73,28 @@ function addNode() {
   console.log("added");
 }
 
+const { drag: connectingEdgeTo, startDrag } = createDrag({});
+function startConnect(opts: {
+  port: string;
+  pos: { x: number; y: number };
+  client: { x: number; y: number };
+}) {
+  invariant(viewport.value);
+  state.connecting = true;
+  state.connectingEdgeFrom.x = opts.pos.x;
+  state.connectingEdgeFrom.y = opts.pos.y;
+  console.log("start drag");
+  startDrag({
+    pos: { ...opts.pos },
+    client: { ...opts.client },
+    zoom: viewport.value.getScale(),
+    onFinish() {
+      console.log("its finished");
+      state.connecting = false;
+    },
+  });
+}
+
 onMounted(() => {
   zoomNodes(editorStore.nodes, { scale: 1 });
 });
@@ -74,6 +102,13 @@ onMounted(() => {
 
 <template>
   <GraphViewport ref="viewport">
+    <GraphLine
+      v-if="state.connecting"
+      :x1="state.connectingEdgeFrom.x"
+      :y1="state.connectingEdgeFrom.y"
+      :x2="connectingEdgeTo.pos.x"
+      :y2="connectingEdgeTo.pos.y"
+    />
     <GraphEdge
       v-for="edge of editorStore.edges"
       :key="edge.id"
@@ -83,6 +118,7 @@ onMounted(() => {
       v-for="node of editorStore.nodes"
       :key="node.id"
       :node-id="node.id"
+      @start-connect="startConnect"
     >
       <div class="font-bold">Node {{ node.id }}</div>
       <!-- <select

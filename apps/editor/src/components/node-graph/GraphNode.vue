@@ -4,10 +4,21 @@ import { onMounted, reactive, ref, inject, type Ref } from "vue";
 
 import invariant from "tiny-invariant";
 import { useGraphEditorStore, type GraphNodeData } from "@/stores/graphEditor";
-import { graph } from "@/vnodes";
+
+import { createDrag, getEventClientPos } from "@/lib/drag";
 
 const props = defineProps<{
   nodeId: GraphNodeData["id"];
+}>();
+const emit = defineEmits<{
+  (
+    e: "startConnect",
+    opts: {
+      port: string;
+      pos: { x: number; y: number };
+      client: { x: number; y: number };
+    }
+  ): void;
 }>();
 const editorStore = useGraphEditorStore();
 const contentRef = ref<HTMLElement>();
@@ -24,6 +35,8 @@ const drag = reactive({
 });
 
 const node = editorStore.getNode(props.nodeId);
+const outputEdges = editorStore.getOutputEdges(node.id);
+const inputEdges = editorStore.getInputEdges(node.id);
 const box = reactive({ width: 0, height: 0 });
 
 function fitContent() {
@@ -45,16 +58,6 @@ function fitContent() {
       y: outputEl.offsetTop + outputEl.offsetHeight / 2 + 1,
     }));
   }
-}
-
-function getEventClientPos(e: MouseEvent | TouchEvent) {
-  let clientX = (e as MouseEvent).clientX;
-  let clientY = (e as MouseEvent).clientY;
-  if (e instanceof TouchEvent && e.touches && e.touches.length) {
-    clientX = e.touches[0].clientX;
-    clientY = e.touches[0].clientY;
-  }
-  return { clientX, clientY };
 }
 
 const dragThreshold = 10;
@@ -112,6 +115,24 @@ function preventClicks(e: Event) {
   }
 }
 
+function startConnect(
+  side: "input" | "output",
+  port: string,
+  e: MouseEvent | TouchEvent
+) {
+  const clientPos = getEventClientPos(e);
+  const ports = side === "input" ? node.inputs : node.outputs;
+  const portsOffset = side === "input" ? node.inputsOffset : node.outputsOffset;
+  const portIndex = ports.indexOf(port);
+  const portOffset = portsOffset[portIndex];
+  const pos = { x: node.x + portOffset.x, y: node.y + portOffset.y };
+  emit("startConnect", {
+    port,
+    pos,
+    client: { x: clientPos.clientX, y: clientPos.clientY },
+  });
+}
+
 onMounted(() => {
   fitContent();
 });
@@ -165,7 +186,16 @@ onMounted(() => {
               class="absolute right-0 top-0 h-full mr-[-24px] flex items-center"
             >
               <div
-                class="rounded-full w-4 h-4 bg-sky-500 border-[3px] border-white"
+                class="rounded-full w-4 h-4 border-[3px] border-white hover:bg-sky-500"
+                :class="{
+                  'bg-sky-500': !!outputEdges.find(
+                    (e) => e.fromPort === output
+                  ),
+                  'bg-sky-100': !outputEdges.find((e) => e.fromPort === output),
+                }"
+                @mousedown.prevent.stop="
+                  (e) => startConnect('output', output, e)
+                "
               ></div>
             </div>
           </div>

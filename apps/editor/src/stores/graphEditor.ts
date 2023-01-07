@@ -69,5 +69,21 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     nodes.value.push(initNodeToNode(node));
   }
 
-  return { nodes, edges, init, getNode, getEdge, addNode };
+  function getOutputEdges(nodeId: string) {
+    return edges.value.filter((edge) => edge.from === nodeId);
+  }
+  function getInputEdges(nodeId: string) {
+    return edges.value.filter((edge) => edge.to === nodeId);
+  }
+
+  return {
+    nodes,
+    edges,
+    init,
+    getNode,
+    getEdge,
+    addNode,
+    getOutputEdges,
+    getInputEdges,
+  };
 });
