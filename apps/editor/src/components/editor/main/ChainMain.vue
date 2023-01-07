@@ -14,8 +14,8 @@ const graphData = {
       id: "b",
       inputs: ["default"],
       outputs: [],
-      x: 200,
-      y: 10,
+      x: 300,
+      y: 100,
     },
   ],
   edges: [
