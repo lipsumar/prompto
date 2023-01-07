@@ -8,6 +8,8 @@ import {
   type GraphData,
 } from "../../stores/graphEditor";
 import { defineProps, onMounted, ref } from "vue";
+import { PlusIcon } from "@heroicons/vue/24/outline";
+import invariant from "tiny-invariant";
 
 const props = defineProps<{ graph: InitGraphData }>();
 const viewport = ref<InstanceType<typeof GraphViewport>>();
@@ -51,6 +53,20 @@ function zoomNodes(
   );
 }
 
+function addNode() {
+  invariant(viewport.value);
+  const pan = viewport.value.getPan();
+  const scale = viewport.value.getScale();
+  editorStore.addNode({
+    id: "new",
+    x: (50 - pan.x) / scale,
+    y: (50 - pan.y) / scale,
+    inputs: ["something"],
+    outputs: ["default"],
+  });
+  console.log("added");
+}
+
 onMounted(() => {
   zoomNodes(editorStore.nodes, { scale: 1 });
 });
@@ -59,16 +75,30 @@ onMounted(() => {
 <template>
   <GraphViewport ref="viewport">
     <GraphEdge
-      v-for="edge of props.graph.edges"
+      v-for="edge of editorStore.edges"
       :key="edge.id"
       :edge-id="edge.id"
     />
     <GraphNode
-      v-for="node of props.graph.nodes"
+      v-for="node of editorStore.nodes"
       :key="node.id"
       :node-id="node.id"
     >
       <div class="font-bold">Node {{ node.id }}</div>
+      <!-- <select
+        @click.stop="f"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
+      >
+        <option value="foo">foo</option>
+        <option value="bar">bar</option>
+      </select> -->
     </GraphNode>
   </GraphViewport>
+
+  <button
+    class="absolute top-2 left-2 w-8 h-8 flex items-center justify-center bg-white shadow rounded"
+    @click="addNode"
+  >
+    <PlusIcon class="w-4 h-4" />
+  </button>
 </template>

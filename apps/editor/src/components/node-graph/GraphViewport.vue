@@ -44,7 +44,17 @@ function zoomRect(
   panzoom.value.pan({ x, y });
 }
 
-defineExpose({ zoomRect });
+defineExpose({
+  zoomRect,
+  getPan: () => {
+    invariant(panzoom.value);
+    return panzoom.value.getPan();
+  },
+  getScale: () => {
+    invariant(panzoom.value);
+    return panzoom.value.getZoom();
+  },
+});
 
 onMounted(() => {
   invariant(screen.value);

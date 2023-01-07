@@ -34,18 +34,22 @@ export type GraphEdgeData = {
   toPort: string;
 };
 
+function initNodeToNode(node: InitGraphData["nodes"][0]) {
+  return {
+    ...node,
+    width: -1,
+    height: -1,
+    inputsOffset: node.inputs.map(() => ({ x: 0, y: 0 })),
+    outputsOffset: node.inputs.map(() => ({ x: 0, y: 0 })),
+  };
+}
+
 export const useGraphEditorStore = defineStore("graphEditor", () => {
   const nodes = ref<GraphNodeData[]>([]);
   const edges = ref<GraphEdgeData[]>([]);
 
   function init(graph: InitGraphData) {
-    nodes.value = graph.nodes.map((node) => ({
-      ...node,
-      width: -1,
-      height: -1,
-      inputsOffset: node.inputs.map(() => ({ x: 0, y: 0 })),
-      outputsOffset: node.inputs.map(() => ({ x: 0, y: 0 })),
-    }));
+    nodes.value = graph.nodes.map(initNodeToNode);
     edges.value = graph.edges;
   }
 
@@ -61,5 +65,9 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     return edge;
   }
 
-  return { nodes, edges, init, getNode, getEdge };
+  function addNode(node: InitGraphData["nodes"][0]) {
+    nodes.value.push(initNodeToNode(node));
+  }
+
+  return { nodes, edges, init, getNode, getEdge, addNode };
 });

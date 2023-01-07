@@ -39,7 +39,7 @@ function switchLayout() {
     <nav class="w-64 flex-none bg-slate-600 text-slate-50">
       <EditorSidebar :key="(route.params.projectId as string)" />
     </nav>
-    <main class="flex-1 min-w-0 overflow-auto bg-slate-200">
+    <main class="flex-1 min-w-0 overflow-auto bg-slate-200 relative">
       <EditorMain :key="(route.params.projectId as string)" />
     </main>
   </div>
