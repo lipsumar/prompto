@@ -6,11 +6,13 @@ import {
   useGraphEditorStore,
   type InitGraphData,
   type GraphData,
+  type GraphPortData,
+  type GraphNodeData,
 } from "../../stores/graphEditor";
 import { defineProps, onMounted, reactive, ref } from "vue";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 import invariant from "tiny-invariant";
-import { createDrag, getEventClientPos } from "@/lib/drag";
+import { createDrag } from "@/lib/drag";
 import GraphLine from "./GraphLine.vue";
 
 const props = defineProps<{ graph: InitGraphData }>();
@@ -74,16 +76,28 @@ function addNode() {
 }
 
 const { drag: connectingEdgeTo, startDrag } = createDrag({});
+const connectingEdgeOnPort = ref<GraphPortData | null>(null);
+function inBbox(
+  pos: { x: number; y: number },
+  bbox: { x: number; y: number; width: number; height: number }
+) {
+  return (
+    pos.x >= bbox.x &&
+    pos.x <= bbox.x + bbox.width &&
+    pos.y >= bbox.y &&
+    pos.y <= bbox.y + bbox.height
+  );
+}
 function startConnect(opts: {
   port: string;
   pos: { x: number; y: number };
   client: { x: number; y: number };
+  node: GraphNodeData;
 }) {
   invariant(viewport.value);
   state.connecting = true;
   state.connectingEdgeFrom.x = opts.pos.x;
   state.connectingEdgeFrom.y = opts.pos.y;
-  console.log("start drag");
   startDrag({
     pos: { ...opts.pos },
     client: { ...opts.client },
@@ -91,6 +105,22 @@ function startConnect(opts: {
     onFinish() {
       console.log("its finished");
       state.connecting = false;
+      if (connectingEdgeOnPort.value) {
+        editorStore.addEdge({
+          from: opts.node.id,
+          fromPort: opts.port,
+          to: connectingEdgeOnPort.value.node.id,
+          toPort: connectingEdgeOnPort.value.port,
+        });
+      }
+      connectingEdgeOnPort.value = null;
+    },
+    onDrag() {
+      const { x, y } = connectingEdgeTo.pos;
+      const portHover = editorStore.ports.find((port) => {
+        return inBbox({ x, y }, port.bbox);
+      });
+      connectingEdgeOnPort.value = portHover || null;
     },
   });
 }

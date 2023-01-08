@@ -5,7 +5,8 @@ import { onMounted, reactive, ref, inject, type Ref } from "vue";
 import invariant from "tiny-invariant";
 import { useGraphEditorStore, type GraphNodeData } from "@/stores/graphEditor";
 
-import { createDrag, getEventClientPos } from "@/lib/drag";
+import { getEventClientPos } from "@/lib/drag";
+import GraphPort from "./GraphPort.vue";
 
 const props = defineProps<{
   nodeId: GraphNodeData["id"];
@@ -17,13 +18,14 @@ const emit = defineEmits<{
       port: string;
       pos: { x: number; y: number };
       client: { x: number; y: number };
+      node: GraphNodeData;
     }
   ): void;
 }>();
 const editorStore = useGraphEditorStore();
 const contentRef = ref<HTMLElement>();
-const inputRef = ref<HTMLElement[]>();
-const outputRef = ref<HTMLElement[]>();
+const inputRef = ref<InstanceType<typeof GraphPort>[]>();
+const outputRef = ref<InstanceType<typeof GraphPort>[]>();
 const margin = 15;
 const panzoom = inject<Ref<SvgPanZoom.Instance>>("panzoom");
 
@@ -35,8 +37,6 @@ const drag = reactive({
 });
 
 const node = editorStore.getNode(props.nodeId);
-const outputEdges = editorStore.getOutputEdges(node.id);
-const inputEdges = editorStore.getInputEdges(node.id);
 const box = reactive({ width: 0, height: 0 });
 
 function fitContent() {
@@ -47,16 +47,10 @@ function fitContent() {
   node.height = box.height;
 
   if (inputRef.value) {
-    node.inputsOffset = inputRef.value.map((inputEl) => ({
-      x: inputEl.offsetLeft - 18,
-      y: inputEl.offsetTop + inputEl.offsetHeight / 2 + 1,
-    }));
+    node.inputsOffset = inputRef.value.map((inPort) => inPort.getOffset());
   }
   if (outputRef.value) {
-    node.outputsOffset = outputRef.value.map((outputEl) => ({
-      x: outputEl.offsetLeft + outputEl.offsetWidth + 18,
-      y: outputEl.offsetTop + outputEl.offsetHeight / 2 + 1,
-    }));
+    node.outputsOffset = outputRef.value.map((outPort) => outPort.getOffset());
   }
 }
 
@@ -130,6 +124,7 @@ function startConnect(
     port,
     pos,
     client: { x: clientPos.clientX, y: clientPos.clientY },
+    node,
   });
 }
 
@@ -159,46 +154,26 @@ onMounted(() => {
           <div class="pb-2">
             <slot></slot>
           </div>
-          <div
-            class="relative"
+
+          <GraphPort
             v-for="input of node.inputs"
             :key="input"
+            type="input"
             ref="inputRef"
-          >
-            {{ input }}
-            <div
-              class="absolute left-0 top-0 h-full ml-[-24px] flex items-center"
-            >
-              <div
-                class="rounded-full w-4 h-4 bg-sky-500 border-[3px] border-white"
-              ></div>
-            </div>
-          </div>
+            :port="input"
+            :node="node"
+            @start-connect="(e) => startConnect('input', input, e)"
+          />
 
-          <div
-            class="relative text-right"
+          <GraphPort
             v-for="output of node.outputs"
             :key="output"
+            type="output"
             ref="outputRef"
-          >
-            {{ output }}
-            <div
-              class="absolute right-0 top-0 h-full mr-[-24px] flex items-center"
-            >
-              <div
-                class="rounded-full w-4 h-4 border-[3px] border-white hover:bg-sky-500"
-                :class="{
-                  'bg-sky-500': !!outputEdges.find(
-                    (e) => e.fromPort === output
-                  ),
-                  'bg-sky-100': !outputEdges.find((e) => e.fromPort === output),
-                }"
-                @mousedown.prevent.stop="
-                  (e) => startConnect('output', output, e)
-                "
-              ></div>
-            </div>
-          </div>
+            :port="output"
+            :node="node"
+            @start-connect="(e) => startConnect('output', output, e)"
+          />
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ export function createDrag(opts: { maxThreshold?: number }) {
     pos: { x: 0, y: 0 },
     threshold: { x: 0, y: 0, crossed: false },
     onFinish: () => {},
+    onDrag: () => {},
   });
 
   function startDrag(opts: {
@@ -15,12 +16,14 @@ export function createDrag(opts: { maxThreshold?: number }) {
     client: { x: number; y: number };
     zoom: number;
     onFinish: () => void;
+    onDrag: () => void;
   }) {
     drag.zoom = opts.zoom;
     drag.prev = { ...opts.client };
     drag.pos = { ...opts.pos };
     drag.threshold = { x: 0, y: 0, crossed: false };
     drag.onFinish = opts.onFinish;
+    drag.onDrag = opts.onDrag;
 
     document.addEventListener("mouseup", stopDrag);
     document.addEventListener("touchend", stopDrag);
@@ -51,7 +54,7 @@ export function createDrag(opts: { maxThreshold?: number }) {
     }
     drag.pos.x += x;
     drag.pos.y += y;
-    console.log(drag.pos);
+    drag.onDrag();
   }
 
   function stopDrag() {
