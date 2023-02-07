@@ -138,6 +138,7 @@ onMounted(() => {
       :y1="state.connectingEdgeFrom.y"
       :x2="connectingEdgeTo.pos.x"
       :y2="connectingEdgeTo.pos.y"
+      :interactive="false"
     />
     <GraphEdge
       v-for="edge of editorStore.edges"

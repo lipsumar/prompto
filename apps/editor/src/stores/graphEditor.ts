@@ -103,6 +103,10 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     edges.value.push({ ...edge, id: getNextEdgeId() });
   }
 
+  function removeEdge(edgeId: number) {
+    edges.value = edges.value.filter((edge) => edge.id !== edgeId);
+  }
+
   function getNextEdgeId() {
     return Math.max(...edges.value.map((e) => e.id)) + 1;
   }
@@ -122,6 +126,7 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     getEdge,
     addNode,
     addEdge,
+    removeEdge,
     getOutputEdges,
     getInputEdges,
     ports,

@@ -21,8 +21,19 @@ const pos = computed(() => {
   const y2 = toNode.y + toNode.inputsOffset[toInputIndex].y;
   return { x1, y1, x2, y2 };
 });
+
+function removeEdge() {
+  graphEditorStore.removeEdge(edge.id);
+}
 </script>
 
 <template>
-  <GraphLine :x1="pos.x1" :y1="pos.y1" :x2="pos.x2" :y2="pos.y2" />
+  <GraphLine
+    :x1="pos.x1"
+    :y1="pos.y1"
+    :x2="pos.x2"
+    :y2="pos.y2"
+    :interactive="true"
+    @interactive-clicked="removeEdge"
+  />
 </template>
