@@ -2,6 +2,7 @@
 import { useGraphEditorStore } from "@/stores/graphEditor";
 import { computed } from "vue";
 import PromptInspector from "./inspectors/PromptInspector.vue";
+import InputInspector from "./inspectors/InputInspector.vue";
 
 const editorStore = useGraphEditorStore();
 const node = computed(() => editorStore.selectedNode);
@@ -15,6 +16,7 @@ const node = computed(() => editorStore.selectedNode);
       </div>
     </div>
     <PromptInspector v-if="node.type === 'prompt'" :node="node" />
+    <InputInspector v-if="node.type === 'input'" :node="node" />
   </div>
   <div
     v-else

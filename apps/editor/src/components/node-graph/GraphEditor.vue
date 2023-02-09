@@ -85,7 +85,7 @@ function addNode(type: "prompt" | "input") {
   if (type === "prompt") {
     node = { ...base, type, config: { text: "hello" } };
   } else {
-    node = { ...base, type, config: { inputKey: "foo" } };
+    node = { ...base, type, config: { inputKey: "", defaultValue: "" } };
   }
   editorStore.addNode(node);
 }

@@ -1,8 +1,12 @@
 import LangGraph from '../src/core/LangGraph';
 import LangNode from '../src/core/LangNode';
+import { langchain } from '../src/langchain';
 import createInputNode from '../src/nodes/input';
 import createPromptNode from '../src/nodes/prompt';
 import createTargetNode from '../src/nodes/target';
+
+jest.mock('../src/langchain');
+const langchainMock = langchain as jest.MockedFunction<typeof langchain>;
 
 describe('graph', () => {
   test('node -> target', async () => {
@@ -28,7 +32,9 @@ describe('graph', () => {
 
   test('input node', async () => {
     const graph = new LangGraph();
-    graph.addNode(createInputNode({ id: 'input1', inputKey: 'input1' }));
+    graph.addNode(
+      createInputNode('input1', { inputKey: 'input1', defaultValue: 'def' })
+    );
     graph.createEdge({
       id: '1',
       fromId: 'input1',
@@ -54,8 +60,12 @@ describe('graph', () => {
         },
       })
     );
-    graph.addNode(createInputNode({ id: 'input1', inputKey: 'input1' }));
-    graph.addNode(createInputNode({ id: 'input2', inputKey: 'input2' }));
+    graph.addNode(
+      createInputNode('input1', { inputKey: 'input1', defaultValue: 'def' })
+    );
+    graph.addNode(
+      createInputNode('input2', { inputKey: 'input2', defaultValue: 'def2' })
+    );
     graph.createEdge({
       id: '1',
       fromId: 'input1',
@@ -78,24 +88,40 @@ describe('graph', () => {
       in2: { type: 'string', value: 'two' },
     });
   });
-  test.only('query store', async () => {
+  test('prompt with input', async () => {
+    langchainMock.mockResolvedValueOnce({
+      generations: [[{ text: 'me smart machine' }]],
+    });
     const graph = new LangGraph();
-    //graph.addNode(createInputNode('q'));
     graph.addNode(
-      createPromptNode({
-        id: 'p',
-        text: 'how do you feel, having to go to the doctor?',
+      createInputNode('in', { inputKey: 'foo', defaultValue: 'def foo' })
+    );
+    graph.addNode(
+      createPromptNode('p', {
+        config: { text: 'some text ({the_input})' },
+        inputs: { the_input: 'string' },
       })
     );
     graph.createEdge({
-      id: 'mlkj',
+      id: 'lkj',
+      fromId: 'in',
+      toId: 'p',
+      toPort: 'the_input',
+    });
+    graph.createEdge({
+      id: 'lmkj',
       fromId: 'p',
       toId: '_target',
     });
-    const resp = await graph.execute({
-      apiInput: {},
-      openaiApiKey: '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',
-    });
+    const resp = await graph.execute({ apiInput: {}, openaiApiKey: 'foo' });
     console.log(resp);
+    expect(langchainMock).toHaveBeenCalledTimes(1);
+    expect(langchainMock).toHaveBeenCalledWith('llms/OpenAI/generate', {
+      args: { openai_api_key: 'foo' },
+      func: ['some text (def foo)'],
+    });
+    expect(resp).toEqual({
+      default: { type: 'string', value: 'me smart machine' },
+    });
   });
 });

@@ -1,15 +1,4 @@
-import type { ExecuteFunctionContext, LangDataType } from '../types';
-
-// const someInput = {lol: 'string', trol: 'image'};
-// export type InputObj = typeof someInput;
-
-type ExecuteFunctionOutputs = Record<string, { type: 'string'; value: string }>;
-//type ExecuteFunctionOutputs<InputObj, K> = { [k:K extends keyof InputObj]: { type: 'string'; value: string } };
-type ExecuteFunctionInputs = Record<string, { type: 'string'; value: string }>;
-type ExecuteFunction = (
-  inputs: ExecuteFunctionInputs,
-  ctx: ExecuteFunctionContext
-) => Promise<ExecuteFunctionOutputs>;
+import type { ExecuteFunction, LangDataType } from '../types';
 
 type NodeOptions = {
   id: string;

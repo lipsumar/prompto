@@ -1,7 +1,7 @@
 import createInputNode from './input';
 
 test('createInputNode', async () => {
-  const node = createInputNode('a', { inputKey: 'foo' });
+  const node = createInputNode('a', { inputKey: 'foo', defaultValue: 'blah' });
   expect(node.id).toBe('a');
   const out = await node.execute(
     {},

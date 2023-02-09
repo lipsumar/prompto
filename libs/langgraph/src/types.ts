@@ -22,3 +22,16 @@ export type SerializedLangNode =
       type: 'input';
       config: InputNodeOptions;
     } & BaseSerializedLangNode);
+
+export type ExecuteFunctionOutputs = Record<
+  string,
+  { type: 'string'; value: string }
+>;
+export type ExecuteFunctionInputs = Record<
+  string,
+  { type: 'string'; value: string }
+>;
+export type ExecuteFunction = (
+  inputs: ExecuteFunctionInputs,
+  ctx: ExecuteFunctionContext
+) => Promise<ExecuteFunctionOutputs>;

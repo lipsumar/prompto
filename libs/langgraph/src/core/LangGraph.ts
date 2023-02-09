@@ -1,11 +1,11 @@
 import LangEdge from './LangEdge';
 import LangNode from './LangNode';
 import invariant from 'tiny-invariant';
-import type { ApiInput, ExecuteFunctionContext } from '../types';
+import type { ExecuteFunctionContext, LangDataType } from '../types';
 import { uniqBy } from 'lodash';
 import createTargetNode from '../nodes/target';
-import createPromptNode from '../nodes/prompt';
-import createInputNode from '../nodes/input';
+import createPromptNode, { PromptNodeOptions } from '../nodes/prompt';
+import createInputNode, { InputNodeOptions } from '../nodes/input';
 
 export default class LangGraph {
   nodes: LangNode[] = [];
@@ -62,7 +62,7 @@ export default class LangGraph {
 
   execute(ctx: ExecuteFunctionContext) {
     if (this.getInputNodesOf(this.targetNode).length === 0) {
-      throw new Error('target node has no input');
+      throw new Error('target node has no connected input');
     }
     return this.executeImpl(this.targetNode, ctx);
   }
@@ -119,15 +119,18 @@ export default class LangGraph {
   }
 }
 
+type JSONNode = {
+  id: string;
+  inputs: Record<string, LangDataType>;
+  outputs: Record<string, LangDataType>;
+} & (
+  | { type: 'prompt'; config: PromptNodeOptions }
+  | { type: 'output'; config?: undefined }
+  | { type: 'input'; config: InputNodeOptions }
+);
+
 export function fromJSON(json: {
-  nodes: {
-    id: string;
-    inputs: string[];
-    outputs: string[];
-    type: 'prompt' | 'input';
-    text?: string;
-    config: any;
-  }[];
+  nodes: JSONNode[];
   edges: {
     id: string;
     from: string;
@@ -141,7 +144,10 @@ export function fromJSON(json: {
     if (jsonNode.id === '_target') return;
     let node;
     if (jsonNode.type === 'prompt') {
-      node = createPromptNode(jsonNode.id, jsonNode.config);
+      node = createPromptNode(jsonNode.id, {
+        inputs: jsonNode.inputs,
+        config: jsonNode.config,
+      });
     } else if (jsonNode.type === 'input') {
       node = createInputNode(jsonNode.id, jsonNode.config);
     } else {
@@ -162,33 +168,3 @@ export function fromJSON(json: {
 
   return graph;
 }
-
-// function createPromptNode({ id }: { id: string }) {
-//   return new LangNode({
-//     id,
-//     execute: async (inputs) => {
-//       //gpt3Complete(prompt: 'say hi in a funny way:', );
-//       return {
-//         default: {
-//           type: 'string',
-//           //value: '-->' + inputs.default.value + '<--',
-//           value: '-->!!<--',
-//         },
-//       };
-//     },
-//     inputs: { default: 'string' },
-//     outputs: { default: 'string' },
-//   });
-// }
-
-// function createInputNode({ id, input }: { input: string; id: string }) {
-//   return new LangNode({
-//     id,
-//     execute: async (_, { apiInput }) => {
-//       const val = apiInput[input] || '';
-//       if (typeof val !== 'string') throw new Error('input must be string');
-//       return { default: { type: 'string', value: val } };
-//     },
-//     outputs: { default: 'string' },
-//   });
-// }
