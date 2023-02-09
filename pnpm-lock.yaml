@@ -68,6 +68,8 @@ importers:
       '@heroicons/vue': ^2.0.13
       '@playwright/test': ^1.28.1
       '@rushstack/eslint-patch': ^1.1.4
+      '@tailwindcss/forms': ^0.5.3
+      '@tailwindcss/line-clamp': ^0.4.2
       '@trpc/client': 10.4.3
       '@trpc/server': 10.4.3
       '@types/jsdom': ^20.0.1
@@ -120,6 +122,8 @@ importers:
     devDependencies:
       '@playwright/test': 1.30.0
       '@rushstack/eslint-patch': 1.2.0
+      '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.4
+      '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.4
       '@types/jsdom': 20.0.1
       '@types/node': 18.11.17
       '@types/uuid': 9.0.0
@@ -1168,6 +1172,23 @@ packages:
     resolution: {integrity: sha512-SwUDyjWnah1AaNl7kxsa7cfLhlTYoiyhDAIgyh+El30YvXs/o7OLXpYH88Zdhyx9JExKrmHDJ+10bwIcY80Jmw==}
     dependencies:
       '@sinonjs/commons': 2.0.0
+    dev: true
+
+  /@tailwindcss/forms/0.5.3_tailwindcss@3.2.4:
+    resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
+    dependencies:
+      mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.2.4
+    dev: true
+
+  /@tailwindcss/line-clamp/0.4.2_tailwindcss@3.2.4:
+    resolution: {integrity: sha512-HFzAQuqYCjyy/SX9sLGB1lroPzmcnWv1FHkIpmypte10hptf4oPUfucryMKovZh2u0uiS9U5Ty3GghWfEJGwVw==}
+    peerDependencies:
+      tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
+    dependencies:
+      tailwindcss: 3.2.4
     dev: true
 
   /@tootallnate/once/2.0.0:
@@ -4594,6 +4615,11 @@ packages:
   /mimic-fn/2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
+    dev: true
+
+  /mini-svg-data-uri/1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
+    hasBin: true
     dev: true
 
   /minimatch/3.0.5:

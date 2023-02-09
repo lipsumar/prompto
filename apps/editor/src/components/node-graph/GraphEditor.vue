@@ -75,7 +75,7 @@ function addNode(type: "prompt" | "input") {
   const scale = viewport.value.getScale();
 
   const base = {
-    id: Math.random().toString(),
+    id: Math.random().toString().substr(-6),
     x: (50 - pan.x) / scale,
     y: (50 - pan.y) / scale,
     inputs: {},
@@ -136,6 +136,11 @@ function startConnect(opts: {
       const portHover = editorStore.ports.find((port) => {
         return inBbox({ x, y }, port.bbox);
       });
+      // may we connect to this port ?
+      if (portHover?.edge) {
+        return;
+      }
+
       connectingEdgeOnPort.value = portHover || null;
     },
   });
@@ -151,7 +156,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <GraphViewport ref="viewport">
+  <GraphViewport ref="viewport" @click="editorStore.selectNode(null)">
     <GraphLine
       v-if="state.connecting"
       :x1="state.connectingEdgeFrom.x"
@@ -171,9 +176,17 @@ onMounted(() => {
       :node-id="node.id"
       @start-connect="startConnect"
     >
-      <div class="font-bold">{{ node.type }} [{{ node.id }}]</div>
+      <div
+        class="absolute right-0 top-0 font-mono px-2 py-1 bg-sky-100 rounded-bl rounded-tr-lg text-xs"
+      >
+        {{ node.id }}
+      </div>
+      <div class="font-bold">{{ node.type }}</div>
+
       <div v-if="node.type === 'input'">{{ node.config.inputKey }}</div>
-      <div v-if="node.type === 'prompt'">{{ node.config.text }}</div>
+      <div v-if="node.type === 'prompt'" class="text-xs line-clamp-2">
+        {{ node.config.text }}
+      </div>
     </GraphNode>
   </GraphViewport>
 

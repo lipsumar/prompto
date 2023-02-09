@@ -1,16 +1,9 @@
-<template>
-  <svg class="w-full h-full" ref="screen">
-    <g>
-      <slot></slot>
-    </g>
-  </svg>
-</template>
-
 <script setup lang="ts">
 import SvgPanZoom from "svg-pan-zoom";
 import { onMounted, provide, ref } from "vue";
 import invariant from "tiny-invariant";
 
+const emits = defineEmits<{ (e: "click", evt: MouseEvent): void }>();
 const screen = ref<HTMLDivElement>();
 const panzoom = ref<SvgPanZoom.Instance & { zoomRect?: typeof zoomRect }>();
 provide("panzoom", panzoom);
@@ -82,3 +75,11 @@ onMounted(() => {
   });
 });
 </script>
+
+<template>
+  <svg class="w-full h-full" ref="screen" @click="(e) => emits('click', e)">
+    <g>
+      <slot></slot>
+    </g>
+  </svg>
+</template>

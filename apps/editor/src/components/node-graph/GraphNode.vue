@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import type SvgPanZoom from "svg-pan-zoom";
-import { onMounted, reactive, ref, inject, type Ref } from "vue";
+import {
+  onMounted,
+  reactive,
+  ref,
+  inject,
+  type Ref,
+  computed,
+  watch,
+  nextTick,
+} from "vue";
 
 import invariant from "tiny-invariant";
 import { useGraphEditorStore, type GraphNodeData } from "@/stores/graphEditor";
@@ -38,6 +47,14 @@ const drag = reactive({
 
 const node = editorStore.getNode(props.nodeId);
 const box = reactive({ width: 0, height: 0 });
+const isSelected = computed(() => {
+  return editorStore.selectedNode && editorStore.selectedNode.id === node.id;
+});
+if (node.config) {
+  watch([node.config, node.inputs], () => {
+    nextTick(() => fitContent());
+  });
+}
 
 function fitContent() {
   invariant(contentRef.value);
@@ -134,6 +151,10 @@ function startConnect(
   });
 }
 
+function nodeClicked() {
+  editorStore.selectNode(node.id);
+}
+
 onMounted(() => {
   fitContent();
 });
@@ -148,6 +169,7 @@ onMounted(() => {
     :height="box.height + margin * 2"
     @mousedown.prevent.stop="startDrag"
     @touchstart.prevent.stop="startDrag"
+    @click.stop="nodeClicked"
   >
     <div :style="`padding: ${margin}px;`">
       <div
@@ -155,7 +177,10 @@ onMounted(() => {
         style="position: relative; white-space: nowrap; width: fit-content"
       >
         <div
-          class="bg-white border border-sky-500 p-4 rounded-lg drop-shadow-md w-44 relative"
+          class="bg-white outline outline-sky-500 p-4 py-2 rounded-lg drop-shadow-md w-44 relative whitespace-normal"
+          :class="{
+            'outline-4': isSelected,
+          }"
         >
           <div class="pb-2">
             <slot></slot>

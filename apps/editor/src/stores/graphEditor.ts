@@ -46,6 +46,7 @@ export type GraphPortData = {
   port: string;
   type: string;
   node: GraphNodeDataWithUi;
+  edge?: GraphEdgeData;
   bbox: {
     x: number;
     y: number;
@@ -76,11 +77,15 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
   const ports = computed<GraphPortData[]>(() => {
     return nodes.value.flatMap((node) => {
       return Object.keys(node.inputs).map((input) => {
+        const edge = edges.value.find(
+          (e) => e.to === node.id && e.toPort === input
+        );
         const portOffset = node.inputsOffset[input];
         return {
           port: input,
           type: "input",
           node,
+          edge,
           bbox: {
             x: node.x + portOffset.x - 10,
             y: node.y + portOffset.y - 10,
@@ -90,6 +95,10 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
         };
       });
     });
+  });
+  const selectedNodeId = ref<string | null>(null);
+  const selectedNode = computed<GraphNodeDataWithUi | null>(() => {
+    return nodes.value.find((n) => n.id === selectedNodeId.value) || null;
   });
 
   function init(graph: GraphData) {
@@ -143,5 +152,9 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     getGraph() {
       return { nodes: nodes.value, edges: edges.value };
     },
+    selectNode(id: string | null) {
+      selectedNodeId.value = id;
+    },
+    selectedNode,
   };
 });
