@@ -47,10 +47,16 @@ function fitContent() {
   node.height = box.height;
 
   if (inputRef.value) {
-    node.inputsOffset = inputRef.value.map((inPort) => inPort.getOffset());
+    node.inputsOffset = inputRef.value.reduce((acc, inPort) => {
+      acc[inPort.port] = inPort.getOffset();
+      return acc;
+    }, {} as Record<string, { x: number; y: number }>);
   }
   if (outputRef.value) {
-    node.outputsOffset = outputRef.value.map((outPort) => outPort.getOffset());
+    node.outputsOffset = outputRef.value.reduce((acc, outPort) => {
+      acc[outPort.port] = outPort.getOffset();
+      return acc;
+    }, {} as Record<string, { x: number; y: number }>);
   }
 }
 
@@ -115,10 +121,10 @@ function startConnect(
   e: MouseEvent | TouchEvent
 ) {
   const clientPos = getEventClientPos(e);
-  const ports = side === "input" ? node.inputs : node.outputs;
+  //const ports = side === "input" ? node.inputs : node.outputs;
   const portsOffset = side === "input" ? node.inputsOffset : node.outputsOffset;
-  const portIndex = ports.indexOf(port);
-  const portOffset = portsOffset[portIndex];
+  //const portIndex = Object.keys(ports).indexOf(port);
+  const portOffset = portsOffset[port];
   const pos = { x: node.x + portOffset.x, y: node.y + portOffset.y };
   emit("startConnect", {
     port,
@@ -156,7 +162,7 @@ onMounted(() => {
           </div>
 
           <GraphPort
-            v-for="input of node.inputs"
+            v-for="(inputType, input) of node.inputs"
             :key="input"
             type="input"
             ref="inputRef"
@@ -166,7 +172,7 @@ onMounted(() => {
           />
 
           <GraphPort
-            v-for="output of node.outputs"
+            v-for="(outputType, output) of node.outputs"
             :key="output"
             type="output"
             ref="outputRef"

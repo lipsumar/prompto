@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { authedProcedure, router } from '..';
 import { prisma } from '../../lib/prisma';
+import { fromJSON as graphFromJSON } from 'langgraph';
+import invariant from 'tiny-invariant';
 
 export const chainRouter = router({
   inProject: authedProcedure
@@ -41,5 +43,16 @@ export const chainRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(({ input }) => {
       return prisma.chain.delete({ where: { id: input.id } });
+    }),
+  run: authedProcedure
+    .input(z.object({ content: z.string() }))
+    .mutation(({ input, ctx }) => {
+      console.log(input.content);
+      const graph = graphFromJSON(JSON.parse(input.content));
+      invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
+      return graph.execute({
+        apiInput: {},
+        openaiApiKey: ctx.user.gpt3ApiToken,
+      });
     }),
 });

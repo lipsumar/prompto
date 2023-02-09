@@ -19,6 +19,7 @@
     "add": "^2.0.6",
     "api": "workspace:*",
     "click-outside-vue3": "^4.0.1",
+    "langgraph": "workspace:*",
     "pinia": "^2.0.28",
     "svg-pan-zoom": "^3.6.1",
     "uuid": "^9.0.0",

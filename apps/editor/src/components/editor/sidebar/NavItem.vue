@@ -101,7 +101,7 @@ function deletePrompt(promptId: string) {
       </button>
       <div
         v-if="state.isMenuOpen"
-        class="absolute bg-slate-50 p-1 border rounded-lg ml-[100%] top-0 w-48 shadow-md text-slate-800 text-left"
+        class="absolute top-0 w-48 z-10 bg-slate-50 p-1 border rounded-lg ml-[100%] shadow-md text-slate-800 text-left"
       >
         <button
           class="flex text-sm items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"

@@ -9,7 +9,7 @@ const props = defineProps<{
   type: "input" | "output";
 }>();
 defineEmits<{ (e: "startConnect", evt: MouseEvent, port: string): void }>();
-defineExpose<{ getOffset: () => { x: number; y: number } }>({
+defineExpose<{ getOffset: () => { x: number; y: number }; port: string }>({
   getOffset() {
     invariant(outer.value);
     const el = outer.value;
@@ -24,6 +24,7 @@ defineExpose<{ getOffset: () => { x: number; y: number } }>({
           : el.offsetTop + el.offsetHeight / 2 + 1,
     };
   },
+  port: props.port,
 });
 const editorStore = useGraphEditorStore();
 const outer = ref<HTMLDivElement>();

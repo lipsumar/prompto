@@ -1,18 +1,20 @@
-import ChainNode from './ChainNode';
+import LangNode from './LangNode';
 
-export default class ChainEdge {
-  from: ChainNode;
-  to: ChainNode;
-  id: number | null = null;
+export default class LangEdge {
+  from: LangNode;
+  to: LangNode;
+  id: string;
   fromPort: string;
   toPort: string;
 
   constructor(
-    from: ChainNode,
+    id: string,
+    from: LangNode,
     fromPort: string,
-    to: ChainNode,
+    to: LangNode,
     toPort: string
   ) {
+    this.id = id;
     this.from = from;
     this.fromPort = fromPort;
     this.to = to;

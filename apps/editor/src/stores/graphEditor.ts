@@ -1,33 +1,41 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import invariant from "tiny-invariant";
+import type { LangDataType } from "langgraph";
+import type { PromptNodeOptions } from "langgraph/dist/nodes/prompt";
+import type { InputNodeOptions } from "langgraph/dist/nodes/input";
 
 export type GraphData = {
   nodes: GraphNodeData[];
   edges: GraphEdgeData[];
 };
-export type InitGraphData = {
-  nodes: Omit<
-    GraphNodeData,
-    "width" | "height" | "inputsOffset" | "outputsOffset"
-  >[];
-  edges: GraphEdgeData[];
-};
 
+// pure data, without width/height/inputsOffset/outputsOffset
 export type GraphNodeData = {
   id: string;
-  inputs: string[];
-  outputs: string[];
+  inputs: Record<string, LangDataType>;
+  outputs: Record<string, LangDataType>;
   x: number;
   y: number;
+} & (
+  | { type: "output"; config?: undefined }
+  | { type: "prompt"; config: PromptNodeOptions }
+  | {
+      type: "input";
+      config: InputNodeOptions;
+    }
+);
+
+// add UI fields
+export type GraphNodeDataWithUi = GraphNodeData & {
   width: number;
   height: number;
-  inputsOffset: { x: number; y: number }[];
-  outputsOffset: { x: number; y: number }[];
+  inputsOffset: Record<string, { x: number; y: number }>;
+  outputsOffset: Record<string, { x: number; y: number }>;
 };
 
 export type GraphEdgeData = {
-  id: number;
+  id: string;
   from: string;
   fromPort: string;
   to: string;
@@ -37,7 +45,7 @@ export type GraphEdgeData = {
 export type GraphPortData = {
   port: string;
   type: string;
-  node: GraphNodeData;
+  node: GraphNodeDataWithUi;
   bbox: {
     x: number;
     y: number;
@@ -46,23 +54,29 @@ export type GraphPortData = {
   };
 };
 
-function initNodeToNode(node: InitGraphData["nodes"][0]) {
+function initNodeToNode(node: GraphNodeData): GraphNodeDataWithUi {
   return {
     ...node,
     width: -1,
     height: -1,
-    inputsOffset: node.inputs.map(() => ({ x: 0, y: 0 })),
-    outputsOffset: node.inputs.map(() => ({ x: 0, y: 0 })),
+    inputsOffset: Object.keys(node.inputs).reduce((acc, key) => {
+      acc[key] = { x: 0, y: 0 };
+      return acc;
+    }, {} as Record<string, { x: 0; y: 0 }>),
+    outputsOffset: Object.keys(node.outputs).reduce((acc, key) => {
+      acc[key] = { x: 0, y: 0 };
+      return acc;
+    }, {} as Record<string, { x: 0; y: 0 }>),
   };
 }
 
 export const useGraphEditorStore = defineStore("graphEditor", () => {
-  const nodes = ref<GraphNodeData[]>([]);
+  const nodes = ref<GraphNodeDataWithUi[]>([]);
   const edges = ref<GraphEdgeData[]>([]);
   const ports = computed<GraphPortData[]>(() => {
     return nodes.value.flatMap((node) => {
-      return node.inputs.map((input, i) => {
-        const portOffset = node.inputsOffset[i];
+      return Object.keys(node.inputs).map((input) => {
+        const portOffset = node.inputsOffset[input];
         return {
           port: input,
           type: "input",
@@ -78,7 +92,7 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     });
   });
 
-  function init(graph: InitGraphData) {
+  function init(graph: GraphData) {
     nodes.value = graph.nodes.map(initNodeToNode);
     edges.value = graph.edges;
   }
@@ -95,20 +109,16 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     return edge;
   }
 
-  function addNode(node: InitGraphData["nodes"][0]) {
+  function addNode(node: GraphNodeData) {
     nodes.value.push(initNodeToNode(node));
   }
 
-  function addEdge(edge: Omit<InitGraphData["edges"][0], "id">) {
-    edges.value.push({ ...edge, id: getNextEdgeId() });
+  function addEdge(edge: GraphEdgeData) {
+    edges.value.push({ ...edge });
   }
 
-  function removeEdge(edgeId: number) {
+  function removeEdge(edgeId: string) {
     edges.value = edges.value.filter((edge) => edge.id !== edgeId);
-  }
-
-  function getNextEdgeId() {
-    return Math.max(...edges.value.map((e) => e.id)) + 1;
   }
 
   function getOutputEdges(nodeId: string) {
@@ -130,5 +140,8 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     getOutputEdges,
     getInputEdges,
     ports,
+    getGraph() {
+      return { nodes: nodes.value, edges: edges.value };
+    },
   };
 });

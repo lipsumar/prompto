@@ -4,23 +4,31 @@ import GraphNode from "@/components/node-graph/GraphNode.vue";
 import GraphEdge from "@/components/node-graph/GraphEdge.vue";
 import {
   useGraphEditorStore,
-  type InitGraphData,
   type GraphData,
   type GraphPortData,
   type GraphNodeData,
+  type GraphNodeDataWithUi,
 } from "../../stores/graphEditor";
 import { defineProps, onMounted, reactive, ref } from "vue";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 import invariant from "tiny-invariant";
 import { createDrag } from "@/lib/drag";
 import GraphLine from "./GraphLine.vue";
+import { PlayIcon } from "@heroicons/vue/20/solid";
 
-const props = defineProps<{ graph: InitGraphData }>();
+const props = defineProps<{ graph: GraphData }>();
+const emits = defineEmits<{ (e: "run", graph: GraphData): void }>();
 const viewport = ref<InstanceType<typeof GraphViewport>>();
 const state = reactive({
   connecting: false,
   connectingEdgeFrom: { x: 0, y: 0 },
+  addMenuOpen: false,
 });
+
+const allNodes = [
+  { name: "Prompt", type: "prompt" as const },
+  { name: "Input", type: "input" as const },
+];
 
 const editorStore = useGraphEditorStore();
 editorStore.init(props.graph);
@@ -29,7 +37,7 @@ editorStore.init(props.graph);
  * centers the view and zoom on a group nodes
  */
 function zoomNodes(
-  nodes: GraphData["nodes"],
+  nodes: GraphNodeDataWithUi[],
   opts: { padding?: number; scale: number | null } = {
     padding: 50,
     scale: null,
@@ -61,18 +69,25 @@ function zoomNodes(
   );
 }
 
-function addNode() {
+function addNode(type: "prompt" | "input") {
   invariant(viewport.value);
   const pan = viewport.value.getPan();
   const scale = viewport.value.getScale();
-  editorStore.addNode({
-    id: "new",
+
+  const base = {
+    id: Math.random().toString(),
     x: (50 - pan.x) / scale,
     y: (50 - pan.y) / scale,
-    inputs: ["something"],
-    outputs: ["default"],
-  });
-  console.log("added");
+    inputs: {},
+    outputs: { default: "string" as const },
+  };
+  let node;
+  if (type === "prompt") {
+    node = { ...base, type, config: { text: "hello" } };
+  } else {
+    node = { ...base, type, config: { inputKey: "foo" } };
+  }
+  editorStore.addNode(node);
 }
 
 const { drag: connectingEdgeTo, startDrag } = createDrag({});
@@ -107,6 +122,7 @@ function startConnect(opts: {
       state.connecting = false;
       if (connectingEdgeOnPort.value) {
         editorStore.addEdge({
+          id: Math.random().toString(), //@todo
           from: opts.node.id,
           fromPort: opts.port,
           to: connectingEdgeOnPort.value.node.id,
@@ -123,6 +139,10 @@ function startConnect(opts: {
       connectingEdgeOnPort.value = portHover || null;
     },
   });
+}
+
+function run() {
+  emits("run", editorStore.getGraph());
 }
 
 onMounted(() => {
@@ -151,21 +171,49 @@ onMounted(() => {
       :node-id="node.id"
       @start-connect="startConnect"
     >
-      <div class="font-bold">Node {{ node.id }}</div>
-      <!-- <select
-        @click.stop="f"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-      >
-        <option value="foo">foo</option>
-        <option value="bar">bar</option>
-      </select> -->
+      <div class="font-bold">{{ node.type }} [{{ node.id }}]</div>
+      <div v-if="node.type === 'input'">{{ node.config.inputKey }}</div>
+      <div v-if="node.type === 'prompt'">{{ node.config.text }}</div>
     </GraphNode>
   </GraphViewport>
 
-  <button
-    class="absolute top-2 left-2 w-8 h-8 flex items-center justify-center bg-white shadow rounded"
-    @click="addNode"
+  <div class="absolute top-2 left-2 flex space-x-2">
+    <button
+      class="w-8 h-8 flex items-center justify-center bg-white shadow rounded"
+      @click="state.addMenuOpen = !state.addMenuOpen"
+    >
+      <PlusIcon class="w-4 h-4" />
+    </button>
+
+    <button
+      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded"
+      @click="run"
+    >
+      <PlayIcon class="w-4 h-4 mr-1" /> Run
+    </button>
+  </div>
+
+  <div
+    v-if="state.addMenuOpen"
+    v-click-outside="
+      () => {
+        state.addMenuOpen = false;
+      }
+    "
+    class="absolute top-11 left-2 w-48 z-10 bg-slate-50 p-1 border rounded-md shadow-md text-slate-800 text-left"
   >
-    <PlusIcon class="w-4 h-4" />
-  </button>
+    <div
+      v-for="node of allNodes"
+      :key="node.type"
+      class="flex text-sm items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"
+      @click="
+        () => {
+          addNode(node.type);
+          state.addMenuOpen = false;
+        }
+      "
+    >
+      {{ node.name }}
+    </div>
+  </div>
 </template>

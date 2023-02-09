@@ -8,17 +8,19 @@ const graphEditorStore = useGraphEditorStore();
 
 const edge = graphEditorStore.getEdge(props.edgeId);
 const fromNode = graphEditorStore.getNode(edge.from);
-const fromOutputIndex = fromNode.outputs.findIndex(
-  (output) => output === edge.fromPort
-);
+// const fromOutputIndex = Object.keys(fromNode.outputs).findIndex(
+//   (output) => output === edge.fromPort
+// );
 const toNode = graphEditorStore.getNode(edge.to);
-const toInputIndex = toNode.inputs.findIndex((input) => input === edge.toPort);
+// const toInputIndex = Object.keys(toNode.inputs).findIndex(
+//   (input) => input === edge.toPort
+// );
 //console.log("->", toInputIndex, fromNode.);
 const pos = computed(() => {
-  const x1 = fromNode.x + fromNode.outputsOffset[fromOutputIndex].x;
-  const y1 = fromNode.y + fromNode.outputsOffset[fromOutputIndex].y;
-  const x2 = toNode.x + toNode.inputsOffset[toInputIndex].x;
-  const y2 = toNode.y + toNode.inputsOffset[toInputIndex].y;
+  const x1 = fromNode.x + fromNode.outputsOffset[edge.fromPort].x;
+  const y1 = fromNode.y + fromNode.outputsOffset[edge.fromPort].y;
+  const x2 = toNode.x + toNode.inputsOffset[edge.toPort].x;
+  const y2 = toNode.y + toNode.inputsOffset[edge.toPort].y;
   return { x1, y1, x2, y2 };
 });
 

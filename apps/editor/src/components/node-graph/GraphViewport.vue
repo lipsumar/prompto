@@ -70,7 +70,7 @@ onMounted(() => {
     fit: false,
     contain: false,
     center: false,
-    zoomScaleSensitivity: 0.4,
+    zoomScaleSensitivity: 0.1,
     minZoom: 0.1,
     maxZoom: 5,
     // onZoom: (scale) => {},
