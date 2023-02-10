@@ -1,7 +1,11 @@
 import LangEdge from './LangEdge';
 import LangNode from './LangNode';
 import invariant from 'tiny-invariant';
-import type { ExecuteFunctionContext, LangDataType } from '../types';
+import type {
+  ExecuteFunctionContext,
+  ExecuteResults,
+  LangDataType,
+} from '../types';
 import { uniqBy } from 'lodash';
 import createTargetNode from '../nodes/target';
 import createPromptNode, { PromptNodeOptions } from '../nodes/prompt';
@@ -11,6 +15,7 @@ export default class LangGraph {
   nodes: LangNode[] = [];
   edges: LangEdge[] = [];
   targetNode: LangNode;
+  executeResults: ExecuteResults = [];
 
   constructor() {
     this.targetNode = createTargetNode({ inputs: { default: 'string' } });
@@ -61,6 +66,7 @@ export default class LangGraph {
   }
 
   execute(ctx: ExecuteFunctionContext) {
+    this.executeResults = [];
     if (this.getInputNodesOf(this.targetNode).length === 0) {
       throw new Error('target node has no connected input');
     }
@@ -92,7 +98,11 @@ export default class LangGraph {
     node.status = 'executing';
     const nodeOutput = await node.execute(inputs, ctx);
     node.status = 'idle';
-
+    this.executeResults.push({
+      nodeId: node.id,
+      inputs,
+      outputs: nodeOutput,
+    });
     return nodeOutput;
   }
 

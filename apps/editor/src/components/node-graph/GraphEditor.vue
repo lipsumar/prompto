@@ -17,7 +17,11 @@ import GraphLine from "./GraphLine.vue";
 import { PlayIcon } from "@heroicons/vue/20/solid";
 
 const props = defineProps<{ graph: GraphData }>();
-const emits = defineEmits<{ (e: "run", graph: GraphData): void }>();
+console.log("--->", JSON.stringify(props.graph));
+const emits = defineEmits<{
+  (e: "run", graph: GraphData): void;
+  (e: "save", graph: GraphData): void;
+}>();
 const viewport = ref<InstanceType<typeof GraphViewport>>();
 const state = reactive({
   connecting: false,
@@ -149,6 +153,9 @@ function startConnect(opts: {
 function run() {
   emits("run", editorStore.getGraph());
 }
+function save() {
+  emits("save", editorStore.getGraph());
+}
 
 onMounted(() => {
   zoomNodes(editorStore.nodes, { scale: 1 });
@@ -197,7 +204,12 @@ onMounted(() => {
     >
       <PlusIcon class="w-4 h-4" />
     </button>
-
+    <button
+      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded"
+      @click="save"
+    >
+      Save
+    </button>
     <button
       class="px-3 h-8 flex items-center justify-center bg-white shadow rounded"
       @click="run"

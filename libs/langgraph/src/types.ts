@@ -35,3 +35,10 @@ export type ExecuteFunction = (
   inputs: ExecuteFunctionInputs,
   ctx: ExecuteFunctionContext
 ) => Promise<ExecuteFunctionOutputs>;
+
+export type ExecuteResult = {
+  nodeId: string;
+  inputs: ExecuteFunctionInputs;
+  outputs: ExecuteFunctionOutputs;
+};
+export type ExecuteResults = ExecuteResult[];

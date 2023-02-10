@@ -4,6 +4,7 @@ import invariant from "tiny-invariant";
 import type { LangDataType } from "langgraph";
 import type { PromptNodeOptions } from "langgraph/dist/nodes/prompt";
 import type { InputNodeOptions } from "langgraph/dist/nodes/input";
+import { trpc } from "@/trpc";
 
 export type GraphData = {
   nodes: GraphNodeData[];

@@ -3,7 +3,11 @@ import GraphEditor from "@/components/node-graph/GraphEditor.vue";
 import type { GraphData } from "@/stores/graphEditor";
 import { trpc } from "@/trpc";
 import ChainInspector from "./ChainInspector.vue";
+import { useCurrentChainStore } from "@/stores/currentChain";
+import invariant from "tiny-invariant";
+const currentChainStore = useCurrentChainStore();
 
+/*
 const graphData: GraphData = {
   nodes: [
     {
@@ -36,20 +40,27 @@ const graphData: GraphData = {
     },
   ],
 };
-
+*/
 function run(graph: GraphData) {
-  trpc.chain.run.mutate({ content: JSON.stringify(graph) }).then((res) => {
-    console.log(res);
-  });
+  invariant(currentChainStore.chain);
+  trpc.chain.run
+    .mutate({ content: JSON.stringify(graph), id: currentChainStore.chain.id })
+    .then((chainRun) => {
+      console.log(chainRun);
+    });
+}
+
+function save(graph: GraphData) {
+  currentChainStore.save(graph);
 }
 </script>
 
 <template>
-  <div class="min-h-screen flex">
+  <div v-if="currentChainStore.graph" class="min-h-screen flex">
     <div class="flex-1 min-w-0 overflow-auto">
-      <GraphEditor :graph="graphData" @run="run" />
+      <GraphEditor :graph="currentChainStore.graph" @run="run" @save="save" />
     </div>
-    <div class="w-80 flex-none bg-white">
+    <div class="w-96 flex-none bg-white h-full h-screen overflow-y-auto">
       <ChainInspector />
     </div>
   </div>

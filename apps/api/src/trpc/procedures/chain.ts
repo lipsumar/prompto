@@ -44,15 +44,40 @@ export const chainRouter = router({
     .mutation(({ input }) => {
       return prisma.chain.delete({ where: { id: input.id } });
     }),
+  update: authedProcedure
+    .input(z.object({ content: z.string(), id: z.string() }))
+    .mutation(({ input }) => {
+      return prisma.chain.update({
+        where: { id: input.id },
+        data: { content: input.content },
+      });
+    }),
   run: authedProcedure
-    .input(z.object({ content: z.string() }))
-    .mutation(({ input, ctx }) => {
-      console.log(input.content);
+    .input(z.object({ content: z.string(), id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
       const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
-      return graph.execute({
+      await graph.execute({
         apiInput: {},
         openaiApiKey: ctx.user.gpt3ApiToken,
+      });
+      const prevRunsCount = await prisma.chainRun.count({
+        where: { chainId: input.id },
+      });
+      return prisma.chainRun.create({
+        data: {
+          chainId: input.id,
+          content: JSON.stringify(graph.executeResults),
+          number: prevRunsCount + 1,
+        },
+      });
+    }),
+  getRuns: authedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(({ input }) => {
+      return prisma.chainRun.findMany({
+        where: { chainId: input.id },
+        orderBy: { number: 'desc' },
       });
     }),
 });

@@ -73,6 +73,18 @@ model Chain {
   name    String
   content String
 
-  Project   Project @relation(fields: [projectId], references: [id])
+  Project   Project    @relation(fields: [projectId], references: [id])
   projectId String
+  ChainRun  ChainRun[]
+}
+
+model ChainRun {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  content String
+  number  Int
+
+  Chain   Chain  @relation(fields: [chainId], references: [id])
+  chainId String
 }

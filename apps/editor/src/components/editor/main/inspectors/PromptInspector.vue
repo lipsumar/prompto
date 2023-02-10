@@ -49,64 +49,68 @@ function removeInput(key: string) {
     </label>
     <div>
       <h3 class="font-bold">Inputs</h3>
-      <table class="table-fixed border-collapse border-gray-700">
-        <thead>
-          <tr>
-            <th
-              class="border border-gray-300 font-normal text-left px-2 py-1"
-              width="40%"
-            >
-              Key
-            </th>
-            <th
-              class="border border-gray-300 font-normal text-left px-2 py-1"
-              width="40%"
-            >
-              Type
-            </th>
-            <th class="border border-gray-300" width="10%"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(type, input) of node.inputs" :key="input">
-            <td class="border border-gray-300 px-2 py-1">{{ input }}</td>
-            <td class="border border-gray-300 px-2 py-1">{{ type }}</td>
-            <td class="border border-gray-300 px-2 py-1">
-              <button
-                @click="removeInput(input)"
-                class="bg-blue-200 w-6 h-6 flex justify-center items-center rounded shadow-sm"
+      <div class="border border-gray-300 rounded-md overflow-hidden">
+        <table class="table-fixed border-collapse">
+          <thead>
+            <tr>
+              <th
+                class="border-gray-300 font-normal text-left px-2 py-1"
+                width="45%"
               >
-                <XMarkIcon class="w-4 h-4" />
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td class="border border-gray-300 px-2 py-1">
-              <input
-                type="text"
-                class="w-full border border-gray-300 rounded px-1"
-                v-model="newInputForm.key"
-              />
-            </td>
-            <td class="border border-gray-300 px-2 py-1">
-              <select
-                class="w-full border border-gray-300 rounded"
-                v-model="newInputForm.type"
+                Key
+              </th>
+              <th
+                class="border-r border-l border-gray-300 font-normal text-left px-2 py-1"
+                width="40%"
               >
-                <option value="string">string</option>
-              </select>
-            </td>
-            <td class="border border-gray-300 text-center px-2 py-1">
-              <button
-                @click="addInput()"
-                class="bg-blue-200 w-6 h-6 flex justify-center items-center rounded shadow-sm"
-              >
-                <PlusIcon class="w-4 h-4" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                Type
+              </th>
+              <th class="border-l border-gray-300" width="5%"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(type, input) of node.inputs" :key="input">
+              <td class="border border-l-0 border-gray-300 px-2 py-1">
+                {{ input }}
+              </td>
+              <td class="border border-gray-300 px-2 py-1">{{ type }}</td>
+              <td class="border border-r-0 border-gray-300 p-1">
+                <button
+                  @click="removeInput(input)"
+                  class="bg-blue-200 w-6 h-6 flex justify-center items-center rounded shadow-sm"
+                >
+                  <XMarkIcon class="w-4 h-4" />
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td class="border-t border-gray-300 px-2 py-1">
+                <input
+                  type="text"
+                  class="w-full border border-gray-300 rounded px-1"
+                  v-model="newInputForm.key"
+                />
+              </td>
+              <td class="border-l border-t border-gray-300 px-2 py-1">
+                <select
+                  class="w-full border border-gray-300 rounded"
+                  v-model="newInputForm.type"
+                >
+                  <option value="string">string</option>
+                </select>
+              </td>
+              <td class="border-l border-t border-gray-300 text-center p-1">
+                <button
+                  @click="addInput()"
+                  class="bg-blue-200 w-6 h-6 flex justify-center items-center rounded shadow-sm"
+                >
+                  <PlusIcon class="w-4 h-4" />
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
