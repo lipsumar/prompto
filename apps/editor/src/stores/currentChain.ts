@@ -26,12 +26,13 @@ function getNewGraph(): GraphData {
   };
 }
 
-type Run = { number: number; results: ExecuteResults };
+type Run = { number: number; results: ExecuteResults; date: Date };
 
 function chainRunToRun(chainRun: ChainRun) {
   return {
     number: chainRun.number,
     results: JSON.parse(chainRun.content),
+    date: new Date(chainRun.createdAt),
   };
 }
 

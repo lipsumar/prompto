@@ -35,7 +35,11 @@ const mode = ref<"inspect" | "debug">("inspect");
       </button>
     </div>
     <div v-if="mode === 'inspect'">
-      <PromptInspector v-if="node.type === 'prompt'" :node="node" />
+      <PromptInspector
+        v-if="node.type === 'prompt'"
+        :node="node"
+        :key="node.id"
+      />
       <InputInspector v-if="node.type === 'input'" :node="node" />
     </div>
     <div v-if="mode === 'debug'">

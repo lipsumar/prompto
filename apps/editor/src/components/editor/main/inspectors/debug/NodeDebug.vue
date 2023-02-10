@@ -18,6 +18,7 @@ function getNodeExecResult(results: ExecuteResults) {
       <NodeDebugRun
         :node-result="getNodeExecResult(run.results)"
         :number="run.number"
+        :date="run.date"
       />
     </div>
   </div>

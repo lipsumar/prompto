@@ -16,8 +16,7 @@ import { createDrag } from "@/lib/drag";
 import GraphLine from "./GraphLine.vue";
 import { PlayIcon } from "@heroicons/vue/20/solid";
 
-const props = defineProps<{ graph: GraphData }>();
-console.log("--->", JSON.stringify(props.graph));
+const props = defineProps<{ graph: GraphData; runDisabled: boolean }>();
 const emits = defineEmits<{
   (e: "run", graph: GraphData): void;
   (e: "save", graph: GraphData): void;
@@ -211,8 +210,9 @@ onMounted(() => {
       Save
     </button>
     <button
-      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded"
+      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded disabled:opacity-70"
       @click="run"
+      :disabled="props.runDisabled"
     >
       <PlayIcon class="w-4 h-4 mr-1" /> Run
     </button>

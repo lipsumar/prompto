@@ -7,6 +7,7 @@ const props = defineProps<{
 }>();
 </script>
 <template>
+  <h4 class="capitalize">{{ props.type }}</h4>
   <div
     v-if="Object.keys(props.data[props.type]).length > 0"
     class="border border-gray-300 rounded-md overflow-hidden"
