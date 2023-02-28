@@ -1,5 +1,6 @@
 import { InputNodeOptions } from './nodes/input';
-import { PromptNodeOptions } from './nodes/prompt';
+import { LlmNodeOptions } from './nodes/llm';
+import { TextNodeOptions } from './nodes/text';
 
 export type LangDataType = 'string';
 export type LangDataObject = { value: string; type: 'string' };
@@ -17,7 +18,8 @@ export type BaseSerializedLangNode = {
 
 export type SerializedLangNode =
   | ({ type: 'output'; config?: undefined } & BaseSerializedLangNode)
-  | ({ type: 'prompt'; config: PromptNodeOptions } & BaseSerializedLangNode)
+  | ({ type: 'llm'; config: LlmNodeOptions } & BaseSerializedLangNode)
+  | ({ type: 'text'; config: TextNodeOptions } & BaseSerializedLangNode)
   | ({
       type: 'input';
       config: InputNodeOptions;

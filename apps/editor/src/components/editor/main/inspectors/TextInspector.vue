@@ -11,7 +11,7 @@ import { reactive, ref, toRefs } from "vue";
 const editorStore = useGraphEditorStore();
 const props = defineProps<{ node: GraphNodeDataWithUi }>();
 const { node } = toRefs(props);
-invariant(node.value.type === "prompt");
+invariant(node.value.type === "text");
 const config = ref(node.value.config);
 
 const newInputForm = reactive<{ key: string; type: LangDataType }>({

@@ -8,7 +8,8 @@ import type {
 } from '../types';
 import { uniqBy } from 'lodash';
 import createTargetNode from '../nodes/target';
-import createPromptNode, { PromptNodeOptions } from '../nodes/prompt';
+import createLlmNode, { LlmNodeOptions } from '../nodes/llm';
+import createTextNode, { TextNodeOptions } from '../nodes/text';
 import createInputNode, { InputNodeOptions } from '../nodes/input';
 
 export default class LangGraph {
@@ -134,7 +135,8 @@ type JSONNode = {
   inputs: Record<string, LangDataType>;
   outputs: Record<string, LangDataType>;
 } & (
-  | { type: 'prompt'; config: PromptNodeOptions }
+  | { type: 'llm'; config: LlmNodeOptions }
+  | { type: 'text'; config: TextNodeOptions }
   | { type: 'output'; config?: undefined }
   | { type: 'input'; config: InputNodeOptions }
 );
@@ -153,8 +155,12 @@ export function fromJSON(json: {
   json.nodes.forEach((jsonNode) => {
     if (jsonNode.id === '_target') return;
     let node;
-    if (jsonNode.type === 'prompt') {
-      node = createPromptNode(jsonNode.id, {
+    if (jsonNode.type === 'llm') {
+      node = createLlmNode(jsonNode.id, {
+        config: jsonNode.config,
+      });
+    } else if (jsonNode.type === 'text') {
+      node = createTextNode(jsonNode.id, {
         inputs: jsonNode.inputs,
         config: jsonNode.config,
       });

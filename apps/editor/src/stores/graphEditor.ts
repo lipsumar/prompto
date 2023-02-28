@@ -2,9 +2,9 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import invariant from "tiny-invariant";
 import type { LangDataType } from "langgraph";
-import type { PromptNodeOptions } from "langgraph/dist/nodes/prompt";
+import type { LlmNodeOptions } from "langgraph/dist/nodes/llm";
 import type { InputNodeOptions } from "langgraph/dist/nodes/input";
-import { trpc } from "@/trpc";
+import type { TextNodeOptions } from "langgraph/dist/nodes/text";
 
 export type GraphData = {
   nodes: GraphNodeData[];
@@ -20,7 +20,8 @@ export type GraphNodeData = {
   y: number;
 } & (
   | { type: "output"; config?: undefined }
-  | { type: "prompt"; config: PromptNodeOptions }
+  | { type: "llm"; config: LlmNodeOptions }
+  | { type: "text"; config: TextNodeOptions }
   | {
       type: "input";
       config: InputNodeOptions;

@@ -29,8 +29,9 @@ const state = reactive({
 });
 
 const allNodes = [
-  { name: "Prompt", type: "prompt" as const },
+  { name: "LLM", type: "llm" as const },
   { name: "Input", type: "input" as const },
+  { name: "Text", type: "text" as const },
 ];
 
 const editorStore = useGraphEditorStore();
@@ -72,7 +73,7 @@ function zoomNodes(
   );
 }
 
-function addNode(type: "prompt" | "input") {
+function addNode(type: "llm" | "input" | "text") {
   invariant(viewport.value);
   const pan = viewport.value.getPan();
   const scale = viewport.value.getScale();
@@ -85,8 +86,15 @@ function addNode(type: "prompt" | "input") {
     outputs: { default: "string" as const },
   };
   let node;
-  if (type === "prompt") {
-    node = { ...base, type, config: { text: "hello" } };
+  if (type === "llm") {
+    node = {
+      ...base,
+      type,
+      inputs: { default: "string" as const },
+      config: { text: "", model: "foo" },
+    };
+  } else if (type === "text") {
+    node = { ...base, type, config: { text: "" } };
   } else {
     node = { ...base, type, config: { inputKey: "", defaultValue: "" } };
   }
@@ -187,10 +195,13 @@ onMounted(() => {
       >
         {{ node.id }}
       </div>
-      <div class="font-bold">{{ node.type }}</div>
+      <div class="font-bold" v-if="node.type !== 'llm'">{{ node.type }}</div>
 
       <div v-if="node.type === 'input'">{{ node.config.inputKey }}</div>
-      <div v-if="node.type === 'prompt'" class="text-xs line-clamp-2">
+      <div v-if="node.type === 'llm'" class="text-lg text-center pb-4 pt-8">
+        LLM
+      </div>
+      <div v-if="node.type === 'text'" class="text-xs line-clamp-2">
         {{ node.config.text }}
       </div>
     </GraphNode>

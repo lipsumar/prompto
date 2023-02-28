@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useGraphEditorStore } from "@/stores/graphEditor";
 import { computed, ref } from "vue";
-import PromptInspector from "./inspectors/PromptInspector.vue";
+import TextInspector from "./inspectors/TextInspector.vue";
 import InputInspector from "./inspectors/InputInspector.vue";
 import NodeDebug from "./inspectors/debug/NodeDebug.vue";
 
@@ -35,11 +35,7 @@ const mode = ref<"inspect" | "debug">("inspect");
       </button>
     </div>
     <div v-if="mode === 'inspect'">
-      <PromptInspector
-        v-if="node.type === 'prompt'"
-        :node="node"
-        :key="node.id"
-      />
+      <TextInspector v-if="node.type === 'text'" :node="node" :key="node.id" />
       <InputInspector v-if="node.type === 'input'" :node="node" />
     </div>
     <div v-if="mode === 'debug'">

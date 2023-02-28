@@ -2,8 +2,9 @@ import LangGraph from '../src/core/LangGraph';
 import LangNode from '../src/core/LangNode';
 import { langchain } from '../src/langchain';
 import createInputNode from '../src/nodes/input';
-import createPromptNode from '../src/nodes/prompt';
+import createLlmNode from '../src/nodes/llm';
 import createTargetNode from '../src/nodes/target';
+import createTextNode from '../src/nodes/text';
 
 jest.mock('../src/langchain');
 const langchainMock = langchain as jest.MockedFunction<typeof langchain>;
@@ -97,20 +98,30 @@ describe('graph', () => {
       createInputNode('in', { inputKey: 'foo', defaultValue: 'def foo' })
     );
     graph.addNode(
-      createPromptNode('p', {
-        config: { text: 'some text ({the_input})' },
+      createTextNode('t', {
         inputs: { the_input: 'string' },
+        config: { text: 'some text ({the_input})' },
+      })
+    );
+    graph.addNode(
+      createLlmNode('llm', {
+        config: { model: 'foo' },
       })
     );
     graph.createEdge({
       id: 'lkj',
       fromId: 'in',
-      toId: 'p',
+      toId: 't',
       toPort: 'the_input',
     });
     graph.createEdge({
+      id: ':lkj',
+      fromId: 't',
+      toId: 'llm',
+    });
+    graph.createEdge({
       id: 'lmkj',
-      fromId: 'p',
+      fromId: 'llm',
       toId: '_target',
     });
     const resp = await graph.execute({ apiInput: {}, openaiApiKey: 'foo' });
