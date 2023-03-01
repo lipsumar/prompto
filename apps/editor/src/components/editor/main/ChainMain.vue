@@ -72,7 +72,7 @@ function save(graph: GraphData) {
         @save="save"
       />
     </div>
-    <div class="w-96 flex-none bg-white h-full h-screen overflow-y-auto">
+    <div class="w-96 flex-none bg-white h-screen overflow-y-auto">
       <ChainInspector />
     </div>
   </div>
