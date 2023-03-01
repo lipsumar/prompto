@@ -16,6 +16,7 @@ import { useGraphEditorStore, type GraphNodeData } from "@/stores/graphEditor";
 
 import { getEventClientPos } from "@/lib/drag";
 import GraphPort from "./GraphPort.vue";
+import { PlayIcon } from "@heroicons/vue/20/solid";
 
 const props = defineProps<{
   nodeId: GraphNodeData["id"];
@@ -30,6 +31,8 @@ const emit = defineEmits<{
       node: GraphNodeData;
     }
   ): void;
+  (e: "delete"): void;
+  (e: "execute"): void;
 }>();
 const editorStore = useGraphEditorStore();
 const contentRef = ref<HTMLElement>();
@@ -173,6 +176,7 @@ onMounted(() => {
   >
     <div :style="`padding: ${margin}px;`">
       <div
+        class="group"
         ref="contentRef"
         style="position: relative; white-space: nowrap; width: fit-content"
       >
@@ -185,7 +189,18 @@ onMounted(() => {
           <div class="pb-2">
             <slot></slot>
           </div>
-
+          <div
+            class="absolute -top-2 -right-2 rounded-full bg-red-500 text-white items-center justify-center w-4 h-4 hidden group-hover:flex cursor-pointer opacity-50 hover:opacity-100"
+            @click="emit('delete')"
+          >
+            ×
+          </div>
+          <div
+            class="absolute -top-3 -left-3 rounded-full bg-blue-500 text-white items-center justify-center w-7 h-7 hidden group-hover:flex cursor-pointer"
+            @click="emit('execute')"
+          >
+            <PlayIcon class="w-4 h-4" />
+          </div>
           <GraphPort
             v-for="(inputType, input) of node.inputs"
             :key="input"

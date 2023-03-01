@@ -14,11 +14,10 @@ import { PlusIcon } from "@heroicons/vue/24/outline";
 import invariant from "tiny-invariant";
 import { createDrag } from "@/lib/drag";
 import GraphLine from "./GraphLine.vue";
-import { PlayIcon } from "@heroicons/vue/20/solid";
 
 const props = defineProps<{ graph: GraphData; runDisabled: boolean }>();
 const emits = defineEmits<{
-  (e: "run", graph: GraphData): void;
+  (e: "run", graph: GraphData, nodeId: string): void;
   (e: "save", graph: GraphData): void;
 }>();
 const viewport = ref<InstanceType<typeof GraphViewport>>();
@@ -94,11 +93,20 @@ function addNode(type: "llm" | "input" | "text") {
       config: { text: "", model: "foo" },
     };
   } else if (type === "text") {
-    node = { ...base, type, config: { text: "" } };
+    node = {
+      ...base,
+      type,
+      config: { text: "" },
+      inputs: { default: "string" as const },
+    };
   } else {
     node = { ...base, type, config: { inputKey: "", defaultValue: "" } };
   }
   editorStore.addNode(node);
+}
+
+function deleteNode(nodeId: string) {
+  editorStore.removeNode(nodeId);
 }
 
 const { drag: connectingEdgeTo, startDrag } = createDrag({});
@@ -157,8 +165,8 @@ function startConnect(opts: {
   });
 }
 
-function run() {
-  emits("run", editorStore.getGraph());
+function executeNode(nodeId: string) {
+  emits("run", editorStore.getGraph(), nodeId);
 }
 function save() {
   emits("save", editorStore.getGraph());
@@ -189,6 +197,8 @@ onMounted(() => {
       :key="node.id"
       :node-id="node.id"
       @start-connect="startConnect"
+      @delete="deleteNode(node.id)"
+      @execute="executeNode(node.id)"
     >
       <div
         class="absolute right-0 top-0 font-mono px-2 py-1 bg-sky-100 rounded-bl rounded-tr-lg text-xs"
@@ -219,13 +229,6 @@ onMounted(() => {
       @click="save"
     >
       Save
-    </button>
-    <button
-      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded disabled:opacity-70"
-      @click="run"
-      :disabled="props.runDisabled"
-    >
-      <PlayIcon class="w-4 h-4 mr-1" /> Run
     </button>
   </div>
 

@@ -7,7 +7,7 @@ import type {
   LangDataType,
 } from '../types';
 import { uniqBy } from 'lodash';
-import createTargetNode from '../nodes/target';
+
 import createLlmNode, { LlmNodeOptions } from '../nodes/llm';
 import createTextNode, { TextNodeOptions } from '../nodes/text';
 import createInputNode, { InputNodeOptions } from '../nodes/input';
@@ -15,18 +15,9 @@ import createInputNode, { InputNodeOptions } from '../nodes/input';
 export default class LangGraph {
   nodes: LangNode[] = [];
   edges: LangEdge[] = [];
-  targetNode: LangNode;
   executeResults: ExecuteResults = [];
 
-  constructor() {
-    this.targetNode = createTargetNode({ inputs: { default: 'string' } });
-    this.addNode(this.targetNode);
-  }
-
-  setTargetNode(newTarget: LangNode) {
-    this.nodes[0] = newTarget;
-    this.targetNode = newTarget;
-  }
+  constructor() {}
 
   addNode(node: LangNode) {
     this.nodes.push(node);
@@ -66,12 +57,11 @@ export default class LangGraph {
     this.edges.push(edge);
   }
 
-  execute(ctx: ExecuteFunctionContext) {
+  executeNode(nodeId: string, ctx: ExecuteFunctionContext) {
+    const node = this.getNode(nodeId);
+    invariant(node, `node id=${nodeId} not found`);
     this.executeResults = [];
-    if (this.getInputNodesOf(this.targetNode).length === 0) {
-      throw new Error('target node has no connected input');
-    }
-    return this.executeImpl(this.targetNode, ctx);
+    return this.executeImpl(node, ctx);
   }
 
   private async executeImpl(node: LangNode, ctx: ExecuteFunctionContext) {
@@ -97,8 +87,15 @@ export default class LangGraph {
 
     // execute node
     node.status = 'executing';
-    const nodeOutput = await node.execute(inputs, ctx);
+    let nodeOutput;
+    try {
+      nodeOutput = await node.execute(inputs, ctx);
+    } catch (err) {
+      console.log('Error executing node id=' + node.id);
+      throw err;
+    }
     node.status = 'idle';
+
     this.executeResults.push({
       nodeId: node.id,
       inputs,
@@ -153,7 +150,6 @@ export function fromJSON(json: {
 }): LangGraph {
   const graph = new LangGraph();
   json.nodes.forEach((jsonNode) => {
-    if (jsonNode.id === '_target') return;
     let node;
     if (jsonNode.type === 'llm') {
       node = createLlmNode(jsonNode.id, {

@@ -3,29 +3,24 @@ import LangNode from '../src/core/LangNode';
 import { langchain } from '../src/langchain';
 import createInputNode from '../src/nodes/input';
 import createLlmNode from '../src/nodes/llm';
-import createTargetNode from '../src/nodes/target';
 import createTextNode from '../src/nodes/text';
 
 jest.mock('../src/langchain');
 const langchainMock = langchain as jest.MockedFunction<typeof langchain>;
 
 describe('graph', () => {
-  test('node -> target', async () => {
-    const promptNode = new LangNode({
-      id: 'prompt',
+  test('single node', async () => {
+    const node = new LangNode({
+      id: 'n',
       async execute(inputs, opts) {
         return { default: { value: 'the prompt result', type: 'string' } };
       },
       outputs: { default: 'string' },
     });
     const graph = new LangGraph();
-    graph.addNode(promptNode);
-    graph.createEdge({
-      id: '1',
-      fromId: 'prompt',
-      toId: '_target',
-    });
-    const res = await graph.execute({ apiInput: {} });
+    graph.addNode(node);
+
+    const res = await graph.executeNode('n', { apiInput: {} });
     expect(res).toEqual({
       default: { value: 'the prompt result', type: 'string' },
     });
@@ -36,12 +31,18 @@ describe('graph', () => {
     graph.addNode(
       createInputNode('input1', { inputKey: 'input1', defaultValue: 'def' })
     );
+    graph.addNode(
+      createTextNode('txt', {
+        config: { text: 'def' },
+        inputs: { default: 'string' },
+      })
+    );
     graph.createEdge({
       id: '1',
       fromId: 'input1',
-      toId: '_target',
+      toId: 'txt',
     });
-    const res = await graph.execute({
+    const res = await graph.executeNode('txt', {
       apiInput: {
         input1: { type: 'string', value: 'one' },
       },
@@ -53,12 +54,10 @@ describe('graph', () => {
 
   test('double input target node', async () => {
     const graph = new LangGraph();
-    graph.setTargetNode(
-      createTargetNode({
-        inputs: {
-          default: 'string',
-          in2: 'string',
-        },
+    graph.addNode(
+      createTextNode('last', {
+        inputs: { default: 'string', in2: 'string' },
+        config: { text: '' },
       })
     );
     graph.addNode(
@@ -70,30 +69,35 @@ describe('graph', () => {
     graph.createEdge({
       id: '1',
       fromId: 'input1',
-      toId: '_target',
+      toId: 'last',
     });
     graph.createEdge({
       id: '2',
       fromId: 'input2',
-      toId: '_target',
+      toId: 'last',
       toPort: 'in2',
     });
-    const res = await graph.execute({
+    const res = await graph.executeNode('last', {
       apiInput: {
-        input1: { type: 'string', value: 'one' },
+        input1: { type: 'string', value: 'one and {in2}' },
         input2: { type: 'string', value: 'two' },
       },
     });
     expect(res).toEqual({
-      default: { type: 'string', value: 'one' },
-      in2: { type: 'string', value: 'two' },
+      default: { type: 'string', value: 'one and two' },
     });
   });
+
   test('prompt with input', async () => {
     langchainMock.mockResolvedValueOnce({
       generations: [[{ text: 'me smart machine' }]],
     });
     const graph = new LangGraph();
+    graph.addNode(
+      createTextNode('last', {
+        config: { text: '' },
+      })
+    );
     graph.addNode(
       createInputNode('in', { inputKey: 'foo', defaultValue: 'def foo' })
     );
@@ -122,10 +126,12 @@ describe('graph', () => {
     graph.createEdge({
       id: 'lmkj',
       fromId: 'llm',
-      toId: '_target',
+      toId: 'last',
     });
-    const resp = await graph.execute({ apiInput: {}, openaiApiKey: 'foo' });
-    console.log(resp);
+    const resp = await graph.executeNode('last', {
+      apiInput: {},
+      openaiApiKey: 'foo',
+    });
     expect(langchainMock).toHaveBeenCalledTimes(1);
     expect(langchainMock).toHaveBeenCalledWith('llms/OpenAI/generate', {
       args: { openai_api_key: 'foo' },

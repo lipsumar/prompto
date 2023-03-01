@@ -21,11 +21,7 @@ const state = reactive({ isOpen: false });
   <div v-if="state.isOpen">
     <div v-if="nodeResult">
       <InputOutputTable :data="nodeResult" type="inputs" />
-      <InputOutputTable
-        :data="nodeResult"
-        type="outputs"
-        v-if="nodeResult.nodeId !== '_target'"
-      />
+      <InputOutputTable :data="nodeResult" type="outputs" />
     </div>
     <div v-else>Node did not run</div>
   </div>

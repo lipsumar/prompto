@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GraphEditor from "@/components/node-graph/GraphEditor.vue";
-import type { GraphData } from "@/stores/graphEditor";
+import { useGraphEditorStore, type GraphData } from "@/stores/graphEditor";
 import { trpc } from "@/trpc";
 import ChainInspector from "./ChainInspector.vue";
 import { useCurrentChainStore } from "@/stores/currentChain";
@@ -10,6 +10,7 @@ const currentChainStore = useCurrentChainStore();
 const state = reactive({
   running: false,
 });
+const editorStore = useGraphEditorStore();
 
 /*
 const graphData: GraphData = {
@@ -45,15 +46,19 @@ const graphData: GraphData = {
   ],
 };
 */
-function run(graph: GraphData) {
+function run(graph: GraphData, nodeId: string) {
   invariant(currentChainStore.chain);
   state.running = true;
   trpc.chain.run
-    .mutate({ content: JSON.stringify(graph), id: currentChainStore.chain.id })
+    .mutate({
+      content: JSON.stringify(graph),
+      id: currentChainStore.chain.id,
+      nodeId,
+    })
     .then((chainRun) => {
-      console.log(chainRun);
       currentChainStore.addRun(chainRun);
       state.running = false;
+      editorStore.setChainRun(JSON.parse(chainRun.content));
     });
 }
 

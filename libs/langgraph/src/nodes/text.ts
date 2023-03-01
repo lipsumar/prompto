@@ -12,21 +12,22 @@ export default function createTextNode(
     inputs,
     config,
   }: {
-    inputs: Record<string, LangDataType>;
+    inputs?: Record<string, LangDataType>;
     config: TextNodeOptions;
   }
 ) {
   return new LangNode({
     id,
     async execute(inputs, ctx) {
-      const replacedText = replaceInputsInText(inputs, config.text);
+      const text = inputs.default?.value || config.text;
+      const replacedText = replaceInputsInText(inputs, text);
 
       return {
         default: { type: 'string', value: replacedText },
       };
     },
     outputs: { default: 'string' },
-    inputs,
+    inputs: { ...inputs, default: 'string' as const },
   });
 }
 

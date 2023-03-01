@@ -53,11 +53,13 @@ export const chainRouter = router({
       });
     }),
   run: authedProcedure
-    .input(z.object({ content: z.string(), id: z.string() }))
+    .input(
+      z.object({ content: z.string(), id: z.string(), nodeId: z.string() })
+    )
     .mutation(async ({ input, ctx }) => {
       const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
-      await graph.execute({
+      await graph.executeNode(input.nodeId, {
         apiInput: {},
         openaiApiKey: ctx.user.gpt3ApiToken,
       });

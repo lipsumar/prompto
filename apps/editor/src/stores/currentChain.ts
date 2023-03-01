@@ -12,16 +12,7 @@ type ChainRun = inferRouterOutputs<AppRouter>["chain"]["run"];
 
 function getNewGraph(): GraphData {
   return {
-    nodes: [
-      {
-        id: "_target",
-        type: "output",
-        inputs: { default: "string" },
-        outputs: {},
-        x: 0,
-        y: 0,
-      },
-    ],
+    nodes: [],
     edges: [],
   };
 }

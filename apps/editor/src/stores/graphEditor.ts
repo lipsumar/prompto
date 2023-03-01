@@ -57,6 +57,12 @@ export type GraphPortData = {
   };
 };
 
+type ChainRunContent = {
+  nodeId: string;
+  inputs: Record<string, { type: LangDataType; value: any }>;
+  outputs: Record<string, { type: LangDataType; value: any }>;
+}[];
+
 function initNodeToNode(node: GraphNodeData): GraphNodeDataWithUi {
   return {
     ...node,
@@ -124,6 +130,12 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     nodes.value.push(initNodeToNode(node));
   }
 
+  function removeNode(nodeId: string) {
+    const edges = [...getInputEdges(nodeId), ...getOutputEdges(nodeId)];
+    edges.forEach((edge) => removeEdge(edge.id));
+    nodes.value = nodes.value.filter((n) => n.id !== nodeId);
+  }
+
   function addEdge(edge: GraphEdgeData) {
     edges.value.push({ ...edge });
   }
@@ -139,11 +151,22 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     return edges.value.filter((edge) => edge.to === nodeId);
   }
 
+  function setChainRun(chainRunContent: ChainRunContent) {
+    chainRunContent.forEach((result) => {
+      const node = getNode(result.nodeId);
+      if (!node) return;
+      if (node.type === "text" && result.inputs && result.inputs.default) {
+        node.config.text = result.inputs.default.value;
+      }
+    });
+  }
+
   return {
     nodes,
     edges,
     init,
     getNode,
+    removeNode,
     getEdge,
     addNode,
     addEdge,
@@ -158,5 +181,6 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
       selectedNodeId.value = id;
     },
     selectedNode,
+    setChainRun,
   };
 });
