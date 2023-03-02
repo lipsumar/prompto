@@ -2,8 +2,10 @@ import { InputNodeOptions } from './nodes/input';
 import { LlmNodeOptions } from './nodes/llm';
 import { TextNodeOptions } from './nodes/text';
 
-export type LangDataType = 'string';
-export type LangDataObject = { value: string; type: 'string' };
+export type LangDataType = 'string' | 'image';
+export type LangDataObject =
+  | { type: 'string'; value: string }
+  | { type: 'image'; value: string };
 export type ApiInput = Record<string, LangDataObject>;
 export type ExecuteFunctionContext = {
   apiInput: ApiInput;
@@ -25,10 +27,7 @@ export type SerializedLangNode =
       config: InputNodeOptions;
     } & BaseSerializedLangNode);
 
-export type ExecuteFunctionOutputs = Record<
-  string,
-  { type: 'string'; value: string }
->;
+export type ExecuteFunctionOutputs = Record<string, LangDataObject>;
 export type ExecuteFunctionInputs = Record<
   string,
   { type: 'string'; value: string }
