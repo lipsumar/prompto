@@ -208,10 +208,8 @@ onMounted(() => {
       <div class="font-bold" v-if="node.type !== 'llm'">{{ node.type }}</div>
 
       <div v-if="node.type === 'input'">{{ node.config.inputKey }}</div>
-      <div v-if="node.type === 'llm'" class="text-lg text-center pb-4 pt-8">
-        LLM
-      </div>
-      <div v-if="node.type === 'text'" class="text-xs line-clamp-2">
+      <div v-if="node.type === 'llm'" class="text-lg text-center pt-8">LLM</div>
+      <div v-if="node.type === 'text'" class="text-md line-clamp-12">
         {{ node.config.text }}
       </div>
     </GraphNode>

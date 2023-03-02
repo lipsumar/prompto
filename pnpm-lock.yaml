@@ -73,6 +73,7 @@ importers:
       '@trpc/client': 10.4.3
       '@trpc/server': 10.4.3
       '@types/jsdom': ^20.0.1
+      '@types/lodash': ^4.14.191
       '@types/node': ^18.11.12
       '@types/uuid': ^9.0.0
       '@vitejs/plugin-vue': ^4.0.0
@@ -88,6 +89,7 @@ importers:
       eslint-plugin-vue: ^9.3.0
       jsdom: ^20.0.3
       langgraph: workspace:*
+      lodash: ^4.17.21
       npm-run-all: ^4.1.5
       pinia: ^2.0.28
       postcss: ^8.4.20
@@ -112,6 +114,7 @@ importers:
       api: link:../api
       click-outside-vue3: 4.0.1
       langgraph: link:../../libs/langgraph
+      lodash: 4.17.21
       pinia: 2.0.30_5yi2kxxaqg74pgvs6b75qdtvru
       svg-pan-zoom: 3.6.1
       uuid: 9.0.0
@@ -125,6 +128,7 @@ importers:
       '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.4
       '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.4
       '@types/jsdom': 20.0.1
+      '@types/lodash': 4.14.191
       '@types/node': 18.11.17
       '@types/uuid': 9.0.0
       '@vitejs/plugin-vue': 4.0.0_vite@4.1.1+vue@3.2.47

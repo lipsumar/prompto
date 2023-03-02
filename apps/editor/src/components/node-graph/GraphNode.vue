@@ -10,7 +10,7 @@ import {
   watch,
   nextTick,
 } from "vue";
-
+import { pickBy } from "lodash";
 import invariant from "tiny-invariant";
 import { useGraphEditorStore, type GraphNodeData } from "@/stores/graphEditor";
 
@@ -37,9 +37,19 @@ const emit = defineEmits<{
 const editorStore = useGraphEditorStore();
 const contentRef = ref<HTMLElement>();
 const inputRef = ref<InstanceType<typeof GraphPort>[]>();
+const defaultInputRef = ref<InstanceType<typeof GraphPort>>();
+const defaultOutputRef = ref<InstanceType<typeof GraphPort>>();
 const outputRef = ref<InstanceType<typeof GraphPort>[]>();
 const margin = 15;
 const panzoom = inject<Ref<SvgPanZoom.Instance>>("panzoom");
+const additionalInputs = computed(
+  () =>
+    pickBy(node.inputs, (_, k) => k !== "default") as Record<string, "string">
+);
+const additionalOutputs = computed(
+  () =>
+    pickBy(node.outputs, (_, k) => k !== "default") as Record<string, "string">
+);
 
 const drag = reactive({
   zoom: 1,
@@ -72,11 +82,20 @@ function fitContent() {
       return acc;
     }, {} as Record<string, { x: number; y: number }>);
   }
+  node.inputsOffset.default = { x: 0, y: box.height / 2 };
+  if (defaultInputRef.value) {
+    defaultInputRef.value.$el.style.top = `${box.height / 2}px`;
+  }
   if (outputRef.value) {
     node.outputsOffset = outputRef.value.reduce((acc, outPort) => {
       acc[outPort.port] = outPort.getOffset();
       return acc;
     }, {} as Record<string, { x: number; y: number }>);
+  }
+  node.outputsOffset.default = { x: box.width, y: box.height / 2 };
+  if (defaultOutputRef.value) {
+    defaultOutputRef.value.$el.style.top = `${box.height / 2}px`;
+    defaultOutputRef.value.$el.style.right = `${margin}px`;
   }
 }
 
@@ -181,9 +200,11 @@ onMounted(() => {
         style="position: relative; white-space: nowrap; width: fit-content"
       >
         <div
-          class="bg-white outline outline-sky-500 p-4 py-2 rounded-lg drop-shadow-md w-44 relative whitespace-normal"
+          class="bg-white outline outline-sky-500 p-4 py-2 rounded-lg drop-shadow-md relative whitespace-normal"
           :class="{
             'outline-4': isSelected,
+            'w-24': node.type === 'llm',
+            'w-60': node.type !== 'llm',
           }"
         >
           <div class="pb-2">
@@ -202,7 +223,15 @@ onMounted(() => {
             <PlayIcon class="w-4 h-4" />
           </div>
           <GraphPort
-            v-for="(inputType, input) of node.inputs"
+            type="input"
+            v-if="!!node.inputs.default"
+            port="default"
+            :node="node"
+            @start-connect="(e) => startConnect('input', 'default', e)"
+            ref="defaultInputRef"
+          />
+          <GraphPort
+            v-for="(inputType, input) of additionalInputs"
             :key="input"
             type="input"
             ref="inputRef"
@@ -212,7 +241,15 @@ onMounted(() => {
           />
 
           <GraphPort
-            v-for="(outputType, output) of node.outputs"
+            type="output"
+            v-if="!!node.outputs.default"
+            port="default"
+            :node="node"
+            @start-connect="(e) => startConnect('output', 'default', e)"
+            ref="defaultOutputRef"
+          />
+          <GraphPort
+            v-for="(outputType, output) of additionalOutputs"
             :key="output"
             type="output"
             ref="outputRef"

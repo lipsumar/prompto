@@ -42,11 +42,15 @@ const connected = computed(
 </script>
 <template>
   <div
-    class="relative"
-    :class="{ 'text-right': props.type === 'output' }"
+    :class="{
+      'text-right': props.type === 'output',
+      relative: port !== 'default',
+      absolute: port === 'default',
+    }"
     ref="outer"
   >
-    {{ props.port }}
+    <span v-if="port !== 'default'" class="text-mono">{{ props.port }}</span>
+
     <div
       class="absolute right-0 top-0 h-full flex items-center"
       :class="{
