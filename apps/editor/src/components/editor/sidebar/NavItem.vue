@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { trpc } from "@/trpc";
 import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
 import {
   DocumentIcon,
@@ -7,17 +6,15 @@ import {
   TrashIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, reactive, ref } from "vue";
-import { useMutation } from "vue-query";
-import type { AppRouter } from "api";
-import type { inferRouterInputs } from "@trpc/server";
-import { usePromptsStore } from "@/stores/prompts";
 import { useEditorStore } from "@/stores/editor";
 
 const props = defineProps(["text", "type", "id"]);
-
+const emit = defineEmits<{
+  (e: "rename", opts: { id: string; value: string }): void;
+  (e: "delete", opts: { id: string }): void;
+}>();
 const state = reactive({ isMenuOpen: false, isRenaming: false });
 const input = ref<HTMLInputElement>();
-const promptsStore = usePromptsStore();
 const editorStore = useEditorStore();
 
 const isActive = computed(
@@ -26,27 +23,11 @@ const isActive = computed(
     editorStore.activeElement?.id === props.id
 );
 
-const { mutate: renamePrompt } = useMutation(
-  (data: inferRouterInputs<AppRouter>["prompt"]["rename"]) =>
-    trpc.prompt.rename.mutate(data),
-  {
-    onSuccess() {
-      promptsStore.update();
-    },
-  }
-);
-
 function focusAndSelect(input: HTMLInputElement) {
   setTimeout(() => {
     input.focus();
     input.select();
   }, 2);
-}
-
-function deletePrompt(promptId: string) {
-  trpc.prompt.delete.mutate({ id: promptId }).then(() => {
-    promptsStore.update();
-  });
 }
 </script>
 
@@ -87,7 +68,7 @@ function deletePrompt(promptId: string) {
             () => {
               state.isRenaming = false;
               if (input) {
-                renamePrompt({ promptId: props.id, name: input.value });
+                emit('rename', { id: props.id, value: input.value });
               }
             }
           "
@@ -121,7 +102,7 @@ function deletePrompt(promptId: string) {
           @click.stop="
             () => {
               state.isMenuOpen = false;
-              deletePrompt(props.id);
+              emit('delete', { id: props.id });
             }
           "
         >

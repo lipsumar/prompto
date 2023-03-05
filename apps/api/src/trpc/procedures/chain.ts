@@ -41,7 +41,8 @@ export const chainRouter = router({
   ),
   delete: authedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
+      await prisma.chainRun.deleteMany({ where: { chainId: input.id } });
       return prisma.chain.delete({ where: { id: input.id } });
     }),
   update: authedProcedure

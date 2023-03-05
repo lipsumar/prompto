@@ -5,18 +5,17 @@ import {
   FolderPlusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import NavItem from "./sidebar/NavItem.vue";
 import { usePromptsStore } from "@/stores/prompts";
 import { trpc } from "@/trpc";
-import { useCurrentPromptStore } from "@/stores/currentPrompt";
 import { RouterLink } from "vue-router";
 import { ref } from "vue";
 import { useChainsStore } from "@/stores/chains";
 import { useEditorStore } from "@/stores/editor";
+import PromptNavItem from "./sidebar/PromptNavItem.vue";
+import ChainNavItem from "./sidebar/ChainNavItem.vue";
 
 const promptsStore = usePromptsStore();
 const chainsStore = useChainsStore();
-const currentPromptStore = useCurrentPromptStore();
 const editorStore = useEditorStore();
 const projectNameRef = ref<HTMLInputElement | null>(null);
 
@@ -81,12 +80,11 @@ function saveProjectName() {
       </button>
     </div>
     <ul class="mt-1">
-      <NavItem
-        :text="prompt.name"
+      <PromptNavItem
         v-for="prompt of promptsStore.prompts"
         :key="prompt.id"
         :id="prompt.id"
-        type="prompt"
+        :text="prompt.name"
       />
     </ul>
   </div>
@@ -101,12 +99,11 @@ function saveProjectName() {
       </button>
     </div>
     <ul class="mt-1">
-      <NavItem
+      <ChainNavItem
         :text="chain.name"
         v-for="chain of chainsStore.chains"
         :key="chain.id"
         :id="chain.id"
-        type="chain"
       />
     </ul>
   </div>
