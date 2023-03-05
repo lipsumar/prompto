@@ -1,37 +1,12 @@
 <script setup lang="ts">
-import { useCurrentPromptStore } from "@/stores/currentPrompt";
-import PromptEditor from "./main/PromptEditor.vue";
-import PromptOutputs from "./main/PromptOutputs.vue";
-import { useEditorSettingsStore } from "@/stores/editorSettings";
+import ChainMain from "./main/ChainMain.vue";
+import PromptMain from "./main/PromptMain.vue";
+import { useEditorStore } from "@/stores/editor";
 
-const currentPromptStore = useCurrentPromptStore();
-const editorSettings = useEditorSettingsStore();
+const editorStore = useEditorStore();
 </script>
 
 <template>
-  <div
-    v-if="currentPromptStore.prompt"
-    class=" "
-    :class="{
-      'h-full max-h-screen overflow-y-auto bg-slate-50':
-        editorSettings.editorLayout === 'page',
-      'min-h-screen overflow-hidden':
-        editorSettings.editorLayout === 'split-horizontal',
-    }"
-  >
-    <div
-      :class="{
-        'h-[50vh]': editorSettings.editorLayout === 'split-horizontal',
-      }"
-    >
-      <PromptEditor />
-    </div>
-    <div
-      :class="{
-        'h-[50vh]': editorSettings.editorLayout === 'split-horizontal',
-      }"
-    >
-      <PromptOutputs />
-    </div>
-  </div>
+  <PromptMain v-if="editorStore.activeElement?.type === 'prompt'" />
+  <ChainMain v-if="editorStore.activeElement?.type === 'chain'" />
 </template>

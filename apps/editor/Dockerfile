@@ -5,10 +5,12 @@ WORKDIR /usr/src/app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nx.json ./
 COPY apps/editor/package.json ./apps/editor/package.json
 COPY apps/api/package.json ./apps/api/package.json
+COPY libs/langgraph/package.json ./libs/langgraph/package.json
 RUN pnpm recursive install
 
 COPY apps/editor ./apps/editor
 COPY apps/api ./apps/api
+COPY libs/langgraph ./libs/langgraph
 
 RUN cd apps/api && pnpm prisma generate
 RUN pnpm nx run editor:build

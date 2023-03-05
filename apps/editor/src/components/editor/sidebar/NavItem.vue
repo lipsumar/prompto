@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { trpc } from "@/trpc";
 import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
 import {
   DocumentIcon,
@@ -7,31 +6,21 @@ import {
   TrashIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, reactive, ref } from "vue";
-import { useMutation } from "vue-query";
-import type { AppRouter } from "api";
-import type { inferRouterInputs } from "@trpc/server";
-import { usePromptsStore } from "@/stores/prompts";
-import { useCurrentPromptStore } from "@/stores/currentPrompt";
+import { useEditorStore } from "@/stores/editor";
 
-const props = defineProps(["text", "promptId"]);
-
+const props = defineProps(["text", "type", "id"]);
+const emit = defineEmits<{
+  (e: "rename", opts: { id: string; value: string }): void;
+  (e: "delete", opts: { id: string }): void;
+}>();
 const state = reactive({ isMenuOpen: false, isRenaming: false });
 const input = ref<HTMLInputElement>();
-const promptsStore = usePromptsStore();
-const currentPromptStore = useCurrentPromptStore();
+const editorStore = useEditorStore();
 
 const isActive = computed(
-  () => currentPromptStore.prompt?.id === props.promptId
-);
-
-const { mutate: renamePrompt } = useMutation(
-  (data: inferRouterInputs<AppRouter>["prompt"]["rename"]) =>
-    trpc.prompt.rename.mutate(data),
-  {
-    onSuccess() {
-      promptsStore.update();
-    },
-  }
+  () =>
+    editorStore.activeElement?.type === props.type &&
+    editorStore.activeElement?.id === props.id
 );
 
 function focusAndSelect(input: HTMLInputElement) {
@@ -39,12 +28,6 @@ function focusAndSelect(input: HTMLInputElement) {
     input.focus();
     input.select();
   }, 2);
-}
-
-function deletePrompt(promptId: string) {
-  trpc.prompt.delete.mutate({ id: promptId }).then(() => {
-    promptsStore.update();
-  });
 }
 </script>
 
@@ -67,7 +50,7 @@ function deletePrompt(promptId: string) {
       }"
       @click="
         () => {
-          currentPromptStore.setPrompt(promptId);
+          editorStore.setActiveElement({ type: props.type, id: props.id });
         }
       "
     >
@@ -85,7 +68,7 @@ function deletePrompt(promptId: string) {
             () => {
               state.isRenaming = false;
               if (input) {
-                renamePrompt({ promptId, name: input.value });
+                emit('rename', { id: props.id, value: input.value });
               }
             }
           "
@@ -99,7 +82,7 @@ function deletePrompt(promptId: string) {
       </button>
       <div
         v-if="state.isMenuOpen"
-        class="absolute bg-slate-50 p-1 border rounded-lg ml-[100%] top-0 w-48 shadow-md text-slate-800 text-left"
+        class="absolute top-0 w-48 z-10 bg-slate-50 p-1 border rounded-lg ml-[100%] shadow-md text-slate-800 text-left"
       >
         <button
           class="flex text-sm items-center px-2 py-1 hover:bg-slate-100 rounded-lg w-full"
@@ -119,7 +102,7 @@ function deletePrompt(promptId: string) {
           @click.stop="
             () => {
               state.isMenuOpen = false;
-              deletePrompt(promptId);
+              emit('delete', { id: props.id });
             }
           "
         >

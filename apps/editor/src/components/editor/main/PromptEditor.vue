@@ -4,6 +4,7 @@ import { useEditorSettingsStore } from "@/stores/editorSettings";
 import { trpc } from "@/trpc";
 import { FireIcon } from "@heroicons/vue/24/outline";
 import { onMounted, reactive, ref, watch } from "vue";
+import { Cog6ToothIcon } from "@heroicons/vue/24/outline";
 
 const currentPromptStore = useCurrentPromptStore();
 const editorSettings = useEditorSettingsStore();
@@ -51,6 +52,12 @@ function resizeTextarea(el?: HTMLTextAreaElement) {
   if (!el) return;
   el.style.height = "auto";
   el.style.height = el.scrollHeight + "px";
+}
+
+function switchLayout() {
+  editorSettings.setEditorLayout(
+    editorSettings.editorLayout === "page" ? "split-horizontal" : "page"
+  );
 }
 </script>
 
@@ -101,4 +108,11 @@ function resizeTextarea(el?: HTMLTextAreaElement) {
       </div>
     </div>
   </div>
+  <button
+    class="absolute top-4 right-4 rounded bg-slate-200 text-slate-400 text-sm p-1"
+    @click="() => switchLayout()"
+    title="Switch editor layout"
+  >
+    <Cog6ToothIcon class="w-4 h-4" />
+  </button>
 </template>

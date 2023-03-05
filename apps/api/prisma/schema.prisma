@@ -26,6 +26,7 @@ model Project {
   User    User     @relation(fields: [userId], references: [id])
   userId  String
   prompts Prompt[]
+  chains  Chain[]
 }
 
 model Prompt {
@@ -62,4 +63,28 @@ model PromptOutput {
 
   PromptVersion   PromptVersion @relation(fields: [promptVersionId], references: [id])
   promptVersionId String
+}
+
+model Chain {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name    String
+  content String
+
+  Project   Project    @relation(fields: [projectId], references: [id])
+  projectId String
+  ChainRun  ChainRun[]
+}
+
+model ChainRun {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  content String
+  number  Int
+
+  Chain   Chain  @relation(fields: [chainId], references: [id])
+  chainId String
 }

@@ -8,7 +8,13 @@ module.exports = {
       fontFamily: {
         sans: ["Nunito", ...defaultTheme.fontFamily.sans],
       },
+      lineClamp: {
+        12: "12",
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/forms")({ strategy: "class" }),
+    require("@tailwindcss/line-clamp"),
+  ],
 };
