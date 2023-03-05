@@ -12,40 +12,6 @@ const state = reactive({
 });
 const editorStore = useGraphEditorStore();
 
-/*
-const graphData: GraphData = {
-  nodes: [
-    {
-      id: "_target",
-      type: "output",
-      inputs: { default: "string" },
-      outputs: {},
-      x: 300,
-      y: 100,
-    },
-    {
-      id: "a",
-      type: "prompt" as const,
-      config: {
-        text: "how do you feel living in this API? Is the surrounding to your liking? Do you need anything?",
-      },
-      inputs: {},
-      outputs: { default: "string" },
-      x: 10,
-      y: 10,
-    },
-  ],
-  edges: [
-    {
-      from: "a",
-      fromPort: "default",
-      to: "_target",
-      toPort: "default",
-      id: "1",
-    },
-  ],
-};
-*/
 function run(graph: GraphData, nodeId: string) {
   invariant(currentChainStore.chain);
   state.running = true;

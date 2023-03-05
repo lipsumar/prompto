@@ -38,6 +38,7 @@ export type GraphNodeDataWithUi = GraphNodeData & {
   height: number;
   inputsOffset: Record<string, { x: number; y: number }>;
   outputsOffset: Record<string, { x: number; y: number }>;
+  status: string;
 };
 
 export type GraphEdgeData = {
@@ -80,6 +81,7 @@ function initNodeToNode(node: GraphNodeData): GraphNodeDataWithUi {
       acc[key] = { x: 0, y: 0 };
       return acc;
     }, {} as Record<string, { x: 0; y: 0 }>),
+    status: "idle",
   };
 }
 
@@ -169,6 +171,15 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     });
   }
 
+  function updateNodesStatus(nodesStatus: { id: string; status: string }[]) {
+    nodes.value.forEach((node) => {
+      const nodeData = nodesStatus.find((n) => n.id === node.id);
+      if (nodeData) {
+        node.status = nodeData.status;
+      }
+    });
+  }
+
   return {
     nodes,
     edges,
@@ -190,5 +201,6 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
     },
     selectedNode,
     setChainRun,
+    updateNodesStatus,
   };
 });

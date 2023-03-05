@@ -15,13 +15,16 @@ import createImageNode, { ImageNodeOptions } from '../nodes/image';
 import createImageGeneratorNode, {
   ImageGeneratorNodeOptions,
 } from '../nodes/image-generator';
+import { EventEmitter } from 'events';
 
-export default class LangGraph {
+export default class LangGraph extends EventEmitter {
   nodes: LangNode[] = [];
   edges: LangEdge[] = [];
   executeResults: ExecuteResults = [];
 
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   addNode(node: LangNode) {
     this.nodes.push(node);
@@ -61,11 +64,14 @@ export default class LangGraph {
     this.edges.push(edge);
   }
 
-  executeNode(nodeId: string, ctx: ExecuteFunctionContext) {
+  async executeNode(nodeId: string, ctx: ExecuteFunctionContext) {
     const node = this.getNode(nodeId);
     invariant(node, `node id=${nodeId} not found`);
     this.executeResults = [];
-    return this.executeImpl(node, ctx);
+    const res = await this.executeImpl(node, ctx);
+    this.emitStep();
+    console.log('emit last');
+    return res;
   }
 
   private async executeImpl(node: LangNode, ctx: ExecuteFunctionContext) {
@@ -91,6 +97,8 @@ export default class LangGraph {
 
     // execute node
     node.status = 'executing';
+    this.emitStep();
+
     let nodeOutput;
     try {
       nodeOutput = await node.execute(inputs, ctx);
@@ -106,6 +114,14 @@ export default class LangGraph {
       outputs: nodeOutput,
     });
     return nodeOutput;
+  }
+
+  emitStep() {
+    this.emit('step', {
+      nodesStatus: this.nodes.map((n) => {
+        return { id: n.id, status: n.status };
+      }),
+    });
   }
 
   getNode(id: string) {

@@ -6,6 +6,7 @@ import cors from 'cors';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { appRouter } from './trpc/appRouter';
 import { createContext } from './trpc';
+import { eventsHandler } from './middlewares/events';
 
 const app = express();
 
@@ -27,5 +28,7 @@ app.use(
     createContext,
   })
 );
+
+app.use('/events', eventsHandler);
 
 export default app;

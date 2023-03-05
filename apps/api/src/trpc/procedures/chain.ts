@@ -3,6 +3,7 @@ import { authedProcedure, router } from '..';
 import { prisma } from '../../lib/prisma';
 import { fromJSON as graphFromJSON } from 'langgraph';
 import invariant from 'tiny-invariant';
+import { sendEventToUser } from '../../middlewares/events';
 
 export const chainRouter = router({
   inProject: authedProcedure
@@ -60,10 +61,23 @@ export const chainRouter = router({
     .mutation(async ({ input, ctx }) => {
       const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
+
+      function broadcastStatus(evt: {
+        nodesStatus: { id: string; status: string }[];
+      }) {
+        console.log('broadcastStatus to', ctx.user.id);
+        sendEventToUser(ctx.user.id, {
+          nodesStatus: evt.nodesStatus,
+          type: 'nodesStatus',
+        });
+      }
+
+      graph.on('step', broadcastStatus);
       await graph.executeNode(input.nodeId, {
         apiInput: {},
         openaiApiKey: ctx.user.gpt3ApiToken,
       });
+      graph.off('step', broadcastStatus);
       const prevRunsCount = await prisma.chainRun.count({
         where: { chainId: input.id },
       });

@@ -17,6 +17,7 @@ import { useGraphEditorStore, type GraphNodeData } from "@/stores/graphEditor";
 import { getEventClientPos } from "@/lib/drag";
 import GraphPort from "./GraphPort.vue";
 import { PlayIcon } from "@heroicons/vue/20/solid";
+import SpinnerLoader from "../SpinnerLoader.vue";
 
 const props = defineProps<{
   nodeId: GraphNodeData["id"];
@@ -221,6 +222,19 @@ onMounted(() => {
             @click="emit('execute')"
           >
             <PlayIcon class="w-4 h-4" />
+          </div>
+          <div
+            class="absolute top-0 right-0 bottom-0 left-0"
+            v-if="node.status === 'executing'"
+          >
+            <div
+              class="absolute top-0 right-0 bottom-0 left-0 bg-white opacity-60"
+            ></div>
+            <div
+              class="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center"
+            >
+              <SpinnerLoader />
+            </div>
           </div>
           <GraphPort
             type="input"

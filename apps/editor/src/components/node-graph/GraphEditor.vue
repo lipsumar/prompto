@@ -9,7 +9,7 @@ import {
   type GraphNodeData,
   type GraphNodeDataWithUi,
 } from "../../stores/graphEditor";
-import { defineProps, onMounted, reactive, ref } from "vue";
+import { defineProps, onMounted, onUnmounted, reactive, ref } from "vue";
 import { PlusIcon } from "@heroicons/vue/24/outline";
 import invariant from "tiny-invariant";
 import { createDrag } from "@/lib/drag";
@@ -37,6 +37,20 @@ const allNodes = [
 
 const editorStore = useGraphEditorStore();
 editorStore.init(props.graph);
+
+const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/events`, {
+  withCredentials: true,
+});
+evtSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(event, data);
+  if (data.type === "nodesStatus") {
+    editorStore.updateNodesStatus(data.nodesStatus);
+  }
+};
+onUnmounted(() => {
+  evtSource.close();
+});
 
 /**
  * centers the view and zoom on a group nodes
