@@ -2,6 +2,7 @@ import invariant from 'tiny-invariant';
 import LangNode from '../core/LangNode';
 import { langchain } from '../langchain';
 import { ExecuteFunctionInputs, LangDataObject, LangDataType } from '../types';
+import { completion } from '../openai-utils';
 
 export type LlmNodeOptions = {
   model: string;
@@ -21,16 +22,18 @@ export default function createLlmNode(
     async execute(inputs, ctx) {
       invariant(ctx.openaiApiKey, 'openai api key is required');
 
-      const resp = await langchain('llms/OpenAI/generate', {
-        args: {
-          openai_api_key: ctx.openaiApiKey,
+      const prompt = inputs.default.value;
+      const resp = await completion(
+        {
+          prompt,
           temperature: config.temperature,
+          model: config.model,
         },
-        func: [inputs.default.value],
-      });
+        ctx.openaiApiKey
+      );
 
       return {
-        default: { type: 'string', value: resp.generations[0][0].text },
+        default: { type: 'string', value: resp.choices[0].text || '' },
       };
     },
     outputs: { default: 'string' },

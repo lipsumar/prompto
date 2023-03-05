@@ -92,7 +92,7 @@ function addNode(type: "llm" | "input" | "text" | "image" | "image-generator") {
       ...base,
       type,
       inputs: { default: "string" as const },
-      config: { text: "", model: "foo" },
+      config: { text: "", model: "text-davinci-003" },
     };
   } else if (type === "text") {
     node = {
