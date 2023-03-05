@@ -5,6 +5,8 @@ import type { LangDataType } from "langgraph";
 import type { LlmNodeOptions } from "langgraph/dist/nodes/llm";
 import type { InputNodeOptions } from "langgraph/dist/nodes/input";
 import type { TextNodeOptions } from "langgraph/dist/nodes/text";
+import type { ImageNodeOptions } from "langgraph/dist/nodes/image";
+import type { ImageGeneratorNodeOptions } from "langgraph/dist/nodes/image-generator";
 
 export type GraphData = {
   nodes: GraphNodeData[];
@@ -22,6 +24,8 @@ export type GraphNodeData = {
   | { type: "output"; config?: undefined }
   | { type: "llm"; config: LlmNodeOptions }
   | { type: "text"; config: TextNodeOptions }
+  | { type: "image"; config: ImageNodeOptions }
+  | { type: "image-generator"; config: ImageGeneratorNodeOptions }
   | {
       type: "input";
       config: InputNodeOptions;
@@ -154,9 +158,13 @@ export const useGraphEditorStore = defineStore("graphEditor", () => {
   function setChainRun(chainRunContent: ChainRunContent) {
     chainRunContent.forEach((result) => {
       const node = getNode(result.nodeId);
+      console.log(node);
       if (!node) return;
       if (node.type === "text" && result.inputs && result.inputs.default) {
         node.config.text = result.inputs.default.value;
+      }
+      if (node.type === "image" && result.inputs && result.inputs.default) {
+        node.config.image = result.inputs.default.value;
       }
     });
   }

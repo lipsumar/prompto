@@ -31,6 +31,8 @@ const allNodes = [
   { name: "LLM", type: "llm" as const },
   { name: "Input", type: "input" as const },
   { name: "Text", type: "text" as const },
+  { name: "Image", type: "image" as const },
+  { name: "Image generator", type: "image-generator" as const },
 ];
 
 const editorStore = useGraphEditorStore();
@@ -72,7 +74,7 @@ function zoomNodes(
   );
 }
 
-function addNode(type: "llm" | "input" | "text") {
+function addNode(type: "llm" | "input" | "text" | "image" | "image-generator") {
   invariant(viewport.value);
   const pan = viewport.value.getPan();
   const scale = viewport.value.getScale();
@@ -99,6 +101,15 @@ function addNode(type: "llm" | "input" | "text") {
       config: { text: "" },
       inputs: { default: "string" as const },
     };
+  } else if (type === "image") {
+    node = {
+      ...base,
+      type,
+      config: { image: "" },
+      inputs: { default: "string" as const },
+    };
+  } else if (type === "image-generator") {
+    node = { ...base, type, config: {}, inputs: { default: "image" as const } };
   } else {
     node = { ...base, type, config: { inputKey: "", defaultValue: "" } };
   }
@@ -211,6 +222,15 @@ onMounted(() => {
       <div v-if="node.type === 'llm'" class="text-lg text-center pt-8">LLM</div>
       <div v-if="node.type === 'text'" class="text-md line-clamp-12">
         {{ node.config.text }}
+      </div>
+      <div v-if="node.type === 'image'">
+        <img
+          v-if="node.config.image"
+          :src="node.config.image"
+          class="object-contain"
+          width="512"
+          height="512"
+        />
       </div>
     </GraphNode>
   </GraphViewport>

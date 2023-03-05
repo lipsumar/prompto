@@ -11,6 +11,10 @@ import { uniqBy } from 'lodash';
 import createLlmNode, { LlmNodeOptions } from '../nodes/llm';
 import createTextNode, { TextNodeOptions } from '../nodes/text';
 import createInputNode, { InputNodeOptions } from '../nodes/input';
+import createImageNode, { ImageNodeOptions } from '../nodes/image';
+import createImageGeneratorNode, {
+  ImageGeneratorNodeOptions,
+} from '../nodes/image-generator';
 
 export default class LangGraph {
   nodes: LangNode[] = [];
@@ -134,8 +138,9 @@ type JSONNode = {
 } & (
   | { type: 'llm'; config: LlmNodeOptions }
   | { type: 'text'; config: TextNodeOptions }
-  | { type: 'output'; config?: undefined }
   | { type: 'input'; config: InputNodeOptions }
+  | { type: 'image'; config: ImageNodeOptions }
+  | { type: 'image-generator'; config: ImageGeneratorNodeOptions }
 );
 
 export function fromJSON(json: {
@@ -162,8 +167,12 @@ export function fromJSON(json: {
       });
     } else if (jsonNode.type === 'input') {
       node = createInputNode(jsonNode.id, jsonNode.config);
+    } else if (jsonNode.type === 'image') {
+      node = createImageNode(jsonNode.id, { config: jsonNode.config });
+    } else if (jsonNode.type === 'image-generator') {
+      node = createImageGeneratorNode(jsonNode.id, { config: jsonNode.config });
     } else {
-      throw new Error('unsupported node type=: ' + jsonNode.type);
+      throw new Error('unsupported node type=: ' + (jsonNode as any).type);
     }
     graph.addNode(node);
   });
