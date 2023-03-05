@@ -7,6 +7,7 @@ import { completion } from '../openai-utils';
 export type LlmNodeOptions = {
   model: string;
   temperature?: number;
+  max_tokens?: number;
 };
 
 export default function createLlmNode(
@@ -28,6 +29,7 @@ export default function createLlmNode(
           prompt,
           temperature: config.temperature,
           model: config.model,
+          max_tokens: config.max_tokens || 100,
         },
         ctx.openaiApiKey
       );
