@@ -17,6 +17,9 @@
   "targetDefaults": {
     "dev": {
       "dependsOn": ["^build"]
+    },
+    "build": {
+      "dependsOn": ["^build"]
     }
   }
 }
