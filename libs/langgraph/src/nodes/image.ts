@@ -1,3 +1,4 @@
+import invariant from 'tiny-invariant';
 import LangNode from '../core/LangNode';
 
 export type ImageNodeOptions = {
@@ -15,6 +16,7 @@ export default function createImageNode(
   return new LangNode({
     id,
     async execute(inputs, ctx) {
+      invariant(inputs.default.type === 'image');
       const image = inputs.default?.value || config.image;
 
       return {

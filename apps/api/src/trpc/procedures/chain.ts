@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { authedProcedure, router } from '..';
 import { prisma } from '../../lib/prisma';
-import { fromJSON as graphFromJSON } from 'langgraph';
+import { ExecutionEngine, fromJSON as graphFromJSON } from 'langgraph';
 import invariant from 'tiny-invariant';
 import { sendEventToUser } from '../../middlewares/events';
 
@@ -72,22 +72,37 @@ export const chainRouter = router({
         });
       }
 
-      graph.on('step', broadcastStatus);
-      await graph.executeNode(input.nodeId, {
-        apiInput: {},
-        openaiApiKey: ctx.user.gpt3ApiToken,
+      const engine = new ExecutionEngine(graph);
+      engine.on('step', broadcastStatus);
+
+      return new Promise((resolve) => {
+        engine.once('done', async () => {
+          engine.off('step', broadcastStatus);
+
+          const prevRunsCount = await prisma.chainRun.count({
+            where: { chainId: input.id },
+          });
+          const chainRun = prisma.chainRun.create({
+            data: {
+              chainId: input.id,
+              content: JSON.stringify(engine.executeResults),
+              number: prevRunsCount + 1,
+            },
+          });
+          resolve(chainRun);
+        });
+        engine.execute({
+          apiInput: {},
+          openaiApiKey: ctx.user.gpt3ApiToken ?? undefined,
+        });
       });
-      graph.off('step', broadcastStatus);
-      const prevRunsCount = await prisma.chainRun.count({
-        where: { chainId: input.id },
-      });
-      return prisma.chainRun.create({
-        data: {
-          chainId: input.id,
-          content: JSON.stringify(graph.executeResults),
-          number: prevRunsCount + 1,
-        },
-      });
+
+      //graph.on('step', broadcastStatus);
+      // await graph.executeNode(input.nodeId, {
+      //   apiInput: {},
+      //   openaiApiKey: ctx.user.gpt3ApiToken,
+      // });
+      //graph.off('step', broadcastStatus);
     }),
   getRuns: authedProcedure
     .input(z.object({ id: z.string() }))

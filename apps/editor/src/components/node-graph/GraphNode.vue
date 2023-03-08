@@ -225,7 +225,7 @@ onMounted(() => {
           </div>
           <div
             class="absolute top-0 right-0 bottom-0 left-0"
-            v-if="node.status === 'executing'"
+            v-if="node.status === 'running'"
           >
             <div
               class="absolute top-0 right-0 bottom-0 left-0 bg-white opacity-60"

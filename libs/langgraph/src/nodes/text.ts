@@ -1,3 +1,4 @@
+import invariant from 'tiny-invariant';
 import LangNode from '../core/LangNode';
 import { ExecuteFunctionInputs, LangDataType } from '../types';
 
@@ -19,7 +20,11 @@ export default function createTextNode(
   return new LangNode({
     id,
     async execute(inputs, ctx) {
-      const text = inputs.default?.value || config.text;
+      let text = config.text;
+      if (inputs.default && inputs.default.type === 'string') {
+        text = inputs.default.value;
+      }
+      //const text = inputs.default?.value || config.text;
       const replacedText = replaceInputsInText(inputs, text);
 
       return {
@@ -37,7 +42,9 @@ function replaceInputsInText(
 ): string {
   let replaced = text;
   for (const input in inputs) {
-    replaced = replaced.split(`{${input}}`).join(inputs[input].value);
+    const currentInput = inputs[input];
+    invariant(currentInput.type === 'string');
+    replaced = replaced.split(`{${input}}`).join(currentInput.value);
   }
   return replaced;
 }

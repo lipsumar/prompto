@@ -18,6 +18,7 @@ export default function createImageGeneratorNode(
   return new LangNode({
     id,
     async execute(inputs, ctx) {
+      invariant(inputs.default.type === 'string');
       invariant(ctx.openaiApiKey, 'openai api key is required');
       const prompt = inputs.default.value;
 

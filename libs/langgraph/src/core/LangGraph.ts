@@ -140,10 +140,37 @@ export default class LangGraph extends EventEmitter {
     return edges.map((edge) => ({ node: edge.from, input: edge.toPort, edge }));
   }
 
+  getOutputNodesOf(node: LangNode) {
+    const edges = Object.keys(node.outputs)
+      .map((outputKey) => this.getEdgeFrom(node.id, outputKey))
+      .filter((edge): edge is LangEdge => typeof edge !== 'undefined');
+    return edges.map((edge) => ({
+      node: edge.to,
+      output: edge.fromPort,
+      edge,
+    }));
+  }
+
   getEdgeTo(toId: string, toPort: string) {
     return this.edges.find(
       (edge) => edge.to.id === toId && edge.toPort === toPort
     );
+  }
+
+  getEdgeFrom(fromId: string, fromPort: string) {
+    return this.edges.find(
+      (edge) => edge.from.id === fromId && edge.fromPort === fromPort
+    );
+  }
+
+  getDownstreamNodesOf(node: LangNode, acc: LangNode[] = []) {
+    const outputNodes = this.getOutputNodesOf(node);
+    const nodes = outputNodes.map((o) => o.node);
+    acc.push(...nodes);
+    nodes.forEach((n) => {
+      this.getDownstreamNodesOf(n, acc);
+    });
+    return acc;
   }
 }
 
