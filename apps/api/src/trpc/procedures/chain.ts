@@ -6,7 +6,7 @@ import invariant from 'tiny-invariant';
 import { sendEventToUser } from '../../middlewares/events';
 import type { LangGraph } from 'langgraph';
 import type { ChainRun, User } from '@prisma/client';
-import { ExecuteFunctionContext } from 'langgraph/dist/types';
+import type { ExecuteFunctionContext } from 'langgraph/dist/types';
 
 export const chainRouter = router({
   inProject: authedProcedure
