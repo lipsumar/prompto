@@ -8,7 +8,7 @@ export default function createListSplitterNode(id: string) {
     async execute(inputs, ctx) {
       invariant(inputs.default.type === 'string');
       const text = inputs.default.value;
-      const list = formatListToListOfStrings(text.trim());
+      const list = textToArray(text.trim());
       return {
         default: { type: 'list', value: list },
       };
@@ -18,16 +18,12 @@ export default function createListSplitterNode(id: string) {
   });
 }
 
-function formatListToListOfStrings(str: string) {
-  const lines = str.split('\n');
-  const output = [];
+function textToArray(text: string) {
+  // Split the text by line breaks and remove any empty lines
+  const lines = text.split('\n').filter((line) => line.trim() !== '');
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line.startsWith('- ')) {
-      output.push(line.substring(2));
-    }
-  }
+  // Remove any leading list markers and whitespace from each line
+  const items = lines.map((line) => line.replace(/^\s*(?:-|\d+\.)\s*/, ''));
 
-  return output;
+  return items;
 }
