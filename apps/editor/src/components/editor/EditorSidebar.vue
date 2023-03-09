@@ -13,9 +13,12 @@ import { useChainsStore } from "@/stores/chains";
 import { useEditorStore } from "@/stores/editor";
 import PromptNavItem from "./sidebar/PromptNavItem.vue";
 import ChainNavItem from "./sidebar/ChainNavItem.vue";
+import { useUserFoldersStore } from "@/stores/userFolders";
+import UserFolderNavItem from "./sidebar/UserFolderNavItem.vue";
 
 const promptsStore = usePromptsStore();
 const chainsStore = useChainsStore();
+const userFoldersStore = useUserFoldersStore();
 const editorStore = useEditorStore();
 const projectNameRef = ref<HTMLInputElement | null>(null);
 
@@ -39,6 +42,15 @@ function createChain() {
     .then((chain) => {
       chainsStore.update();
       editorStore.setActiveElement({ type: "chain", id: chain.id });
+    });
+}
+
+function createUserFolder() {
+  trpc.userFolder.create
+    .mutate({ projectId: promptsStore.projectId, name: "Untitled" })
+    .then((userFolder) => {
+      userFoldersStore.update();
+      editorStore.setActiveElement({ type: "userFolder", id: userFolder.id });
     });
 }
 
@@ -102,6 +114,26 @@ function saveProjectName() {
       <ChainNavItem
         :text="chain.name"
         v-for="chain of chainsStore.chains"
+        :key="chain.id"
+        :id="chain.id"
+      />
+    </ul>
+  </div>
+
+  <div class="pr-4 pt-2">
+    <div class="flex items-center ml-4 text-sm text-slate-300">
+      <div class="flex-1">Folders</div>
+      <button
+        class="ml-1 p-1 flex items-center justify-center rounded hover:bg-slate-200 hover:text-slate-800 text-white"
+        @click="() => createUserFolder()"
+      >
+        <PlusIcon class="w-4 h-4" />
+      </button>
+    </div>
+    <ul class="mt-1">
+      <UserFolderNavItem
+        :text="chain.name"
+        v-for="chain of userFoldersStore.userFolders"
         :key="chain.id"
         :id="chain.id"
       />

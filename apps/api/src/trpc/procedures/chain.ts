@@ -6,6 +6,7 @@ import invariant from 'tiny-invariant';
 import { sendEventToUser } from '../../middlewares/events';
 import type { LangGraph } from 'langgraph';
 import type { ChainRun, User } from '@prisma/client';
+import { ExecuteFunctionContext } from 'langgraph/dist/types';
 
 export const chainRouter = router({
   inProject: authedProcedure
@@ -63,7 +64,21 @@ export const chainRouter = router({
     .mutation(async ({ input, ctx }) => {
       const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
-      return runGraph(graph, ctx.user, input.id);
+      return runGraph(graph, ctx.user, input.id, {
+        apiInput: {},
+        openaiApiKey: ctx.user.gpt3ApiToken ?? undefined,
+        folderStorage: {
+          insert: async (folderId, dataObject) => {
+            await prisma.dataObjects.create({
+              data: {
+                type: dataObject.type,
+                value: JSON.stringify(dataObject.value),
+                userFolderId: folderId,
+              },
+            });
+          },
+        },
+      });
       //graph.on('step', broadcastStatus);
       // await graph.executeNode(input.nodeId, {
       //   apiInput: {},
@@ -84,7 +99,8 @@ export const chainRouter = router({
 async function runGraph(
   graph: LangGraph,
   user: User,
-  chainId: string
+  chainId: string,
+  ctx: ExecuteFunctionContext
 ): Promise<ChainRun> {
   function broadcastStatus(evt: {
     nodesStatus: { id: string; status: string }[];
@@ -115,9 +131,6 @@ async function runGraph(
       });
       resolve(chainRun);
     });
-    engine.execute({
-      apiInput: {},
-      openaiApiKey: user.gpt3ApiToken ?? undefined,
-    });
+    engine.execute(ctx);
   });
 }

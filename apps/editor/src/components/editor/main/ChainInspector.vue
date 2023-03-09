@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import TextInspector from "./inspectors/TextInspector.vue";
 import InputInspector from "./inspectors/InputInspector.vue";
 import NodeDebug from "./inspectors/debug/NodeDebug.vue";
+import UserFolderInspector from "./inspectors/UserFolderInspector.vue";
 
 const editorStore = useGraphEditorStore();
 const node = computed(() => editorStore.selectedNode);
@@ -36,7 +37,16 @@ const mode = ref<"inspect" | "debug">("inspect");
     </div>
     <div v-if="mode === 'inspect'">
       <TextInspector v-if="node.type === 'text'" :node="node" :key="node.id" />
-      <InputInspector v-if="node.type === 'input'" :node="node" />
+      <InputInspector
+        v-if="node.type === 'input'"
+        :node="node"
+        :key="node.id"
+      />
+      <UserFolderInspector
+        v-if="node.type === 'folder'"
+        :node="node"
+        :key="node.id"
+      />
     </div>
     <div v-if="mode === 'debug'">
       <NodeDebug :node="node" />

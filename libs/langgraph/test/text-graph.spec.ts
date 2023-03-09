@@ -4,6 +4,8 @@ import { langchain } from '../src/langchain';
 import createInputNode from '../src/nodes/input';
 import createLlmNode from '../src/nodes/llm';
 import createTextNode from '../src/nodes/text';
+import { ExecuteFunctionContext } from '../src/types';
+import { createCtx } from './utils';
 
 jest.mock('../src/langchain');
 const langchainMock = langchain as jest.MockedFunction<typeof langchain>;
@@ -20,7 +22,7 @@ describe('graph', () => {
     const graph = new LangGraph();
     graph.addNode(node);
 
-    const res = await graph.executeNode('n', { apiInput: {} });
+    const res = await graph.executeNode('n', createCtx());
     expect(res).toEqual({
       default: { value: 'the prompt result', type: 'string' },
     });
@@ -42,11 +44,14 @@ describe('graph', () => {
       fromId: 'input1',
       toId: 'txt',
     });
-    const res = await graph.executeNode('txt', {
-      apiInput: {
-        input1: { type: 'string', value: 'one' },
-      },
-    });
+    const res = await graph.executeNode(
+      'txt',
+      createCtx({
+        apiInput: {
+          input1: { type: 'string', value: 'one' },
+        },
+      })
+    );
     expect(res).toEqual({
       default: { value: 'one', type: 'string' },
     });
@@ -77,12 +82,15 @@ describe('graph', () => {
       toId: 'last',
       toPort: 'in2',
     });
-    const res = await graph.executeNode('last', {
-      apiInput: {
-        input1: { type: 'string', value: 'one and {in2}' },
-        input2: { type: 'string', value: 'two' },
-      },
-    });
+    const res = await graph.executeNode(
+      'last',
+      createCtx({
+        apiInput: {
+          input1: { type: 'string', value: 'one and {in2}' },
+          input2: { type: 'string', value: 'two' },
+        },
+      })
+    );
     expect(res).toEqual({
       default: { type: 'string', value: 'one and two' },
     });
@@ -128,10 +136,12 @@ describe('graph', () => {
       fromId: 'llm',
       toId: 'last',
     });
-    const resp = await graph.executeNode('last', {
-      apiInput: {},
-      openaiApiKey: 'foo',
-    });
+    const resp = await graph.executeNode(
+      'last',
+      createCtx({
+        openaiApiKey: 'foo',
+      })
+    );
     expect(langchainMock).toHaveBeenCalledTimes(1);
     expect(langchainMock).toHaveBeenCalledWith('llms/OpenAI/generate', {
       args: { openai_api_key: 'foo' },

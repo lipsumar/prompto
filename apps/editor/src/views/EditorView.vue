@@ -6,11 +6,13 @@ import { useRoute } from "vue-router";
 import { usePromptsStore } from "@/stores/prompts";
 import { useEditorStore } from "@/stores/editor";
 import { useChainsStore } from "@/stores/chains";
+import { useUserFoldersStore } from "@/stores/userFolders";
 
 const route = useRoute();
 const promptsStore = usePromptsStore();
 const chainsStore = useChainsStore();
 const editorStore = useEditorStore();
+const userFoldersStore = useUserFoldersStore();
 
 const state = reactive({ ready: false });
 
@@ -20,6 +22,7 @@ onMounted(async () => {
   Promise.all([
     promptsStore.init(route.params.projectId as string),
     chainsStore.init(route.params.projectId as string),
+    userFoldersStore.init(route.params.projectId as string),
   ]).then(() => (state.ready = true));
 });
 </script>

@@ -23,7 +23,7 @@ export default function createImageGeneratorNode(
       const prompt = inputs.default.value;
 
       const resp = await dalle(
-        { prompt, ...config, response_format: 'url' },
+        { prompt, size: '512x512', ...config, response_format: 'url' },
         ctx.openaiApiKey
       );
       invariant(resp.data[0].url, 'no url returned');

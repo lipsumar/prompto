@@ -11,6 +11,9 @@ export type ApiInput = Record<string, LangDataObject>;
 export type ExecuteFunctionContext = {
   apiInput: ApiInput;
   openaiApiKey?: string;
+  folderStorage: {
+    insert: (folderId: string, data: LangDataObject) => Promise<void>;
+  };
 };
 
 // deprecated

@@ -3,6 +3,7 @@ import LangNode from '../src/core/LangNode';
 import createImageNode from '../src/nodes/image';
 import createImageGeneratorNode from '../src/nodes/image-generator';
 import createTextNode from '../src/nodes/text';
+import { createCtx } from './utils';
 
 describe('graph', () => {
   test('text -> image-generator -> image', async () => {
@@ -20,10 +21,13 @@ describe('graph', () => {
     graph.addNode(createImageNode('img', { config: { image: '' } }));
     graph.createEdge({ id: 'dalle-img', fromId: 'dalle', toId: 'img' });
 
-    const res = await graph.executeNode('img', {
-      apiInput: {},
-      openaiApiKey: 'kj',
-    });
+    const res = await graph.executeNode(
+      'img',
+      createCtx({
+        apiInput: {},
+        openaiApiKey: 'kj',
+      })
+    );
     expect(res).toEqual({
       default: { value: expect.any(String), type: 'image' },
     });

@@ -12,6 +12,9 @@ import createLlmNode, { LlmNodeOptions } from '../nodes/llm';
 import createTextNode, { TextNodeOptions } from '../nodes/text';
 import createInputNode, { InputNodeOptions } from '../nodes/input';
 import createImageNode, { ImageNodeOptions } from '../nodes/image';
+import createListSplitterNode from '../nodes/list-splitter';
+import createLoopNode from '../nodes/loop';
+import createFolderNode, { FolderNodeOptions } from '../nodes/folder';
 import createImageGeneratorNode, {
   ImageGeneratorNodeOptions,
 } from '../nodes/image-generator';
@@ -184,6 +187,9 @@ type JSONNode = {
   | { type: 'input'; config: InputNodeOptions }
   | { type: 'image'; config: ImageNodeOptions }
   | { type: 'image-generator'; config: ImageGeneratorNodeOptions }
+  | { type: 'list-splitter'; config: {} }
+  | { type: 'loop'; config: {} }
+  | { type: 'folder'; config: FolderNodeOptions }
 );
 
 export function fromJSON(json: {
@@ -214,6 +220,12 @@ export function fromJSON(json: {
       node = createImageNode(jsonNode.id, { config: jsonNode.config });
     } else if (jsonNode.type === 'image-generator') {
       node = createImageGeneratorNode(jsonNode.id, { config: jsonNode.config });
+    } else if (jsonNode.type === 'list-splitter') {
+      node = createListSplitterNode(jsonNode.id);
+    } else if (jsonNode.type === 'loop') {
+      node = createLoopNode(jsonNode.id);
+    } else if (jsonNode.type === 'folder') {
+      node = createFolderNode(jsonNode.id, { config: jsonNode.config });
     } else {
       throw new Error('unsupported node type=: ' + (jsonNode as any).type);
     }

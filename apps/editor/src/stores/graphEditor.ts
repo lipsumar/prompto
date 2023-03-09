@@ -7,6 +7,7 @@ import type { InputNodeOptions } from "langgraph/dist/nodes/input";
 import type { TextNodeOptions } from "langgraph/dist/nodes/text";
 import type { ImageNodeOptions } from "langgraph/dist/nodes/image";
 import type { ImageGeneratorNodeOptions } from "langgraph/dist/nodes/image-generator";
+import type { FolderNodeOptions } from "langgraph/dist/nodes/folder";
 
 export type GraphData = {
   nodes: GraphNodeData[];
@@ -26,6 +27,9 @@ export type GraphNodeData = {
   | { type: "text"; config: TextNodeOptions }
   | { type: "image"; config: ImageNodeOptions }
   | { type: "image-generator"; config: ImageGeneratorNodeOptions }
+  | { type: "list-splitter"; config: {} }
+  | { type: "loop"; config: {} }
+  | { type: "folder"; config: FolderNodeOptions }
   | {
       type: "input";
       config: InputNodeOptions;

@@ -9,6 +9,7 @@ import createLlmNode from '../src/nodes/llm';
 import createLoopNode from '../src/nodes/loop';
 import createTextNode from '../src/nodes/text';
 import { completion, dalle } from '../src/openai-utils';
+import { createCtx } from './utils';
 
 jest.mock('../src/openai-utils');
 const completionMock = completion as jest.MockedFunction<typeof completion>;
@@ -42,7 +43,7 @@ describe('graph', () => {
       });
       done();
     });
-    engine.execute({ apiInput: {} });
+    engine.execute(createCtx());
   });
 
   test('input node', (done) => {
@@ -69,11 +70,13 @@ describe('graph', () => {
       });
       done();
     });
-    engine.execute({
-      apiInput: {
-        input1: { type: 'string', value: 'one' },
-      },
-    });
+    engine.execute(
+      createCtx({
+        apiInput: {
+          input1: { type: 'string', value: 'one' },
+        },
+      })
+    );
   });
 
   test('double input target node', (done) => {
@@ -109,12 +112,14 @@ describe('graph', () => {
       });
       done();
     });
-    engine.execute({
-      apiInput: {
-        input1: { type: 'string', value: 'one and {in2}' },
-        input2: { type: 'string', value: 'two' },
-      },
-    });
+    engine.execute(
+      createCtx({
+        apiInput: {
+          input1: { type: 'string', value: 'one and {in2}' },
+          input2: { type: 'string', value: 'two' },
+        },
+      })
+    );
   });
 
   test('prompt with input', (done) => {
@@ -176,7 +181,7 @@ describe('graph', () => {
       });
       done();
     });
-    engine.execute({ apiInput: {}, openaiApiKey: 'foo-key' });
+    engine.execute(createCtx({ apiInput: {}, openaiApiKey: 'foo-key' }));
   });
 
   describe('lists', () => {
@@ -202,7 +207,7 @@ describe('graph', () => {
         });
         done();
       });
-      engine.execute({ apiInput: {} });
+      engine.execute(createCtx({ apiInput: {} }));
     });
 
     test('txt -> list-splitter -> loop -> node', (done) => {
@@ -262,7 +267,7 @@ describe('graph', () => {
         });
         done();
       });
-      engine.execute({ apiInput: {} });
+      engine.execute(createCtx({ apiInput: {} }));
     });
 
     test('txt -> list-splitter -> loop -> txt -> img-gen', (done) => {
@@ -318,7 +323,7 @@ describe('graph', () => {
         });
         done();
       });
-      engine.execute({ apiInput: {}, openaiApiKey: 'lol' });
+      engine.execute(createCtx({ apiInput: {}, openaiApiKey: 'lol' }));
     });
   });
 });

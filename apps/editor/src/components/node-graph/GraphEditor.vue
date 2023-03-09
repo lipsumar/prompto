@@ -33,6 +33,9 @@ const allNodes = [
   { name: "Text", type: "text" as const },
   { name: "Image", type: "image" as const },
   { name: "Image generator", type: "image-generator" as const },
+  { name: "List splitter", type: "list-splitter" as const },
+  { name: "Loop", type: "loop" as const },
+  { name: "Folder", type: "folder" as const },
 ];
 
 const editorStore = useGraphEditorStore();
@@ -88,7 +91,17 @@ function zoomNodes(
   );
 }
 
-function addNode(type: "llm" | "input" | "text" | "image" | "image-generator") {
+function addNode(
+  type:
+    | "llm"
+    | "input"
+    | "text"
+    | "image"
+    | "image-generator"
+    | "list-splitter"
+    | "loop"
+    | "folder"
+) {
   invariant(viewport.value);
   const pan = viewport.value.getPan();
   const scale = viewport.value.getScale();
@@ -124,6 +137,20 @@ function addNode(type: "llm" | "input" | "text" | "image" | "image-generator") {
     };
   } else if (type === "image-generator") {
     node = { ...base, type, config: {}, inputs: { default: "image" as const } };
+  } else if (type === "list-splitter") {
+    node = { ...base, type, config: {}, inputs: { default: "list" as const } };
+  } else if (type === "loop") {
+    node = { ...base, type, config: {}, inputs: { default: "list" as const } };
+  } else if (type === "folder") {
+    node = {
+      ...base,
+      type,
+      config: {
+        folderId: "clf129kur000106zw7zxw7jow",
+      },
+      inputs: { default: "string" as const },
+      outputs: {},
+    };
   } else {
     node = { ...base, type, config: { inputKey: "", defaultValue: "" } };
   }

@@ -23,10 +23,11 @@ model Project {
 
   name String
 
-  User    User     @relation(fields: [userId], references: [id])
-  userId  String
-  prompts Prompt[]
-  chains  Chain[]
+  User        User         @relation(fields: [userId], references: [id])
+  userId      String
+  prompts     Prompt[]
+  chains      Chain[]
+  userFolders UserFolder[]
 }
 
 model Prompt {
@@ -87,4 +88,28 @@ model ChainRun {
 
   Chain   Chain  @relation(fields: [chainId], references: [id])
   chainId String
+}
+
+model UserFolder {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+
+  Project     Project       @relation(fields: [projectId], references: [id])
+  projectId   String
+  dataObjects DataObjects[]
+}
+
+model DataObjects {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type  String
+  value String
+
+  UserFolder   UserFolder @relation(fields: [userFolderId], references: [id])
+  userFolderId String
 }
