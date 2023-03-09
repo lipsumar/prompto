@@ -1,5 +1,5 @@
-import { User } from '@prisma/client';
-import { Request, Response } from 'express';
+import type { User } from '@prisma/client';
+import type { Request, Response } from 'express';
 import invariant from 'tiny-invariant';
 
 let clients: { id: number; response: Response; userId: string }[] = [];

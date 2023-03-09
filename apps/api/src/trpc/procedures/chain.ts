@@ -4,6 +4,8 @@ import { prisma } from '../../lib/prisma';
 import { ExecutionEngine, fromJSON as graphFromJSON } from 'langgraph';
 import invariant from 'tiny-invariant';
 import { sendEventToUser } from '../../middlewares/events';
+import type { LangGraph } from 'langgraph';
+import type { ChainRun, User } from '@prisma/client';
 
 export const chainRouter = router({
   inProject: authedProcedure
@@ -61,42 +63,7 @@ export const chainRouter = router({
     .mutation(async ({ input, ctx }) => {
       const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
-
-      function broadcastStatus(evt: {
-        nodesStatus: { id: string; status: string }[];
-      }) {
-        console.log('broadcastStatus to', ctx.user.id);
-        sendEventToUser(ctx.user.id, {
-          nodesStatus: evt.nodesStatus,
-          type: 'nodesStatus',
-        });
-      }
-
-      const engine = new ExecutionEngine(graph);
-      engine.on('step', broadcastStatus);
-
-      return new Promise((resolve) => {
-        engine.once('done', async () => {
-          engine.off('step', broadcastStatus);
-
-          const prevRunsCount = await prisma.chainRun.count({
-            where: { chainId: input.id },
-          });
-          const chainRun = prisma.chainRun.create({
-            data: {
-              chainId: input.id,
-              content: JSON.stringify(engine.executeResults),
-              number: prevRunsCount + 1,
-            },
-          });
-          resolve(chainRun);
-        });
-        engine.execute({
-          apiInput: {},
-          openaiApiKey: ctx.user.gpt3ApiToken ?? undefined,
-        });
-      });
-
+      return runGraph(graph, ctx.user, input.id);
       //graph.on('step', broadcastStatus);
       // await graph.executeNode(input.nodeId, {
       //   apiInput: {},
@@ -113,3 +80,44 @@ export const chainRouter = router({
       });
     }),
 });
+
+async function runGraph(
+  graph: LangGraph,
+  user: User,
+  chainId: string
+): Promise<ChainRun> {
+  function broadcastStatus(evt: {
+    nodesStatus: { id: string; status: string }[];
+  }) {
+    console.log('broadcastStatus to', user.id);
+    sendEventToUser(user.id, {
+      nodesStatus: evt.nodesStatus,
+      type: 'nodesStatus',
+    });
+  }
+
+  const engine = new ExecutionEngine(graph);
+  engine.on('step', broadcastStatus);
+
+  return new Promise((resolve) => {
+    engine.once('done', async () => {
+      engine.off('step', broadcastStatus);
+
+      const prevRunsCount = await prisma.chainRun.count({
+        where: { chainId },
+      });
+      const chainRun = await prisma.chainRun.create({
+        data: {
+          chainId,
+          content: JSON.stringify(engine.executeResults),
+          number: prevRunsCount + 1,
+        },
+      });
+      resolve(chainRun);
+    });
+    engine.execute({
+      apiInput: {},
+      openaiApiKey: user.gpt3ApiToken ?? undefined,
+    });
+  });
+}
