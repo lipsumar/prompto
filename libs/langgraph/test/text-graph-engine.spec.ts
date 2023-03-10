@@ -7,6 +7,7 @@ import createInputNode from '../src/nodes/input';
 import createListSplitterNode from '../src/nodes/list-splitter';
 import createLlmNode from '../src/nodes/llm';
 import createLoopNode from '../src/nodes/loop';
+import createRepeatNode from '../src/nodes/repeat';
 import createTextNode from '../src/nodes/text';
 import { completion, dalle } from '../src/openai-utils';
 import { createCtx } from './utils';
@@ -324,6 +325,128 @@ describe('graph', () => {
         done();
       });
       engine.execute(createCtx({ apiInput: {}, openaiApiKey: 'lol' }));
+    });
+  });
+
+  describe('repeat', () => {
+    test('txt -> repeat -> node', (done) => {
+      const graph = new LangGraph();
+      graph.addNode(createTextNode('txt', { config: { text: 'some text' } }));
+
+      graph.addNode(createRepeatNode('rep', { config: { maxIteration: 3 } }));
+      graph.createEdge({
+        id: 'jkl',
+        fromId: 'txt',
+        toId: 'rep',
+      });
+
+      const nodeExecute = jest.fn();
+      graph.addNode(
+        new LangNode({
+          id: 'node',
+          async execute(inputs) {
+            //console.log('exe', inputs);
+            nodeExecute(inputs);
+            return inputs;
+          },
+          inputs: { default: 'string' },
+        })
+      );
+      graph.createEdge({
+        id: 'jkjkl',
+        fromId: 'rep',
+        toId: 'node',
+      });
+
+      const engine = new ExecutionEngine(graph);
+      engine.once('done', () => {
+        expect(engine.getNodeOutputs('node')).toEqual({
+          default: { type: 'string', value: 'some text' },
+        });
+        expect(nodeExecute).toHaveBeenCalledTimes(3);
+        expect(nodeExecute.mock.calls[0][0]).toEqual({
+          default: { type: 'string', value: 'some text' },
+        });
+        expect(nodeExecute.mock.calls[1][0]).toEqual({
+          default: { type: 'string', value: 'some text' },
+        });
+        expect(nodeExecute.mock.calls[2][0]).toEqual({
+          default: { type: 'string', value: 'some text' },
+        });
+        done();
+      });
+      engine.execute(createCtx());
+    });
+
+    test('txt -> repeat (-> nodeA) (-> nodeB)', (done) => {
+      const graph = new LangGraph();
+      graph.addNode(createTextNode('txt', { config: { text: 'some text' } }));
+
+      graph.addNode(createRepeatNode('rep', { config: { maxIteration: 3 } }));
+      graph.createEdge({
+        id: 'jkl',
+        fromId: 'txt',
+        toId: 'rep',
+      });
+
+      const nodeAExecute = jest.fn();
+      graph.addNode(
+        new LangNode({
+          id: 'nodeA',
+          async execute(inputs) {
+            //console.log('exe', inputs);
+            nodeAExecute(inputs);
+            return inputs;
+          },
+          inputs: { default: 'string' },
+        })
+      );
+      graph.createEdge({
+        id: 'jkjklA',
+        fromId: 'rep',
+        toId: 'nodeA',
+      });
+
+      const nodeBExecute = jest.fn();
+      graph.addNode(
+        new LangNode({
+          id: 'nodeB',
+          async execute(inputs) {
+            //console.log('exe', inputs);
+            nodeBExecute(inputs);
+            return inputs;
+          },
+          inputs: { default: 'string' },
+        })
+      );
+      graph.createEdge({
+        id: 'jkjklB',
+        fromId: 'rep',
+        toId: 'nodeB',
+      });
+
+      const engine = new ExecutionEngine(graph);
+      engine.once('done', () => {
+        expect(engine.getNodeOutputs('nodeA')).toEqual({
+          default: { type: 'string', value: 'some text' },
+        });
+        expect(nodeAExecute).toHaveBeenCalledTimes(3);
+        expect(nodeAExecute.mock.calls).toEqual([
+          [{ default: { type: 'string', value: 'some text' } }],
+          [{ default: { type: 'string', value: 'some text' } }],
+          [{ default: { type: 'string', value: 'some text' } }],
+        ]);
+
+        expect(nodeBExecute).toHaveBeenCalledTimes(3);
+        expect(nodeBExecute.mock.calls).toEqual([
+          [{ default: { type: 'string', value: 'some text' } }],
+          [{ default: { type: 'string', value: 'some text' } }],
+          [{ default: { type: 'string', value: 'some text' } }],
+        ]);
+
+        done();
+      });
+      engine.execute(createCtx());
     });
   });
 });

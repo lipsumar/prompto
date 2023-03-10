@@ -58,9 +58,7 @@ export const chainRouter = router({
       });
     }),
   run: authedProcedure
-    .input(
-      z.object({ content: z.string(), id: z.string(), nodeId: z.string() })
-    )
+    .input(z.object({ content: z.string(), id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
@@ -102,9 +100,10 @@ async function runGraph(
   chainId: string,
   ctx: ExecuteFunctionContext
 ): Promise<ChainRun> {
-  function broadcastStatus(evt: {
+  type BroadcastEvent = {
     nodesStatus: { id: string; status: string }[];
-  }) {
+  };
+  function broadcastStatus(evt: BroadcastEvent) {
     console.log('broadcastStatus to', user.id);
     sendEventToUser(user.id, {
       nodesStatus: evt.nodesStatus,
@@ -112,13 +111,30 @@ async function runGraph(
     });
   }
 
+  const broadcastQueue: BroadcastEvent[] = [];
+  function addToBroadcastQueue(evt: BroadcastEvent) {
+    broadcastQueue.push(evt);
+  }
+  let stopBroadcast = false;
+  function sendBroadcastFromQueue() {
+    if (broadcastQueue.length > 0) {
+      broadcastStatus(broadcastQueue.shift()!);
+    }
+
+    if (stopBroadcast && broadcastQueue.length === 0) {
+      return;
+    }
+    setTimeout(sendBroadcastFromQueue, 100);
+  }
+  sendBroadcastFromQueue();
+
   const engine = new ExecutionEngine(graph);
-  engine.on('step', broadcastStatus);
+  engine.on('step', addToBroadcastQueue);
 
   return new Promise((resolve) => {
     engine.once('done', async () => {
-      engine.off('step', broadcastStatus);
-
+      engine.off('step', addToBroadcastQueue);
+      stopBroadcast = true;
       const prevRunsCount = await prisma.chainRun.count({
         where: { chainId },
       });

@@ -12,14 +12,13 @@ const state = reactive({
 });
 const editorStore = useGraphEditorStore();
 
-function run(graph: GraphData, nodeId: string) {
+function run(graph: GraphData) {
   invariant(currentChainStore.chain);
   state.running = true;
   trpc.chain.run
     .mutate({
       content: JSON.stringify(graph),
       id: currentChainStore.chain.id,
-      nodeId,
     })
     .then((chainRun) => {
       currentChainStore.addRun(chainRun);

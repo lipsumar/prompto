@@ -15,6 +15,7 @@ import createImageNode, { ImageNodeOptions } from '../nodes/image';
 import createListSplitterNode from '../nodes/list-splitter';
 import createLoopNode from '../nodes/loop';
 import createFolderNode, { FolderNodeOptions } from '../nodes/folder';
+import createRepeatNode, { RepeatNodeOptions } from '../nodes/repeat';
 import createImageGeneratorNode, {
   ImageGeneratorNodeOptions,
 } from '../nodes/image-generator';
@@ -145,7 +146,7 @@ export default class LangGraph extends EventEmitter {
 
   getOutputNodesOf(node: LangNode) {
     const edges = Object.keys(node.outputs)
-      .map((outputKey) => this.getEdgeFrom(node.id, outputKey))
+      .flatMap((outputKey) => this.getEdgesFrom(node.id, outputKey))
       .filter((edge): edge is LangEdge => typeof edge !== 'undefined');
     return edges.map((edge) => ({
       node: edge.to,
@@ -160,8 +161,8 @@ export default class LangGraph extends EventEmitter {
     );
   }
 
-  getEdgeFrom(fromId: string, fromPort: string) {
-    return this.edges.find(
+  getEdgesFrom(fromId: string, fromPort: string) {
+    return this.edges.filter(
       (edge) => edge.from.id === fromId && edge.fromPort === fromPort
     );
   }
@@ -190,6 +191,7 @@ type JSONNode = {
   | { type: 'list-splitter'; config: {} }
   | { type: 'loop'; config: {} }
   | { type: 'folder'; config: FolderNodeOptions }
+  | { type: 'repeat'; config: RepeatNodeOptions }
 );
 
 export function fromJSON(json: {
@@ -226,6 +228,8 @@ export function fromJSON(json: {
       node = createLoopNode(jsonNode.id);
     } else if (jsonNode.type === 'folder') {
       node = createFolderNode(jsonNode.id, { config: jsonNode.config });
+    } else if (jsonNode.type === 'repeat') {
+      node = createRepeatNode(jsonNode.id, { config: jsonNode.config });
     } else {
       throw new Error('unsupported node type=: ' + (jsonNode as any).type);
     }

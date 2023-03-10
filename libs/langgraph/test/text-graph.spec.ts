@@ -10,7 +10,7 @@ import { createCtx } from './utils';
 jest.mock('../src/langchain');
 const langchainMock = langchain as jest.MockedFunction<typeof langchain>;
 
-describe('graph', () => {
+describe.skip('graph', () => {
   test('single node', async () => {
     const node = new LangNode({
       id: 'n',

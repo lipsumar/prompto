@@ -10,14 +10,17 @@ import {
   type GraphNodeDataWithUi,
 } from "../../stores/graphEditor";
 import { defineProps, onMounted, onUnmounted, reactive, ref } from "vue";
-import { PlusIcon } from "@heroicons/vue/24/outline";
+import { PlayIcon, PlusIcon } from "@heroicons/vue/24/solid";
 import invariant from "tiny-invariant";
 import { createDrag } from "@/lib/drag";
 import GraphLine from "./GraphLine.vue";
+import { FolderIcon } from "@heroicons/vue/24/outline";
+import { ExclamationCircleIcon } from "@heroicons/vue/24/solid";
+import { useUserFoldersStore } from "@/stores/userFolders";
 
 const props = defineProps<{ graph: GraphData; runDisabled: boolean }>();
 const emits = defineEmits<{
-  (e: "run", graph: GraphData, nodeId: string): void;
+  (e: "run", graph: GraphData): void;
   (e: "save", graph: GraphData): void;
 }>();
 const viewport = ref<InstanceType<typeof GraphViewport>>();
@@ -26,6 +29,7 @@ const state = reactive({
   connectingEdgeFrom: { x: 0, y: 0 },
   addMenuOpen: false,
 });
+const foldersStore = useUserFoldersStore();
 
 const allNodes = [
   { name: "LLM", type: "llm" as const },
@@ -35,6 +39,7 @@ const allNodes = [
   { name: "Image generator", type: "image-generator" as const },
   { name: "List splitter", type: "list-splitter" as const },
   { name: "Loop", type: "loop" as const },
+  { name: "Repeat", type: "repeat" as const },
   { name: "Folder", type: "folder" as const },
 ];
 
@@ -101,6 +106,7 @@ function addNode(
     | "list-splitter"
     | "loop"
     | "folder"
+    | "repeat"
 ) {
   invariant(viewport.value);
   const pan = viewport.value.getPan();
@@ -146,10 +152,17 @@ function addNode(
       ...base,
       type,
       config: {
-        folderId: "clf129kur000106zw7zxw7jow",
+        folderId: "",
       },
       inputs: { default: "string" as const },
       outputs: {},
+    };
+  } else if (type === "repeat") {
+    node = {
+      ...base,
+      type,
+      config: { maxIteration: 3 },
+      inputs: { default: "string" as const },
     };
   } else {
     node = { ...base, type, config: { inputKey: "", defaultValue: "" } };
@@ -217,8 +230,8 @@ function startConnect(opts: {
   });
 }
 
-function executeNode(nodeId: string) {
-  emits("run", editorStore.getGraph(), nodeId);
+function run() {
+  emits("run", editorStore.getGraph());
 }
 function save() {
   emits("save", editorStore.getGraph());
@@ -250,14 +263,15 @@ onMounted(() => {
       :node-id="node.id"
       @start-connect="startConnect"
       @delete="deleteNode(node.id)"
-      @execute="executeNode(node.id)"
     >
       <div
         class="absolute right-0 top-0 font-mono px-2 py-1 bg-sky-100 rounded-bl rounded-tr-lg text-xs"
       >
         {{ node.id }}
       </div>
-      <div class="font-bold" v-if="node.type !== 'llm'">{{ node.type }}</div>
+      <div class="font-bold pr-16" v-if="node.type !== 'llm'">
+        {{ node.type }}
+      </div>
 
       <div v-if="node.type === 'input'">{{ node.config.inputKey }}</div>
       <div v-if="node.type === 'llm'" class="text-lg text-center pt-8">LLM</div>
@@ -268,10 +282,28 @@ onMounted(() => {
         <img
           v-if="node.config.image"
           :src="node.config.image"
+          :key="node.config.image"
           class="object-contain"
           width="512"
           height="512"
         />
+      </div>
+      <div v-if="node.type === 'folder'">
+        <div v-if="node.config.folderId" class="flex space-x-2 items-center">
+          <FolderIcon class="w-4 h-4" />
+          <span>{{
+            foldersStore.getFolderById(node.config.folderId)?.name
+          }}</span>
+        </div>
+        <div v-else class="text-orange-600 flex space-x-2">
+          <ExclamationCircleIcon class="w-4 h-4 flex-shrink-0" />
+          <span class="text-sm">No folder selected</span>
+        </div>
+      </div>
+      <div v-if="node.type === 'repeat'">
+        <div class="text-xl font-bold text-center pt-2">
+          {{ node.config.maxIteration }}x
+        </div>
       </div>
     </GraphNode>
   </GraphViewport>
@@ -288,6 +320,14 @@ onMounted(() => {
       @click="save"
     >
       Save
+    </button>
+
+    <button
+      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded"
+      @click="run"
+    >
+      Run
+      <PlayIcon class="w-4 h-4" />
     </button>
   </div>
 

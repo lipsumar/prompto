@@ -19,11 +19,15 @@ export const useUserFoldersStore = defineStore("userFolders", () => {
     return null;
   }
 
+  function getFolderById(id: string) {
+    return userFolders.value.find((f) => f.id === id);
+  }
+
   function init(id: string) {
     userFolders.value = [];
     projectId.value = id;
     return update();
   }
 
-  return { userFolders: userFolders, projectId, update, init };
+  return { userFolders: userFolders, projectId, update, init, getFolderById };
 });

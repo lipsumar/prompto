@@ -17,7 +17,7 @@ const currentUserFolderStore = useCurrentUserFolderStore();
         v-for="dataObject in currentUserFolderStore.dataObjects"
         :key="dataObject.id"
       >
-        <div class="bg-white p-2 rounded">
+        <div class="bg-white p-2 rounded h-full">
           <div v-if="dataObject.type === 'string'">
             {{ JSON.parse(dataObject.value) }}
           </div>

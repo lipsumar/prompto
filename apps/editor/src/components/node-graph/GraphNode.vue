@@ -33,7 +33,6 @@ const emit = defineEmits<{
     }
   ): void;
   (e: "delete"): void;
-  (e: "execute"): void;
 }>();
 const editorStore = useGraphEditorStore();
 const contentRef = ref<HTMLElement>();
@@ -204,11 +203,12 @@ onMounted(() => {
           class="bg-white outline outline-sky-500 p-4 py-2 rounded-lg drop-shadow-md relative whitespace-normal"
           :class="{
             'outline-4': isSelected,
-            'w-24': node.type === 'llm',
-            'w-60': node.type !== 'llm',
+            // 'w-24': node.type === 'llm',
+            // 'w-60': node.type !== 'llm',
+            'w-60': ['text', 'image'].includes(node.type),
           }"
         >
-          <div class="pb-2">
+          <div class="pb-1">
             <slot></slot>
           </div>
           <div
@@ -217,18 +217,13 @@ onMounted(() => {
           >
             ×
           </div>
-          <div
-            class="absolute -top-3 -left-3 rounded-full bg-blue-500 text-white items-center justify-center w-7 h-7 hidden group-hover:flex cursor-pointer"
-            @click="emit('execute')"
-          >
-            <PlayIcon class="w-4 h-4" />
-          </div>
+
           <div
             class="absolute top-0 right-0 bottom-0 left-0"
             v-if="node.status === 'running'"
           >
             <div
-              class="absolute top-0 right-0 bottom-0 left-0 bg-white opacity-60"
+              class="absolute top-0 right-0 bottom-0 left-0 bg-white opacity-60 rounded-lg"
             ></div>
             <div
               class="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center"
