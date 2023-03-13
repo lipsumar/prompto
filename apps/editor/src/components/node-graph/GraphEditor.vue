@@ -96,18 +96,7 @@ function zoomNodes(
   );
 }
 
-function addNode(
-  type:
-    | "llm"
-    | "input"
-    | "text"
-    | "image"
-    | "image-generator"
-    | "list-splitter"
-    | "loop"
-    | "folder"
-    | "repeat"
-) {
+function addNode(type: GraphNodeData["type"]) {
   invariant(viewport.value);
   const pan = viewport.value.getPan();
   const scale = viewport.value.getScale();
@@ -125,7 +114,7 @@ function addNode(
       ...base,
       type,
       inputs: { default: "string" as const },
-      config: { text: "", model: "text-davinci-003" },
+      config: { model: "text-davinci-003" },
     };
   } else if (type === "text") {
     node = {

@@ -178,7 +178,7 @@ export default class LangGraph extends EventEmitter {
   }
 }
 
-type JSONNode = {
+export type JSONNode = {
   id: string;
   inputs: Record<string, LangDataType>;
   outputs: Record<string, LangDataType>;

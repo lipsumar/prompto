@@ -2,13 +2,7 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import invariant from "tiny-invariant";
 import type { LangDataType } from "langgraph";
-import type { LlmNodeOptions } from "langgraph/dist/nodes/llm";
-import type { InputNodeOptions } from "langgraph/dist/nodes/input";
-import type { TextNodeOptions } from "langgraph/dist/nodes/text";
-import type { ImageNodeOptions } from "langgraph/dist/nodes/image";
-import type { ImageGeneratorNodeOptions } from "langgraph/dist/nodes/image-generator";
-import type { FolderNodeOptions } from "langgraph/dist/nodes/folder";
-import type { RepeatNodeOptions } from "langgraph/dist/nodes/repeat";
+import type { JSONNode } from "langgraph/dist/core/LangGraph";
 
 export type GraphData = {
   nodes: GraphNodeData[];
@@ -16,27 +10,7 @@ export type GraphData = {
 };
 
 // pure data, without width/height/inputsOffset/outputsOffset
-export type GraphNodeData = {
-  id: string;
-  inputs: Record<string, LangDataType>;
-  outputs: Record<string, LangDataType>;
-  x: number;
-  y: number;
-} & (
-  | { type: "output"; config?: undefined }
-  | { type: "llm"; config: LlmNodeOptions }
-  | { type: "text"; config: TextNodeOptions }
-  | { type: "image"; config: ImageNodeOptions }
-  | { type: "image-generator"; config: ImageGeneratorNodeOptions }
-  | { type: "list-splitter"; config: {} }
-  | { type: "loop"; config: {} }
-  | { type: "folder"; config: FolderNodeOptions }
-  | { type: "repeat"; config: RepeatNodeOptions }
-  | {
-      type: "input";
-      config: InputNodeOptions;
-    }
-);
+export type GraphNodeData = JSONNode & { x: number; y: number };
 
 // add UI fields
 export type GraphNodeDataWithUi = GraphNodeData & {
