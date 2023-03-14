@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  email        String    @unique
-  gpt3ApiToken String?
-  projects     Project[]
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  email               String    @unique
+  gpt3ApiToken        String?
+  huggingFaceApiToken String?
+  projects            Project[]
 }
 
 model Project {

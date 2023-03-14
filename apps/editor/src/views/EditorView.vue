@@ -28,7 +28,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex" v-if="state.ready">
+  <div class="h-screen flex" v-if="state.ready">
     <nav class="w-64 flex-none bg-slate-600 text-slate-50">
       <EditorSidebar :key="(route.params.projectId as string)" />
     </nav>
