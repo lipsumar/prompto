@@ -49,7 +49,7 @@ const connected = computed(
     }"
     ref="outer"
   >
-    <span v-if="port !== 'default'" class="text-mono">{{ props.port }}</span>
+    <span v-if="port !== 'default'" class="font-mono">{{ props.port }}</span>
 
     <div
       class="absolute right-0 top-0 h-full flex items-center"
