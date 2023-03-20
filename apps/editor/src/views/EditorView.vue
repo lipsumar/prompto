@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import EditorSidebar from "@/components/editor/EditorSidebar.vue";
 import EditorMain from "@/components/editor/EditorMain.vue";
-import { onMounted, reactive } from "vue";
+import { onMounted, onUnmounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { usePromptsStore } from "@/stores/prompts";
 import { useEditorStore } from "@/stores/editor";
@@ -17,6 +17,7 @@ const userFoldersStore = useUserFoldersStore();
 const state = reactive({ ready: false });
 
 onMounted(async () => {
+  window.document.body.style.overflow = "hidden";
   editorStore.reset();
 
   Promise.all([
@@ -24,6 +25,9 @@ onMounted(async () => {
     chainsStore.init(route.params.projectId as string),
     userFoldersStore.init(route.params.projectId as string),
   ]).then(() => (state.ready = true));
+});
+onUnmounted(() => {
+  window.document.body.style.overflow = "";
 });
 </script>
 
