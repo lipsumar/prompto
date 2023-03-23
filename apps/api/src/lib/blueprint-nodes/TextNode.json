@@ -1,0 +1,13 @@
+{
+  "type": "text",
+  "flowInputs": [],
+  "flowOutputs": [],
+  "dataInputs": [],
+  "dataOutputs": [
+    {
+      "key": "text",
+      "dataType": "string",
+      "isArray": false
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 {
   "name": "@lipsumar/blueprintjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "jest"

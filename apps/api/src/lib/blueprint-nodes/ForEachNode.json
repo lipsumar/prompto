@@ -1,0 +1,19 @@
+{
+  "type": "for-each",
+  "flowInputs": ["exec"],
+  "flowOutputs": ["body", "done"],
+  "dataInputs": [
+    {
+      "key": "array",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
+  "dataOutputs": [
+    {
+      "key": "current",
+      "dataType": "string",
+      "isArray": false
+    }
+  ]
+}

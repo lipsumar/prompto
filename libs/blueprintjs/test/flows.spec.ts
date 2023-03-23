@@ -58,20 +58,13 @@ class DummyLoopNode extends BlueprintNode {
   execute(ctx: ExecutionContext): void {
     this.spy();
     if (this.current < this.maxIteration) {
-      setTimeout(() => {
-        this.current++;
-        ctx.triggerPulse('body');
-
-        console.log('je continue');
-        ctx.continue(this.execute);
-      }, 0);
+      this.current++;
+      ctx.triggerPulse('body');
+      ctx.continue(this.execute);
     } else {
-      //setTimeout(() => {
       this.current = 0;
       ctx.triggerPulse('done');
-
       ctx.done();
-      //}, 0);
     }
   }
 }

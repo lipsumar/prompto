@@ -1,0 +1,19 @@
+{
+  "type": "text-split",
+  "flowInputs": [],
+  "flowOutputs": [],
+  "dataInputs": [
+    {
+      "key": "text",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
+  "dataOutputs": [
+    {
+      "key": "array",
+      "dataType": "string",
+      "isArray": true
+    }
+  ]
+}

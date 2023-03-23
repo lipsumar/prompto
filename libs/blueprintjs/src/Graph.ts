@@ -2,7 +2,7 @@ import BlueprintNode from './Node';
 import invariant from 'tiny-invariant';
 import { matches } from 'lodash';
 
-type BlueprintEdge = {
+export type BlueprintEdge = {
   fromId: string;
   fromKey: string;
   toId: string;
@@ -41,6 +41,11 @@ export default class BlueprintGraph {
 
   findEdges(filter: Partial<BlueprintEdge>) {
     return this.edges.filter(matches(filter));
+  }
+
+  getInputNodesOf(nodeId: string) {
+    const edges = this.findEdges({ toId: nodeId });
+    return edges.map((edge) => edge.fromId);
   }
 
   getFlowDependencies(nodeId: string) {

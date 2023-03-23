@@ -1,0 +1,13 @@
+{
+  "type": "add-to-folder",
+  "flowInputs": ["exec"],
+  "flowOutputs": ["done"],
+  "dataInputs": [
+    {
+      "key": "object",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
+  "dataOutputs": []
+}

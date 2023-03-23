@@ -1,0 +1,29 @@
+{
+  "type": "text-complete",
+  "flowInputs": ["exec"],
+  "flowOutputs": ["done"],
+  "dataInputs": [
+    {
+      "key": "prompt",
+      "dataType": "string",
+      "isArray": false
+    },
+    {
+      "key": "temperature",
+      "dataType": "number",
+      "isArray": false
+    },
+    {
+      "key": "model",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
+  "dataOutputs": [
+    {
+      "key": "text",
+      "dataType": "string",
+      "isArray": false
+    }
+  ]
+}

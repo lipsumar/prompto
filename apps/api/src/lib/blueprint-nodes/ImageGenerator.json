@@ -1,0 +1,19 @@
+{
+  "type": "image-generator",
+  "flowInputs": ["exec"],
+  "flowOutputs": ["done"],
+  "dataInputs": [
+    {
+      "key": "prompt",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
+  "dataOutputs": [
+    {
+      "key": "image",
+      "dataType": "image",
+      "isArray": false
+    }
+  ]
+}

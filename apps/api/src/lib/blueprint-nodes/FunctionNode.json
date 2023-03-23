@@ -1,0 +1,7 @@
+{
+  "type": "function",
+  "flowInputs": [],
+  "flowOutputs": ["done"],
+  "dataInputs": [],
+  "dataOutputs": []
+}

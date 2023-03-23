@@ -1,14 +1,25 @@
 import Konva from "konva";
-import type { BlueprintNodeJSON } from "api";
+import type { BlueprintEdge, BlueprintNodeJSON } from "api";
 import Node from "./Node";
+import invariant from "tiny-invariant";
+import Edge from "./Edge";
+import { isMatch } from "lodash";
+import type { Vector2d } from "konva/lib/types";
+
+type BlueprintGraphOptions = {
+  onContextMenu: (pos: Vector2d, stagePos: Vector2d) => void;
+  onClick: () => void;
+};
 
 export default class BlueprintGraph {
   el: HTMLDivElement;
   stage: Konva.Stage;
   nodeLayer: Konva.Layer;
   nodes: Node[] = [];
+  edgeLayer: Konva.Layer;
+  edges: Edge[] = [];
 
-  constructor(el: HTMLDivElement) {
+  constructor(el: HTMLDivElement, opts: BlueprintGraphOptions) {
     this.el = el;
     this.stage = new Konva.Stage({
       container: "konva-stage",
@@ -16,15 +27,55 @@ export default class BlueprintGraph {
       height: el.offsetHeight,
     });
     this.nodeLayer = new Konva.Layer();
+    this.edgeLayer = new Konva.Layer();
+    this.stage.add(this.edgeLayer);
     this.stage.add(this.nodeLayer);
     this.fitStage();
     this.setupPanZoom();
+    this.el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+    this.stage.on("click", (e) => {
+      if (e.evt.button === 2) {
+        //right click
+        const transform = this.stage.getAbsoluteTransform().copy();
+        transform.invert();
+        const point = transform.point(this.stage.getPointerPosition()!);
+        opts.onContextMenu(this.stage.getPointerPosition()!, point);
+      } else {
+        opts.onClick();
+      }
+    });
   }
 
   addNode(node: BlueprintNodeJSON) {
-    const uiNode = new Node(node);
+    const uiNode = new Node(node, this);
     this.nodes.push(uiNode);
     this.nodeLayer.add(uiNode.group);
+  }
+
+  addEdge(edge: BlueprintEdge) {
+    const fromNode = this.getNode(edge.fromId).node;
+    const type = fromNode.flowOutputs.includes(edge.fromKey)
+      ? "flow"
+      : fromNode.dataOutputs.find((p) => p.key === edge.fromKey)!.dataType;
+    const uiEdge = new Edge(edge, this, type);
+    this.edges.push(uiEdge);
+    this.edgeLayer.add(uiEdge.group);
+  }
+
+  removeEdge(edge: BlueprintEdge) {
+    const index = this.edges.findIndex((e) => isMatch(e.edge, edge));
+    invariant(index > -1);
+    const uiEdge = this.edges[index];
+    uiEdge.destroy();
+    this.edges = this.edges.filter((e, i) => i !== index);
+  }
+
+  getNode(nodeId: string) {
+    const node = this.nodes.find((n) => n.node.id === nodeId);
+    invariant(node);
+    return node;
   }
 
   fitStage() {
