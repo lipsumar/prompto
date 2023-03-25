@@ -13,14 +13,18 @@ export class TextCompleteNode extends BlueprintNode {
   async execute(ctx: ExecutionContext): Promise<void> {
     const prompt = ctx.input<string>('prompt');
 
-    const completion = await gpt3Complete(prompt, ctx.env('openaiApiKey'), {
-      temperature: ctx.input('temperature'),
-      model: ctx.input('model'),
-    });
-    ctx.output('text', completion);
+    try {
+      const completion = await gpt3Complete(prompt, ctx.env('openaiApiKey'), {
+        temperature: ctx.input('temperature'),
+        model: ctx.input('model'),
+      });
+      ctx.output('text', completion);
 
-    ctx.triggerPulse('done');
-    ctx.done();
+      ctx.triggerPulse('done');
+      ctx.done();
+    } catch (err) {
+      ctx.error(err);
+    }
   }
 
   // toJSON(){

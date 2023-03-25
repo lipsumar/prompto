@@ -2,9 +2,26 @@
 import BlueprintGraph from "@/blueprint-graph";
 import invariant from "tiny-invariant";
 import { onMounted, reactive } from "vue";
-import { allNodes, type BlueprintNode, type BlueprintNodeJSON } from "api";
+import { allNodes, type BlueprintPort, type BlueprintNodeJSON } from "api";
+
+import NodeInspector from "./NodeInspector.vue";
+import BlueprintToolBar from "./BlueprintToolBar.vue";
+import { trpc } from "@/trpc";
+import { useCurrentChainStore } from "@/stores/currentChain";
 
 const contextMenu = reactive({ x: 0, y: 0, show: false, stageX: 0, stageY: 0 });
+const inspector = reactive<{
+  show: boolean;
+  nodeId: string | null;
+  dataInputs: BlueprintPort[];
+  selfInputs: Record<string, any>;
+}>({
+  show: false,
+  nodeId: null,
+  dataInputs: [],
+  selfInputs: {},
+});
+const currentChainStore = useCurrentChainStore();
 let blueprintGraph: BlueprintGraph;
 onMounted(() => {
   var container = document.querySelector<HTMLDivElement>("#konva-stage");
@@ -20,58 +37,53 @@ onMounted(() => {
     },
     onClick() {
       contextMenu.show = false;
+      inspector.show = false;
+    },
+    openInspector(nodeId) {
+      inspector.show = true;
+      inspector.nodeId = nodeId;
+      inspector.dataInputs = [
+        ...blueprintGraph.getNode(nodeId).node.dataInputs,
+      ];
+      inspector.selfInputs = {
+        ...blueprintGraph.getNode(nodeId).node.selfInputs,
+      };
+    },
+    onRun(nodeId) {
+      invariant(currentChainStore.chain);
+      const json = blueprintGraph.toJSON();
+      trpc.chain.run
+        .mutate({
+          content: JSON.stringify(json),
+          id: currentChainStore.chain.id,
+          nodeId,
+        })
+        .then((resp) => {
+          console.log(resp);
+          // currentChainStore.addRun(chainRun);
+          // state.running = false;
+          // editorStore.setChainRun(JSON.parse(chainRun.content));
+        });
     },
   });
-  // blueprintGraph.addNode({
-  //   id: "complete",
-  //   type: "text-completion",
-  //   x: 100,
-  //   y: 100,
-  //   flowInputs: ["exec"],
-  //   flowOutputs: ["done"],
-  //   dataInputs: [{ key: "prompt", dataType: "string", isArray: false }],
-  //   dataOutputs: [{ key: "text", dataType: "string", isArray: false }],
-  // });
-  // blueprintGraph.addNode({
-  //   id: "complete2",
-  //   type: "text-completion2",
-  //   x: 600,
-  //   y: 400,
-  //   flowInputs: ["exec"],
-  //   flowOutputs: ["done"],
-  //   dataInputs: [{ key: "prompt", dataType: "string", isArray: false }],
-  //   dataOutputs: [{ key: "text", dataType: "string", isArray: false }],
-  // });
 
-  // blueprintGraph.addNode({
-  //   id: "loop",
-  //   type: "loop",
-  //   x: 400,
-  //   y: 200,
-  //   flowInputs: ["exec"],
-  //   flowOutputs: ["body", "done"],
-  //   dataInputs: [],
-  //   dataOutputs: [],
-  // });
-
-  // blueprintGraph.addNode({
-  //   id: "loop2",
-  //   type: "loop",
-  //   x: 800,
-  //   y: 180,
-  //   flowInputs: ["exec"],
-  //   flowOutputs: ["body", "done"],
-  //   dataInputs: [],
-  //   dataOutputs: [],
-  // });
-
-  // blueprintGraph.addEdge({
-  //   fromId: "complete",
-  //   fromKey: "done",
-  //   toId: "loop",
-  //   toKey: "exec",
-  // });
+  const graph = currentChainStore.graph;
+  invariant(graph);
+  if (graph.nodes) {
+    graph.nodes.forEach((node) => {
+      blueprintGraph.addNode(node);
+    });
+  }
+  if (graph.edges) {
+    graph.edges.forEach((edge) => {
+      blueprintGraph.addEdge(edge);
+    });
+  }
 });
+
+function setSelfInput(nodeId: string, key: string, value: any) {
+  blueprintGraph.getNode(nodeId).setSelfInput(key, value);
+}
 
 function makeid(length: number) {
   let result = "";
@@ -91,6 +103,7 @@ function addNode(type: string) {
   const schema = allNodes.find((n) => n.type === type);
   invariant(schema);
   const node = {
+    selfInputs: {},
     ...schema,
     id,
     x: contextMenu.stageX,
@@ -99,10 +112,31 @@ function addNode(type: string) {
   blueprintGraph.addNode(node as BlueprintNodeJSON);
   contextMenu.show = false;
 }
+
+function save() {
+  invariant(currentChainStore.chain);
+  const json = blueprintGraph.toJSON();
+  trpc.chain.update.mutate({
+    id: currentChainStore.chain.id,
+    content: JSON.stringify(json),
+  });
+}
 </script>
 <template>
   <div class="relative w-full h-full">
     <div id="konva-stage" class="w-full h-full"></div>
+    <BlueprintToolBar @save="save" />
+    <div
+      v-if="inspector.show && inspector.nodeId"
+      class="absolute right-3 top-3 bottom-3 w-96"
+    >
+      <NodeInspector
+        :nodeId="inspector.nodeId"
+        :dataInputs="inspector.dataInputs"
+        :selfInputs="inspector.selfInputs"
+        @setSelfInput="setSelfInput($event.nodeId, $event.key, $event.value)"
+      />
+    </div>
     <div
       class="absolute p-3 rounded shadow-lg bg-white"
       :class="{
@@ -118,6 +152,7 @@ function addNode(type: string) {
         v-for="node of allNodes"
         :key="node.type"
         @click="addNode(node.type)"
+        class="cursor-pointer"
       >
         {{ node.type }}
       </div>

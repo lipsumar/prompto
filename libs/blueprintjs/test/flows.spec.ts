@@ -1,44 +1,14 @@
-import ExecutionEngine, { ExecutionContext } from '../src/ExecutionEngine';
+import ExecutionEngine, {
+  ExecutionContext,
+  ExecutionError,
+} from '../src/ExecutionEngine';
 import BlueprintGraph from '../src/Graph';
 import BlueprintNode from '../src/Node';
+import { DummyNode, DummyAsyncNode } from './dummyNodes';
 
 function printFrame(frame: any, ident = 0) {
   process.stdout.write('--'.repeat(ident) + frame.nodeId + '\n');
   frame.children.forEach((c: any) => printFrame(c, ident + 1));
-}
-
-class DummyNode extends BlueprintNode {
-  spy: Function;
-  constructor(spy: Function) {
-    super();
-    this.registerInputSignal('exec', this.execute);
-    this.registerOutputSignal('done');
-    this.spy = spy;
-  }
-
-  execute(ctx: ExecutionContext): void {
-    this.spy();
-    ctx.triggerPulse('done');
-    ctx.done();
-  }
-}
-
-class DummyAsyncNode extends BlueprintNode {
-  spy: Function;
-  constructor(spy: Function) {
-    super();
-    this.registerInputSignal('exec', this.execute);
-    this.registerOutputSignal('done');
-    this.spy = spy;
-  }
-
-  execute(ctx: ExecutionContext): void {
-    this.spy();
-    setTimeout(() => {
-      ctx.triggerPulse('done');
-      ctx.done();
-    }, 0);
-  }
 }
 
 class DummyLoopNode extends BlueprintNode {

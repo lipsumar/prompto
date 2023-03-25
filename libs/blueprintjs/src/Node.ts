@@ -15,6 +15,7 @@ class BlueprintNode {
   flowOutputs: string[] = [];
   dataInputs: BlueprintPort[] = [];
   dataOutputs: BlueprintPort[] = [];
+  selfInputs: Record<string, any> = {};
 
   execute(ctx: ExecutionContext): void {
     throw new Error('Method not implemented.');
@@ -40,10 +41,14 @@ class BlueprintNode {
     return this.flowInputs.length === 0 && this.flowOutputs.length === 0;
   }
 
-  triggerPulse(key: string, ctx: ExecutionContext) {
+  async triggerPulse(key: string, ctx: ExecutionContext) {
     const callback = this.flowInputsCallbacks[key];
     invariant(callback, `no callback found for pulse "${key}"`);
-    callback.call(this, ctx);
+    try {
+      await callback.call(this, ctx);
+    } catch (err) {
+      ctx.error(err);
+    }
   }
 
   hasOutputKey(key: string) {

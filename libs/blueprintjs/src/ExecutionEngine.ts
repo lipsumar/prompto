@@ -5,6 +5,7 @@ import { uniq, uniqBy } from 'lodash';
 export type ExecutionContext = {
   triggerPulse: (key: string) => void;
   done: () => void;
+  error: (err: unknown) => void;
   continue: (callback: Function) => void;
   input: <T>(key: string) => T;
   output: <T>(key: string, value: T) => void;
@@ -29,13 +30,16 @@ export default class ExecutionEngine {
   head: string | null = null;
   pulseQueue: Pulse[] = [];
   executionDoneCallback: (() => void) | null = null;
+  executionErrorCallback: ((err: unknown) => void) | null = null;
   nodeStates: Map<string, NodeState> = new Map();
   nodeContinueCallbacks: Map<string, Function> = new Map();
   nodeOutputs: Map<string, any> = new Map();
+  nodeErrors: Map<string, any> = new Map();
   stack: Frame[] = [];
   env: Record<string, string>;
+  stopExecution = false;
 
-  constructor(graph: BlueprintGraph, env: Record<string, string>) {
+  constructor(graph: BlueprintGraph, env: Record<string, string> = {}) {
     this.graph = graph;
     this.env = env;
   }
@@ -51,14 +55,18 @@ export default class ExecutionEngine {
     };
     this.stack.push(frame);
 
+    const promise = new Promise<void>((resolve, reject) => {
+      this.executionDoneCallback = resolve;
+      this.executionErrorCallback = reject;
+    });
+
     const node = this.graph.getNode(nodeId);
     const ctx = this.createExecutionContext(nodeId, frame);
     this.nodeStates.set(nodeId, 'running');
     node.execute(ctx);
     this.handlePulseQueue(); // start "event loop"
-    return new Promise<void>((resolve) => {
-      this.executionDoneCallback = resolve;
-    });
+
+    return promise;
   }
 
   createExecutionContext(nodeId: string, frame?: Frame): ExecutionContext {
@@ -85,10 +93,16 @@ export default class ExecutionEngine {
       env: (key: string) => {
         return this.env[key];
       },
+      error: (err: unknown) => {
+        this.onError(err, nodeId);
+      },
     };
   }
 
   handlePulseQueue() {
+    if (this.stopExecution) {
+      return;
+    }
     const outgoingPulse = this.pulseQueue.shift();
 
     if (!outgoingPulse && this.allNodesIdle()) {
@@ -96,11 +110,7 @@ export default class ExecutionEngine {
       this.executionDoneCallback();
       return;
     }
-    // console.log('still work to do', {
-    //   pulse: !outgoingPulse,
-    //   allIdle: this.allNodesIdle(),
-    //   statuses: this.nodeStates,
-    // });
+
     if (outgoingPulse) {
       const edges = this.graph.findEdges({
         fromId: outgoingPulse.nodeId,
@@ -158,13 +168,29 @@ export default class ExecutionEngine {
     node.triggerPulse(pulse.key, ctx);
   }
 
+  onError(err: unknown, nodeId: string) {
+    this.stopExecution = true;
+    invariant(this.executionErrorCallback);
+    this.executionErrorCallback(new ExecutionError({ nodeId, cause: err }));
+  }
+
   getDataForInput(nodeId: string, inputKey: string) {
     console.log('getDataForInput', { nodeId, inputKey });
+
+    const node = this.graph.getNode(nodeId);
+    if (node.selfInputs[inputKey]) {
+      return node.selfInputs[inputKey];
+    }
+
     const edges = this.graph.findEdges({ toId: nodeId, toKey: inputKey });
     if (edges.length !== 1) {
-      throw new Error(
-        `Expected to find exactly 1 node on ${nodeId}.${inputKey} but found ${edges.length}`
+      invariant(this.executionErrorCallback);
+      this.executionErrorCallback(
+        new Error(
+          `Expected to find exactly 1 node on ${nodeId}.${inputKey} but found ${edges.length}`
+        )
       );
+      return;
     }
     const edge = edges[0];
 
@@ -198,4 +224,15 @@ export default class ExecutionEngine {
   //   const node = this.graph.getNode(nodeId);
   //   await node.execute(); // and now the fun begins
   // }
+}
+
+export class ExecutionError extends Error {
+  nodeId: string;
+  cause: unknown;
+
+  constructor({ nodeId, cause }: { nodeId: string; cause: unknown }) {
+    super('Execution error');
+    this.nodeId = nodeId;
+    this.cause = cause;
+  }
 }

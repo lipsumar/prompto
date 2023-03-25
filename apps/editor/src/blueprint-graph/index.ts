@@ -1,14 +1,17 @@
 import Konva from "konva";
 import type { BlueprintEdge, BlueprintNodeJSON } from "api";
-import Node from "./Node";
+import type Node from "./Node";
 import invariant from "tiny-invariant";
 import Edge from "./Edge";
 import { isMatch } from "lodash";
 import type { Vector2d } from "konva/lib/types";
+import { NodeByType } from "./constants";
 
 type BlueprintGraphOptions = {
   onContextMenu: (pos: Vector2d, stagePos: Vector2d) => void;
   onClick: () => void;
+  openInspector: (nodeId: string) => void;
+  onRun: (nodeId: string) => void;
 };
 
 export default class BlueprintGraph {
@@ -18,9 +21,11 @@ export default class BlueprintGraph {
   nodes: Node[] = [];
   edgeLayer: Konva.Layer;
   edges: Edge[] = [];
+  opts: BlueprintGraphOptions;
 
   constructor(el: HTMLDivElement, opts: BlueprintGraphOptions) {
     this.el = el;
+    this.opts = opts;
     this.stage = new Konva.Stage({
       container: "konva-stage",
       width: el.offsetWidth,
@@ -48,10 +53,26 @@ export default class BlueprintGraph {
     });
   }
 
+  openInspector(nodeId: string) {
+    this.opts.openInspector(nodeId);
+  }
+
+  // stagePosToAbsolute(stagePoint: Vector2d) {
+  //   const transform = this.stage.getAbsoluteTransform().copy();
+  //   transform.invert();
+  //   return transform.point(stagePoint);
+  // }
+
   addNode(node: BlueprintNodeJSON) {
-    const uiNode = new Node(node, this);
+    const NodeClass = NodeByType[node.type] || NodeByType._default;
+    console.log("addNode. class=", NodeClass);
+    const uiNode = new NodeClass(node, this);
+    console.log("uiNode=", uiNode);
     this.nodes.push(uiNode);
     this.nodeLayer.add(uiNode.group);
+    uiNode.group.on("bp:run", () => {
+      this.opts.onRun(uiNode.node.id);
+    });
   }
 
   addEdge(edge: BlueprintEdge) {
@@ -76,6 +97,17 @@ export default class BlueprintGraph {
     const node = this.nodes.find((n) => n.node.id === nodeId);
     invariant(node);
     return node;
+  }
+
+  toJSON(): { nodes: BlueprintNodeJSON[]; edges: BlueprintEdge[] } {
+    return {
+      nodes: this.nodes.map((uiNode) => {
+        return { ...uiNode.node, x: uiNode.group.x(), y: uiNode.group.y() };
+      }),
+      edges: this.edges.map((uiEdge) => {
+        return uiEdge.edge;
+      }),
+    };
   }
 
   fitStage() {

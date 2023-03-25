@@ -9,6 +9,7 @@ export type BlueprintNodeJSON = {
   flowOutputs: string[];
   dataInputs: BlueprintPort[];
   dataOutputs: BlueprintPort[];
+  selfInputs: Record<string, any>;
 };
 
 export {

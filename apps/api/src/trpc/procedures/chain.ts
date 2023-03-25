@@ -1,12 +1,18 @@
 import { z } from 'zod';
 import { authedProcedure, router } from '..';
 import { prisma } from '../../lib/prisma';
-import { ExecutionEngine, fromJSON as graphFromJSON } from 'langgraph';
 import invariant from 'tiny-invariant';
 import { sendEventToUser } from '../../middlewares/events';
 import type { LangGraph } from 'langgraph';
 import type { ChainRun, User } from '@prisma/client';
 import type { ExecuteFunctionContext } from 'langgraph/dist/types';
+import {
+  BlueprintEdge,
+  BlueprintGraph,
+  ExecutionEngine,
+} from '@lipsumar/blueprintjs';
+import getBlueprintNode from '../../lib/blueprint-nodes/getBlueprintNode';
+import { BlueprintNodeJSON } from '../../exports';
 
 export const chainRouter = router({
   inProject: authedProcedure
@@ -58,25 +64,49 @@ export const chainRouter = router({
       });
     }),
   run: authedProcedure
-    .input(z.object({ content: z.string(), id: z.string() }))
+    .input(
+      z.object({ content: z.string(), id: z.string(), nodeId: z.string() })
+    )
     .mutation(async ({ input, ctx }) => {
-      const graph = graphFromJSON(JSON.parse(input.content));
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
-      return runGraph(graph, ctx.user, input.id, {
-        apiInput: {},
-        openaiApiKey: ctx.user.gpt3ApiToken ?? undefined,
-        folderStorage: {
-          insert: async (folderId, dataObject) => {
-            await prisma.dataObjects.create({
-              data: {
-                type: dataObject.type,
-                value: JSON.stringify(dataObject.value),
-                userFolderId: folderId,
-              },
-            });
-          },
-        },
+      const json = JSON.parse(input.content);
+      const graph = new BlueprintGraph();
+
+      json.nodes.forEach((jsonNode: BlueprintNodeJSON) => {
+        const node = getBlueprintNode(jsonNode);
+        graph.addNode(jsonNode.id, node);
       });
+      json.edges.forEach((edge: BlueprintEdge) => {
+        graph.addEdge(edge);
+      });
+      const engine = new ExecutionEngine(graph, {
+        openaiApiKey: ctx.user.gpt3ApiToken,
+      });
+      try {
+        await engine.startExecution(input.nodeId);
+      } catch (err) {
+        console.log('oops');
+        throw err;
+      }
+
+      return [...engine.nodeOutputs.entries()];
+      // const graph = graphFromJSON(JSON.parse(input.content));
+      // invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
+      // return runGraph(graph, ctx.user, input.id, {
+      //   apiInput: {},
+      //   openaiApiKey: ctx.user.gpt3ApiToken ?? undefined,
+      //   folderStorage: {
+      //     insert: async (folderId, dataObject) => {
+      //       await prisma.dataObjects.create({
+      //         data: {
+      //           type: dataObject.type,
+      //           value: JSON.stringify(dataObject.value),
+      //           userFolderId: folderId,
+      //         },
+      //       });
+      //     },
+      //   },
+      // });
       //graph.on('step', broadcastStatus);
       // await graph.executeNode(input.nodeId, {
       //   apiInput: {},
@@ -94,59 +124,59 @@ export const chainRouter = router({
     }),
 });
 
-async function runGraph(
-  graph: LangGraph,
-  user: User,
-  chainId: string,
-  ctx: ExecuteFunctionContext
-): Promise<ChainRun> {
-  type BroadcastEvent = {
-    nodesStatus: { id: string; status: string }[];
-  };
-  function broadcastStatus(evt: BroadcastEvent) {
-    console.log('broadcastStatus to', user.id);
-    sendEventToUser(user.id, {
-      nodesStatus: evt.nodesStatus,
-      type: 'nodesStatus',
-    });
-  }
+// async function runGraph(
+//   graph: LangGraph,
+//   user: User,
+//   chainId: string,
+//   ctx: ExecuteFunctionContext
+// ): Promise<ChainRun> {
+//   type BroadcastEvent = {
+//     nodesStatus: { id: string; status: string }[];
+//   };
+//   function broadcastStatus(evt: BroadcastEvent) {
+//     console.log('broadcastStatus to', user.id);
+//     sendEventToUser(user.id, {
+//       nodesStatus: evt.nodesStatus,
+//       type: 'nodesStatus',
+//     });
+//   }
 
-  const broadcastQueue: BroadcastEvent[] = [];
-  function addToBroadcastQueue(evt: BroadcastEvent) {
-    broadcastQueue.push(evt);
-  }
-  let stopBroadcast = false;
-  function sendBroadcastFromQueue() {
-    if (broadcastQueue.length > 0) {
-      broadcastStatus(broadcastQueue.shift()!);
-    }
+//   const broadcastQueue: BroadcastEvent[] = [];
+//   function addToBroadcastQueue(evt: BroadcastEvent) {
+//     broadcastQueue.push(evt);
+//   }
+//   let stopBroadcast = false;
+//   function sendBroadcastFromQueue() {
+//     if (broadcastQueue.length > 0) {
+//       broadcastStatus(broadcastQueue.shift()!);
+//     }
 
-    if (stopBroadcast && broadcastQueue.length === 0) {
-      return;
-    }
-    setTimeout(sendBroadcastFromQueue, 100);
-  }
-  sendBroadcastFromQueue();
+//     if (stopBroadcast && broadcastQueue.length === 0) {
+//       return;
+//     }
+//     setTimeout(sendBroadcastFromQueue, 100);
+//   }
+//   sendBroadcastFromQueue();
 
-  const engine = new ExecutionEngine(graph);
-  engine.on('step', addToBroadcastQueue);
+//   const engine = new ExecutionEngine(graph);
+//   engine.on('step', addToBroadcastQueue);
 
-  return new Promise((resolve) => {
-    engine.once('done', async () => {
-      engine.off('step', addToBroadcastQueue);
-      stopBroadcast = true;
-      const prevRunsCount = await prisma.chainRun.count({
-        where: { chainId },
-      });
-      const chainRun = await prisma.chainRun.create({
-        data: {
-          chainId,
-          content: JSON.stringify(engine.executeResults),
-          number: prevRunsCount + 1,
-        },
-      });
-      resolve(chainRun);
-    });
-    engine.execute(ctx);
-  });
-}
+//   return new Promise((resolve) => {
+//     engine.once('done', async () => {
+//       engine.off('step', addToBroadcastQueue);
+//       stopBroadcast = true;
+//       const prevRunsCount = await prisma.chainRun.count({
+//         where: { chainId },
+//       });
+//       const chainRun = await prisma.chainRun.create({
+//         data: {
+//           chainId,
+//           content: JSON.stringify(engine.executeResults),
+//           number: prevRunsCount + 1,
+//         },
+//       });
+//       resolve(chainRun);
+//     });
+//     engine.execute(ctx);
+//   });
+// }

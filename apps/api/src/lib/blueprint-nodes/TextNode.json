@@ -2,7 +2,13 @@
   "type": "text",
   "flowInputs": [],
   "flowOutputs": [],
-  "dataInputs": [],
+  "dataInputs": [
+    {
+      "key": "text",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
   "dataOutputs": [
     {
       "key": "text",

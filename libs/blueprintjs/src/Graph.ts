@@ -22,15 +22,25 @@ export default class BlueprintGraph {
     const [fromId, fromKey] = from.split('.');
     const [toId, toKey] = to.split('.');
 
-    invariant(this.getNode(fromId).hasOutputKey(fromKey), `${from} not found`);
-    invariant(this.getNode(toId).hasInputKey(toKey), `${to} not found`);
-
-    this.edges.push({
+    const edge = {
       fromId,
       fromKey,
       toId,
       toKey,
-    });
+    };
+    this.addEdge(edge);
+  }
+
+  addEdge(edge: BlueprintEdge) {
+    invariant(
+      this.getNode(edge.fromId).hasOutputKey(edge.fromKey),
+      `${edge.fromId}.${edge.fromKey} not found`
+    );
+    invariant(
+      this.getNode(edge.toId).hasInputKey(edge.toKey),
+      `${edge.toId}.${edge.toKey} not found`
+    );
+    this.edges.push(edge);
   }
 
   getNode(id: string) {

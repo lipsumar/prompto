@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { trpc } from "@/trpc";
 import type { GraphData } from "./graphEditor";
 import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "api";
+import type { AppRouter, BlueprintEdge, BlueprintNodeJSON } from "api";
 import { ref } from "vue";
 import invariant from "tiny-invariant";
 import type { ExecuteResults } from "langgraph/dist/types";
@@ -10,14 +10,8 @@ import type { ExecuteResults } from "langgraph/dist/types";
 type Chain = inferRouterOutputs<AppRouter>["chain"]["get"];
 type ChainRun = inferRouterOutputs<AppRouter>["chain"]["run"];
 
-function getNewGraph(): GraphData {
-  return {
-    nodes: [],
-    edges: [],
-  };
-}
-
 type Run = { number: number; results: ExecuteResults; date: Date };
+type GraphJSON = { nodes: BlueprintNodeJSON[]; edges: BlueprintEdge[] };
 
 function chainRunToRun(chainRun: ChainRun) {
   return {
@@ -29,7 +23,7 @@ function chainRunToRun(chainRun: ChainRun) {
 
 export const useCurrentChainStore = defineStore("currentChain", () => {
   const chain = ref<Chain | null>(null);
-  const graph = ref<GraphData | null>(null);
+  const graph = ref<GraphJSON | null>(null);
   const runs = ref<Run[]>([]);
   return {
     chain,
@@ -47,17 +41,17 @@ export const useCurrentChainStore = defineStore("currentChain", () => {
       }
       //console.log({ chainData });
       chain.value = chainData;
-      let graphData = JSON.parse(chainData.content);
-      if (!graphData.nodes) {
-        const newGraph = getNewGraph();
-        graphData = newGraph;
-      } else {
-        const chainRuns = await trpc.chain.getRuns.query({ id: chainId });
-        runs.value = chainRuns.map(chainRunToRun);
-      }
+      const graphData = JSON.parse(chainData.content);
+      // if (!graphData.nodes) {
+      //   const newGraph = getNewGraph();
+      //   graphData = newGraph;
+      // } else {
+      //   const chainRuns = await trpc.chain.getRuns.query({ id: chainId });
+      //   runs.value = chainRuns.map(chainRunToRun);
+      // }
       graph.value = graphData;
     },
-    async save(newGraph: GraphData) {
+    async save(newGraph: any) {
       invariant(chain.value);
       return trpc.chain.update
         .mutate({

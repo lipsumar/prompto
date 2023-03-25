@@ -8,7 +8,7 @@ importers:
       nx: 15.2.4
       prettier: ^2.6.2
     devDependencies:
-      '@nrwl/nx-cloud': 15.2.3
+      '@nrwl/nx-cloud': 15.3.2
       nx: 15.2.4
       prettier: 2.8.3
 
@@ -1119,8 +1119,8 @@ packages:
       - debug
     dev: true
 
-  /@nrwl/nx-cloud/15.2.3:
-    resolution: {integrity: sha512-odbLJVhANnjXhUvHOeKGfMeK6hrC8poa/y1p6Wj1E5K8xbECMlz/kUWYjcbkEFcSCGyjCednDZCirhT9oy3RVQ==}
+  /@nrwl/nx-cloud/15.3.2:
+    resolution: {integrity: sha512-fga4duqcrkyT3djQpyRp8god3trb18hb+Tv0CYRrCcdNDHhzb6LOrxnenrFsjPjt38hyCdyu/ZYmHI/lQXyhAw==}
     hasBin: true
     dependencies:
       axios: 0.21.4

@@ -45,6 +45,9 @@ export default class Node {
       shadowOffsetY: 2,
     });
     this.group.add(this.bg);
+    this.bg.on("dblclick", () => {
+      this.graph.openInspector(this.node.id);
+    });
 
     const title = new Konva.Text({
       text: this.node.type
@@ -264,6 +267,10 @@ export default class Node {
         toKey: key,
       });
     });
+  }
+
+  setSelfInput(key: string, value: any) {
+    this.node.selfInputs[key] = value;
   }
 
   resize() {
