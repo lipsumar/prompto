@@ -2,17 +2,7 @@ import { z } from 'zod';
 import { authedProcedure, router } from '..';
 import { prisma } from '../../lib/prisma';
 import invariant from 'tiny-invariant';
-import { sendEventToUser } from '../../middlewares/events';
-import type { LangGraph } from 'langgraph';
-import type { ChainRun, User } from '@prisma/client';
-import type { ExecuteFunctionContext } from 'langgraph/dist/types';
-import {
-  BlueprintEdge,
-  BlueprintGraph,
-  ExecutionEngine,
-} from '@lipsumar/blueprintjs';
-import getBlueprintNode from '../../lib/blueprint-nodes/getBlueprintNode';
-import { BlueprintNodeJSON } from '../../exports';
+import chainExecutorManager from '../../lib/chainExecutorManager';
 
 export const chainRouter = router({
   inProject: authedProcedure
@@ -69,27 +59,28 @@ export const chainRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
-      const json = JSON.parse(input.content);
-      const graph = new BlueprintGraph();
 
-      json.nodes.forEach((jsonNode: BlueprintNodeJSON) => {
-        const node = getBlueprintNode(jsonNode);
-        graph.addNode(jsonNode.id, node);
-      });
-      json.edges.forEach((edge: BlueprintEdge) => {
-        graph.addEdge(edge);
-      });
-      const engine = new ExecutionEngine(graph, {
-        openaiApiKey: ctx.user.gpt3ApiToken,
-      });
-      try {
-        await engine.startExecution(input.nodeId);
-      } catch (err) {
-        console.log('oops');
-        throw err;
+      if (chainExecutorManager.isRunning(input.id)) {
+        throw new Error('chain already executing');
       }
+      chainExecutorManager.run(
+        input.id,
+        input.content,
+        input.nodeId,
+        {
+          openaiApiKey: ctx.user.gpt3ApiToken,
+        },
+        ctx.user.id
+      );
 
-      return [...engine.nodeOutputs.entries()];
+      // try {
+      //   await engine.startExecution(input.nodeId);
+      // } catch (err) {
+      //   console.log('oops');
+      //   throw err;
+      // }
+
+      return { ok: true };
       // const graph = graphFromJSON(JSON.parse(input.content));
       // invariant(ctx.user.gpt3ApiToken, 'openAI API key must be set');
       // return runGraph(graph, ctx.user, input.id, {

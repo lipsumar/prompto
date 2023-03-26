@@ -1,6 +1,7 @@
 import invariant from 'tiny-invariant';
 import BlueprintGraph from './Graph';
 import { uniq, uniqBy } from 'lodash';
+import EventEmitter from 'events';
 
 export type ExecutionContext = {
   triggerPulse: (key: string) => void;
@@ -25,7 +26,7 @@ type Frame = {
 
 type NodeState = 'idle' | 'running' | 'blocked' | 'to-continue';
 
-export default class ExecutionEngine {
+export default class ExecutionEngine extends EventEmitter {
   graph: BlueprintGraph;
   head: string | null = null;
   pulseQueue: Pulse[] = [];
@@ -40,6 +41,7 @@ export default class ExecutionEngine {
   stopExecution = false;
 
   constructor(graph: BlueprintGraph, env: Record<string, string> = {}) {
+    super();
     this.graph = graph;
     this.env = env;
   }
@@ -83,7 +85,9 @@ export default class ExecutionEngine {
         this.nodeStates.set(nodeId, 'to-continue');
       },
       input: <T>(key: string): T => {
-        return this.getDataForInput(nodeId, key) as T;
+        const value = this.getDataForInput(nodeId, key) as T;
+        this.emit('node-input', { nodeId, key, value });
+        return value;
       },
       output: <T>(key: string, value: T) => {
         const output = this.nodeOutputs.get(nodeId) || {};
@@ -135,7 +139,7 @@ export default class ExecutionEngine {
       }
     }
 
-    setTimeout(this.handlePulseQueue.bind(this), 0);
+    setTimeout(this.handlePulseQueue.bind(this), 500);
   }
 
   rewindStack(frame: Frame) {
@@ -165,6 +169,7 @@ export default class ExecutionEngine {
     const ctx = this.createExecutionContext(pulse.nodeId, pulse.frame);
     const node = this.graph.getNode(pulse.nodeId);
     this.nodeStates.set(pulse.nodeId, 'running');
+    this.emit('pulse', { nodeId: pulse.nodeId });
     node.triggerPulse(pulse.key, ctx);
   }
 
@@ -234,5 +239,17 @@ export class ExecutionError extends Error {
     super('Execution error');
     this.nodeId = nodeId;
     this.cause = cause;
+  }
+
+  toJSON() {
+    const cause =
+      this.cause instanceof Error
+        ? { message: this.cause.message, stack: this.cause.stack }
+        : `${this.cause}`;
+    return {
+      message: 'Execution error',
+      nodeId: this.nodeId,
+      cause,
+    };
   }
 }

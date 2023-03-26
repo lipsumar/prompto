@@ -7,4 +7,5 @@ export {
 export {
   default as ExecutionEngine,
   ExecutionContext,
+  ExecutionError,
 } from './ExecutionEngine';

@@ -5,6 +5,8 @@ import ImageGenerator from './ImageGenerator.json';
 import TextNode from './TextNode.json';
 import TextSplitNode from './TextSplitNode.json';
 import ForEachNode from './ForEachNode.json';
+import RepeatNode from './RepeatNode.json';
+import DebugNode from './DebugNode.json';
 
 export const allNodes = [
   TextCompleteNode,
@@ -14,4 +16,7 @@ export const allNodes = [
   TextNode,
   TextSplitNode,
   ForEachNode,
+  RepeatNode,
+  DebugNode,
+  RepeatNode,
 ];

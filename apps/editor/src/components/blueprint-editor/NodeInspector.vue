@@ -60,7 +60,7 @@ defineEmits<{
                   $emit('setSelfInput', {
                     key: port.key,
                     nodeId: nodeId,
-                    value: ($event.target as HTMLTextAreaElement).value,
+                    value: Number(($event.target as HTMLTextAreaElement).value),
                   })
                 "
                 class="w-full"

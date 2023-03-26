@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BlueprintGraph from "@/blueprint-graph";
 import invariant from "tiny-invariant";
-import { onMounted, reactive } from "vue";
+import { onMounted, onUnmounted, reactive } from "vue";
 import { allNodes, type BlueprintPort, type BlueprintNodeJSON } from "api";
 
 import NodeInspector from "./NodeInspector.vue";
@@ -22,6 +22,21 @@ const inspector = reactive<{
   selfInputs: {},
 });
 const currentChainStore = useCurrentChainStore();
+
+const evtSource = new EventSource(`${import.meta.env.VITE_API_URL}/events`, {
+  withCredentials: true,
+});
+evtSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(data);
+  if (data.type === "pulse" || data.type === "done") {
+    blueprintGraph.updateNodeStates(data.nodeStates);
+  }
+  if (data.type === "node-input") {
+    blueprintGraph.getNode(data.nodeId).setInput(data.key, data.value);
+  }
+};
+
 let blueprintGraph: BlueprintGraph;
 onMounted(() => {
   var container = document.querySelector<HTMLDivElement>("#konva-stage");
@@ -79,6 +94,10 @@ onMounted(() => {
       blueprintGraph.addEdge(edge);
     });
   }
+});
+
+onUnmounted(() => {
+  evtSource.close();
 });
 
 function setSelfInput(nodeId: string, key: string, value: any) {

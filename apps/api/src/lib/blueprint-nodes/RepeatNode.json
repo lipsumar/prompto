@@ -1,19 +1,22 @@
 {
-  "type": "for-each",
+  "type": "repeat",
   "flowInputs": ["exec"],
   "flowOutputs": ["body", "done"],
   "dataInputs": [
     {
-      "key": "array",
-      "dataType": "string",
-      "isArray": true
+      "key": "count",
+      "dataType": "number",
+      "isArray": false
     }
   ],
   "dataOutputs": [
     {
       "key": "current",
-      "dataType": "string",
+      "dataType": "number",
       "isArray": false
     }
-  ]
+  ],
+  "selfInputs": {
+    "count": 3
+  }
 }

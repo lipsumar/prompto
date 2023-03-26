@@ -99,6 +99,13 @@ export default class BlueprintGraph {
     return node;
   }
 
+  updateNodeStates(nodeStates: Record<string, string>) {
+    this.nodes.forEach((uiNode) => {
+      const state = nodeStates[uiNode.node.id];
+      uiNode.updateState(state);
+    });
+  }
+
   toJSON(): { nodes: BlueprintNodeJSON[]; edges: BlueprintEdge[] } {
     return {
       nodes: this.nodes.map((uiNode) => {

@@ -1,0 +1,13 @@
+{
+  "type": "debug",
+  "flowInputs": ["exec"],
+  "flowOutputs": ["done"],
+  "dataInputs": [
+    {
+      "key": "text",
+      "dataType": "string",
+      "isArray": false
+    }
+  ],
+  "dataOutputs": []
+}

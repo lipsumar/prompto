@@ -3,10 +3,12 @@ import type { BlueprintNodeJSON, BlueprintPort } from "api";
 import type { Context } from "konva/lib/Context";
 import type BlueprintGraph from ".";
 import { colorByDataType } from "./constants";
+import invariant from "tiny-invariant";
 
 export default class Node {
   group: Konva.Group;
   bg: Konva.Rect | null = null;
+  state: Konva.Text | null = null;
   node: BlueprintNodeJSON;
   currentInputY = 40;
   currentOutputY = 40;
@@ -15,6 +17,7 @@ export default class Node {
   inputPositions: Record<string, number> = {};
   outputPositions: Record<string, number> = {};
   graph: BlueprintGraph;
+  inputs: Record<string, any> = {};
 
   constructor(node: BlueprintNodeJSON, graph: BlueprintGraph) {
     this.node = node;
@@ -62,6 +65,17 @@ export default class Node {
     });
     this.group.add(title);
 
+    const state = new Konva.Text({
+      text: "idle",
+      fontSize: 12,
+      width: 50,
+      x: this.width - 55,
+      y: 5,
+      align: "right",
+    });
+    this.group.add(state);
+    this.state = state;
+
     this.node.flowInputs.forEach((flowInput) => {
       this.addFlowInput(flowInput);
     });
@@ -103,6 +117,7 @@ export default class Node {
       y: this.currentInputY,
       height: 20,
       verticalAlign: "middle",
+      listening: false,
     });
     this.group.add(text);
 
@@ -138,6 +153,7 @@ export default class Node {
       width: 50,
       verticalAlign: "middle",
       align: "right",
+      listening: false,
     });
     this.group.add(text);
 
@@ -171,6 +187,7 @@ export default class Node {
       y: this.currentInputY,
       height: 20,
       verticalAlign: "middle",
+      listening: false,
     });
     this.group.add(text);
 
@@ -206,6 +223,7 @@ export default class Node {
       width: 50,
       verticalAlign: "middle",
       align: "right",
+      listening: false,
     });
     this.group.add(text);
 
@@ -269,8 +287,17 @@ export default class Node {
     });
   }
 
+  setInput(key: string, value: any) {
+    this.inputs[key] = value;
+  }
+
   setSelfInput(key: string, value: any) {
     this.node.selfInputs[key] = value;
+  }
+
+  updateState(state: string) {
+    invariant(this.state);
+    this.state.text(state);
   }
 
   resize() {

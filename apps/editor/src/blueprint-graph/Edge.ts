@@ -51,7 +51,6 @@ export default class Edge {
     this.line.on("mouseenter", () => {
       this.placeDeleteGroup();
       this.deleteGroup.opacity(1);
-      console.log("me");
     });
     this.line.on("mouseleave", () => {
       this.deleteGroup.opacity(0);
