@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "flowInputs": [],
+  "flowOutputs": [],
+  "dataInputs": [],
+  "dataOutputs": [
+    {
+      "key": "object",
+      "dataType": "object",
+      "isArray": false
+    }
+  ],
+  "allowUserCreatedDataInputs": ["string", "number", "image", "object"]
+}

@@ -1,18 +1,19 @@
 {
-  "type": "add-to-folder",
+  "type": "neon-dream",
   "flowInputs": ["exec"],
   "flowOutputs": ["done"],
   "dataInputs": [
     {
-      "key": "value",
-      "dataType": "string",
-      "isArray": false
-    },
-    {
-      "key": "userFolderId",
+      "key": "prompt",
       "dataType": "string",
       "isArray": false
     }
   ],
-  "dataOutputs": []
+  "dataOutputs": [
+    {
+      "key": "image",
+      "dataType": "image",
+      "isArray": false
+    }
+  ]
 }

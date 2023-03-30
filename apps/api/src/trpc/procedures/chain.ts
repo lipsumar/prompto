@@ -69,9 +69,13 @@ export const chainRouter = router({
         input.nodeId,
         {
           openaiApiKey: ctx.user.gpt3ApiToken,
+          neonDreamApiToken: ctx.user.neonDreamApiToken || '',
         },
         ctx.user.id
       );
+      // .catch((err) => {
+      //   console.log('caramba!', err);
+      // });
 
       // try {
       //   await engine.startExecution(input.nodeId);

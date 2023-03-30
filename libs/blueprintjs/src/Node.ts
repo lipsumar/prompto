@@ -1,7 +1,7 @@
 import invariant from 'tiny-invariant';
 import { ExecutionContext } from './ExecutionEngine';
 
-export type DataType = 'string' | 'number';
+export type DataType = 'string' | 'number' | 'object' | 'image';
 
 export type BlueprintPort = {
   key: string;

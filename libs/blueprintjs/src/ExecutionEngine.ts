@@ -2,6 +2,7 @@ import invariant from 'tiny-invariant';
 import BlueprintGraph from './Graph';
 import { uniq, uniqBy } from 'lodash';
 import EventEmitter from 'events';
+import { DataType } from './Node';
 
 export type ExecutionContext = {
   triggerPulse: (key: string) => void;
@@ -9,6 +10,7 @@ export type ExecutionContext = {
   error: (err: unknown) => void;
   continue: (callback: Function) => void;
   input: <T>(key: string) => T;
+  inputs: () => Record<string, { type: DataType; value: any }>;
   output: <T>(key: string, value: T) => void;
   env: (key: string) => string;
 };
@@ -72,6 +74,15 @@ export default class ExecutionEngine extends EventEmitter {
   }
 
   createExecutionContext(nodeId: string, frame?: Frame): ExecutionContext {
+    // collect all inputs
+    const inputs = this.graph.getNode(nodeId).dataInputs.reduce((acc, port) => {
+      const wrapped = this.getDataForInput(nodeId, port.key);
+      acc[port.key] = {
+        value: wrapped.value,
+        type: wrapped.dataType,
+      };
+      return acc;
+    }, {} as Record<string, { type: DataType; value: any }>);
     return {
       triggerPulse: (key: string) => {
         invariant(frame);
@@ -85,9 +96,18 @@ export default class ExecutionEngine extends EventEmitter {
         this.nodeStates.set(nodeId, 'to-continue');
       },
       input: <T>(key: string): T => {
-        const value = this.getDataForInput(nodeId, key) as T;
-        this.emit('node-input', { nodeId, key, value });
-        return value;
+        const wrapped = this.getDataForInput(nodeId, key);
+        console.log('input', key, wrapped);
+        this.emit('node-input', {
+          nodeId,
+          key,
+          value: wrapped.value,
+          dataType: wrapped.dataType,
+        });
+        return wrapped.value as T;
+      },
+      inputs: () => {
+        return inputs;
       },
       output: <T>(key: string, value: T) => {
         const output = this.nodeOutputs.get(nodeId) || {};
@@ -179,12 +199,16 @@ export default class ExecutionEngine extends EventEmitter {
     this.executionErrorCallback(new ExecutionError({ nodeId, cause: err }));
   }
 
-  getDataForInput(nodeId: string, inputKey: string) {
+  getDataForInput(
+    nodeId: string,
+    inputKey: string
+  ): { value: any; dataType: DataType } {
     console.log('getDataForInput', { nodeId, inputKey });
 
     const node = this.graph.getNode(nodeId);
+    const inputPort = node.dataInputs.find((p) => p.key === inputKey)!;
     if (node.selfInputs[inputKey]) {
-      return node.selfInputs[inputKey];
+      return { value: node.selfInputs[inputKey], dataType: inputPort.dataType };
     }
 
     const edges = this.graph.findEdges({ toId: nodeId, toKey: inputKey });
@@ -195,14 +219,18 @@ export default class ExecutionEngine extends EventEmitter {
           `Expected to find exactly 1 node on ${nodeId}.${inputKey} but found ${edges.length}`
         )
       );
-      return;
+      return { value: null, dataType: 'object' }; //@todo cleanup
     }
     const edge = edges[0];
+
+    const dataType = this.graph
+      .getNode(edge.fromId)
+      .dataOutputs.find((p) => p.key === edge.fromKey)!.dataType;
 
     this.computeNodeOutputs(edge.fromId);
     const ret = this.nodeOutputs.get(edge.fromId)![edge.fromKey];
     console.log('getDataForInput return', ret);
-    return ret;
+    return { value: ret, dataType };
   }
 
   computeNodeOutputs(nodeId: string) {

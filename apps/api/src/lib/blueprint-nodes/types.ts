@@ -1,4 +1,9 @@
-import { BlueprintPort } from '@lipsumar/blueprintjs';
+import { BlueprintPort, DataType } from '@lipsumar/blueprintjs';
+
+export type BlueprintPortJSON = BlueprintPort & {
+  userCreated?: boolean;
+};
+
 // @todo extend base type from blueprint?
 export type BlueprintNodeJSON = {
   id: string;
@@ -7,9 +12,10 @@ export type BlueprintNodeJSON = {
   y: number;
   flowInputs: string[];
   flowOutputs: string[];
-  dataInputs: BlueprintPort[];
+  dataInputs: BlueprintPortJSON[];
   dataOutputs: BlueprintPort[];
   selfInputs: Record<string, any>;
+  allowUserCreatedDataInputs?: DataType[];
 };
 
 export {

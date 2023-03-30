@@ -7,6 +7,8 @@ export const colorByDataType = {
   string: "magenta",
   number: "green",
   flow: "black",
+  object: "blue",
+  image: "orange",
 };
 
 export const NodeByType: Record<string, typeof Node> = {

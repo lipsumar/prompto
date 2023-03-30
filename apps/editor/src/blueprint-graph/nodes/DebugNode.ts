@@ -47,7 +47,8 @@ export default class DebugNode extends Node {
 
   setInput(key: string, value: any) {
     Node.prototype.setInput.call(this, key, value);
-    this.textField?.text(value);
+    const text = typeof value === "string" ? value : JSON.stringify(value);
+    this.textField?.text(text);
     this.resize();
   }
 

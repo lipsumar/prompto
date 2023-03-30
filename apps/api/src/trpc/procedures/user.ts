@@ -8,13 +8,18 @@ export const userRouter = router({
   }),
   updateCurrent: authedProcedure
     .input(
-      z.object({ gpt3ApiToken: z.string(), huggingFaceApiToken: z.string() })
+      z.object({
+        gpt3ApiToken: z.string(),
+        huggingFaceApiToken: z.string(),
+        neonDreamApiToken: z.string(),
+      })
     )
     .mutation(async ({ input, ctx }) => {
       await prisma.user.update({
         data: {
           gpt3ApiToken: input.gpt3ApiToken,
           huggingFaceApiToken: input.huggingFaceApiToken,
+          neonDreamApiToken: input.neonDreamApiToken,
         },
         where: { id: ctx.user.id },
       });

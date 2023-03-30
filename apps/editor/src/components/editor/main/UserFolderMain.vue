@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useCurrentUserFolderStore } from "@/stores/currentUserFolder";
+import AnyRenderer from "@/components/user-folder-renderers/anyRenderer.vue";
+import type { DataType } from "api";
 
 const currentUserFolderStore = useCurrentUserFolderStore();
 </script>
@@ -18,7 +20,11 @@ const currentUserFolderStore = useCurrentUserFolderStore();
         :key="dataObject.id"
       >
         <div class="bg-white p-2 rounded h-full">
-          <div v-if="dataObject.type === 'string'">
+          <AnyRenderer
+            :value="JSON.parse(dataObject.value)"
+            :type="(dataObject.type as DataType)"
+          />
+          <!-- <div v-if="dataObject.type === 'string'">
             {{ JSON.parse(dataObject.value) }}
           </div>
           <div v-if="dataObject.type === 'image'">
@@ -29,6 +35,9 @@ const currentUserFolderStore = useCurrentUserFolderStore();
               height="512"
             />
           </div>
+          <div v-if="dataObject.type === 'object'">
+            <ObjectRenderer :object="JSON.parse(dataObject.value)" />
+          </div> -->
         </div>
       </div>
     </div>

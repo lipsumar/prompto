@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { PlayIcon } from "@heroicons/vue/24/solid";
 defineEmits<{
   (e: "save"): void;
-  (e: "run"): void;
 }>();
 </script>
 <template>
@@ -12,14 +10,6 @@ defineEmits<{
       @click="$emit('save')"
     >
       Save
-    </button>
-
-    <button
-      class="px-3 h-8 flex items-center justify-center bg-white shadow rounded"
-      @click="$emit('run')"
-    >
-      Run
-      <PlayIcon class="w-4 h-4" />
     </button>
   </div>
 </template>

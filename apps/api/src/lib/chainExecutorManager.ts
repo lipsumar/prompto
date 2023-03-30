@@ -1,6 +1,7 @@
 import {
   BlueprintEdge,
   BlueprintGraph,
+  DataType,
   ExecutionEngine,
   ExecutionError,
 } from '@lipsumar/blueprintjs';
@@ -101,10 +102,12 @@ class ExecutorRun {
     nodeId,
     key,
     value,
+    dataType,
   }: {
     nodeId: string;
     key: string;
     value: any;
+    dataType: DataType;
   }) {
     const node = this.engine.graph.getNode(nodeId);
     if (node instanceof DebugNode) {
@@ -114,6 +117,7 @@ class ExecutorRun {
         nodeId,
         key,
         value,
+        dataType,
       });
     }
   }

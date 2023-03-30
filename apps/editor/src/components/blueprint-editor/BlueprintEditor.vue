@@ -2,7 +2,12 @@
 import BlueprintGraph from "@/blueprint-graph";
 import invariant from "tiny-invariant";
 import { onMounted, onUnmounted, reactive } from "vue";
-import { allNodes, type BlueprintPort, type BlueprintNodeJSON } from "api";
+import {
+  allNodes,
+  type BlueprintPort,
+  type BlueprintNodeJSON,
+  type DataType,
+} from "api";
 
 import NodeInspector from "./NodeInspector.vue";
 import BlueprintToolBar from "./BlueprintToolBar.vue";
@@ -15,11 +20,13 @@ const inspector = reactive<{
   nodeId: string | null;
   dataInputs: BlueprintPort[];
   selfInputs: Record<string, any>;
+  allowUserCreatedDataInputs: DataType[] | null;
 }>({
   show: false,
   nodeId: null,
   dataInputs: [],
   selfInputs: {},
+  allowUserCreatedDataInputs: null,
 });
 const currentChainStore = useCurrentChainStore();
 
@@ -63,6 +70,8 @@ onMounted(() => {
       inspector.selfInputs = {
         ...blueprintGraph.getNode(nodeId).node.selfInputs,
       };
+      inspector.allowUserCreatedDataInputs =
+        blueprintGraph.getNode(nodeId).node.allowUserCreatedDataInputs || null;
     },
     onRun(nodeId) {
       invariant(currentChainStore.chain);
@@ -140,6 +149,19 @@ function save() {
     content: JSON.stringify(json),
   });
 }
+
+function createNewInput({
+  nodeId,
+  dataType,
+  name,
+}: {
+  nodeId: string;
+  dataType: DataType;
+  name: string;
+}) {
+  blueprintGraph.getNode(nodeId).createNewInput(name, dataType);
+  inspector.dataInputs = [...blueprintGraph.getNode(nodeId).node.dataInputs];
+}
 </script>
 <template>
   <div class="relative w-full h-full">
@@ -153,6 +175,8 @@ function save() {
         :nodeId="inspector.nodeId"
         :dataInputs="inspector.dataInputs"
         :selfInputs="inspector.selfInputs"
+        :allowUserCreatedDataInputs="inspector.allowUserCreatedDataInputs"
+        @createNewInput="createNewInput($event)"
         @setSelfInput="setSelfInput($event.nodeId, $event.key, $event.value)"
       />
     </div>

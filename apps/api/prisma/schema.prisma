@@ -14,6 +14,7 @@ model User {
   email               String    @unique
   gpt3ApiToken        String?
   huggingFaceApiToken String?
+  neonDreamApiToken   String?
   projects            Project[]
 }
 

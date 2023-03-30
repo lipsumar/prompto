@@ -1,15 +1,25 @@
 <script setup lang="ts">
-import type { BlueprintPort } from "api";
+import type { BlueprintPort, DataType } from "api";
+import { reactive } from "vue";
 
 const props = defineProps<{
   dataInputs: BlueprintPort[];
   selfInputs: Record<string, any>;
   nodeId: string;
+  allowUserCreatedDataInputs: string[] | null;
 }>();
+const newInput = reactive({
+  name: "",
+  dataType: "",
+});
 defineEmits<{
   (
     e: "setSelfInput",
     opts: { nodeId: string; key: string; value: string }
+  ): void;
+  (
+    e: "createNewInput",
+    opts: { name: string; dataType: DataType; nodeId: string }
   ): void;
 }>();
 </script>
@@ -69,6 +79,38 @@ defineEmits<{
           </tr>
         </tbody>
       </table>
+    </div>
+    <div v-if="allowUserCreatedDataInputs" class="mt-2 space-x-1">
+      <input
+        type="text"
+        v-model="newInput.name"
+        class="w-28 border border-gray-300 rounded px-1"
+        placeholder="New input"
+      />
+      <select
+        v-model="newInput.dataType"
+        class="w-28 border border-gray-300 rounded px-1"
+      >
+        <option v-for="typeName of allowUserCreatedDataInputs" :key="typeName">
+          {{ typeName }}
+        </option>
+      </select>
+      <button
+        @click="
+          ($event) => {
+            $emit('createNewInput', {
+              name: newInput.name,
+              dataType: newInput.dataType,
+              nodeId: nodeId,
+            });
+            newInput.name = '';
+            newInput.dataType = '';
+          }
+        "
+        class="bg-blue-500 text-white px-2 rounded"
+      >
+        create
+      </button>
     </div>
   </div>
 </template>

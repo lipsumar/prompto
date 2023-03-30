@@ -1,5 +1,5 @@
 import Konva from "konva";
-import type { BlueprintNodeJSON, BlueprintPort } from "api";
+import type { BlueprintNodeJSON, BlueprintPort, DataType } from "api";
 import type { Context } from "konva/lib/Context";
 import type BlueprintGraph from ".";
 import { colorByDataType } from "./constants";
@@ -7,6 +7,7 @@ import invariant from "tiny-invariant";
 
 export default class Node {
   group: Konva.Group;
+  inputsGroup: Konva.Group;
   bg: Konva.Rect | null = null;
   state: Konva.Text | null = null;
   node: BlueprintNodeJSON;
@@ -27,6 +28,8 @@ export default class Node {
       y: node.y,
       draggable: true,
     });
+    this.inputsGroup = new Konva.Group();
+
     this.build();
   }
 
@@ -76,6 +79,7 @@ export default class Node {
     this.group.add(state);
     this.state = state;
 
+    this.group.add(this.inputsGroup);
     this.node.flowInputs.forEach((flowInput) => {
       this.addFlowInput(flowInput);
     });
@@ -92,15 +96,7 @@ export default class Node {
   }
 
   addFlowInput(key: string) {
-    const arrow = new Konva.Shape({
-      x: -8,
-      y: this.currentInputY,
-      stroke: "#000",
-      strokeWidth: 1,
-      fill: "#fff",
-      sceneFunc: flowArrowSceneFunc,
-    });
-    this.group.add(arrow);
+    this.inputsGroup.add(flowArrowShape(-8, this.currentInputY));
     this.addEdgeEndTarget(
       {
         x: 0,
@@ -108,33 +104,13 @@ export default class Node {
       },
       key
     );
-
-    const text = new Konva.Text({
-      text: key,
-      fontFamily: "BlinkMacSystemFont",
-      fontSize: 16,
-      x: 20,
-      y: this.currentInputY,
-      height: 20,
-      verticalAlign: "middle",
-      listening: false,
-    });
-    this.group.add(text);
-
+    this.inputsGroup.add(inputText(key, this.currentInputY));
     this.inputPositions[key] = this.currentInputY + 10;
     this.currentInputY += 35;
   }
 
   addFlowOutput(key: string) {
-    const arrow = new Konva.Shape({
-      x: this.width - 9,
-      y: this.currentOutputY,
-      stroke: "#000",
-      strokeWidth: 1,
-      fill: "#fff",
-      sceneFunc: flowArrowSceneFunc,
-    });
-    this.group.add(arrow);
+    this.group.add(flowArrowShape(this.width - 9, this.currentOutputY));
     this.addEdgeStartTarget(
       {
         x: this.width,
@@ -142,35 +118,19 @@ export default class Node {
       },
       key
     );
-
-    const text = new Konva.Text({
-      text: key,
-      fontFamily: "BlinkMacSystemFont",
-      fontSize: 16,
-      x: this.width - 20 - 50,
-      y: this.currentOutputY,
-      height: 20,
-      width: 50,
-      verticalAlign: "middle",
-      align: "right",
-      listening: false,
-    });
-    this.group.add(text);
-
+    this.group.add(outputText(key, this.width - 20 - 50, this.currentOutputY));
     this.outputPositions[key] = this.currentOutputY + 10;
     this.currentOutputY += 35;
   }
 
   addDataInput(port: BlueprintPort) {
-    const circle = new Konva.Circle({
-      x: 0,
-      y: this.currentInputY + 10,
-      radius: 7,
-      stroke: colorByDataType[port.dataType],
-      strokeWidth: 1.5,
-      fill: "white",
-    });
-    this.group.add(circle);
+    this.inputsGroup.add(
+      inputOutputCircle(
+        0,
+        this.currentInputY + 10,
+        colorByDataType[port.dataType]
+      )
+    );
     this.addEdgeEndTarget(
       {
         x: 0,
@@ -178,33 +138,20 @@ export default class Node {
       },
       port.key
     );
-
-    const text = new Konva.Text({
-      text: port.key,
-      fontFamily: "BlinkMacSystemFont",
-      fontSize: 16,
-      x: 20,
-      y: this.currentInputY,
-      height: 20,
-      verticalAlign: "middle",
-      listening: false,
-    });
-    this.group.add(text);
+    this.inputsGroup.add(inputText(port.key, this.currentInputY));
 
     this.inputPositions[port.key] = this.currentInputY + 10;
     this.currentInputY += 35;
   }
 
   addDataOutput(port: BlueprintPort) {
-    const circle = new Konva.Circle({
-      x: this.width,
-      y: this.currentOutputY + 10,
-      radius: 7,
-      stroke: colorByDataType[port.dataType],
-      strokeWidth: 1.5,
-      fill: "white",
-    });
-    this.group.add(circle);
+    this.group.add(
+      inputOutputCircle(
+        this.width,
+        this.currentOutputY + 10,
+        colorByDataType[port.dataType]
+      )
+    );
     this.addEdgeStartTarget(
       {
         x: this.width,
@@ -212,21 +159,9 @@ export default class Node {
       },
       port.key
     );
-
-    const text = new Konva.Text({
-      text: port.key,
-      fontFamily: "BlinkMacSystemFont",
-      fontSize: 16,
-      x: this.width - 20 - 50,
-      y: this.currentOutputY,
-      height: 20,
-      width: 50,
-      verticalAlign: "middle",
-      align: "right",
-      listening: false,
-    });
-    this.group.add(text);
-
+    this.group.add(
+      outputText(port.key, this.width - 20 - 50, this.currentOutputY)
+    );
     this.outputPositions[port.key] = this.currentOutputY + 10;
     this.currentOutputY += 35;
   }
@@ -295,6 +230,25 @@ export default class Node {
     this.node.selfInputs[key] = value;
   }
 
+  createNewInput(key: string, dataType: DataType) {
+    this.node.dataInputs.push({
+      key,
+      dataType,
+      isArray: false,
+      userCreated: true,
+    });
+    this.inputsGroup.destroyChildren();
+    this.inputPositions = {};
+    this.currentInputY = 40;
+    this.node.flowInputs.forEach((flowInput) => {
+      this.addFlowInput(flowInput);
+    });
+    this.node.dataInputs.forEach((port) => {
+      this.addDataInput(port);
+    });
+    this.resize();
+  }
+
   updateState(state: string) {
     invariant(this.state);
     this.state.text(state);
@@ -307,14 +261,62 @@ export default class Node {
   }
 }
 
-function flowArrowSceneFunc(ctx: Context, shape: Konva.Shape) {
-  const width = 15;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(width, 0);
-  ctx.lineTo(width + 5, 10);
-  ctx.lineTo(width, 20);
-  ctx.lineTo(0, 20);
-  ctx.closePath();
-  ctx.fillStrokeShape(shape);
+function flowArrowShape(x: number, y: number) {
+  return new Konva.Shape({
+    x,
+    y,
+    stroke: "#000",
+    strokeWidth: 1,
+    fill: "#fff",
+    sceneFunc(ctx: Context, shape: Konva.Shape) {
+      const width = 15;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width, 0);
+      ctx.lineTo(width + 5, 10);
+      ctx.lineTo(width, 20);
+      ctx.lineTo(0, 20);
+      ctx.closePath();
+      ctx.fillStrokeShape(shape);
+    },
+  });
+}
+
+function inputText(text: string, y: number) {
+  return new Konva.Text({
+    text,
+    fontFamily: "BlinkMacSystemFont",
+    fontSize: 16,
+    x: 20,
+    y,
+    height: 20,
+    verticalAlign: "middle",
+    listening: false,
+  });
+}
+
+function outputText(text: string, x: number, y: number) {
+  return new Konva.Text({
+    text,
+    fontFamily: "BlinkMacSystemFont",
+    fontSize: 16,
+    x,
+    y,
+    height: 20,
+    width: 50,
+    verticalAlign: "middle",
+    align: "right",
+    listening: false,
+  });
+}
+
+function inputOutputCircle(x: number, y: number, color: string) {
+  return new Konva.Circle({
+    x,
+    y,
+    radius: 7,
+    stroke: color,
+    strokeWidth: 1.5,
+    fill: "white",
+  });
 }

@@ -34,7 +34,8 @@ export function eventsHandler(request: Request, response: Response) {
 
 export function sendEventToUser(userId: string, event: any) {
   const client = clients.find((c) => c.userId === userId);
-  invariant(client, 'event client not found');
-  //console.log('send to', client);
-  client.response.write(`data:${JSON.stringify(event)}\n\n`);
+  //invariant(client, 'event client not found');
+  if (client) {
+    client.response.write(`data:${JSON.stringify(event)}\n\n`);
+  }
 }

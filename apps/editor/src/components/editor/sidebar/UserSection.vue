@@ -7,6 +7,7 @@ const state = reactive({
   email: "",
   gpt3ApiToken: "",
   huggingFaceApiToken: "",
+  neonDreamApiToken: "",
   isOpen: false,
 });
 
@@ -15,6 +16,7 @@ onMounted(() => {
     state.email = user.email;
     state.gpt3ApiToken = user.gpt3ApiToken || "";
     state.huggingFaceApiToken = user.huggingFaceApiToken || "";
+    state.neonDreamApiToken = user.neonDreamApiToken || "";
   });
 });
 
@@ -23,6 +25,7 @@ function save() {
     .mutate({
       gpt3ApiToken: state.gpt3ApiToken,
       huggingFaceApiToken: state.huggingFaceApiToken,
+      neonDreamApiToken: state.neonDreamApiToken,
     })
     .then(() => {
       state.isOpen = false;
@@ -67,6 +70,15 @@ function save() {
             type="text"
             class="form-input w-full mt-1 rounded-md border-gray-30 p-2"
             v-model="state.huggingFaceApiToken"
+          />
+        </label>
+
+        <label class="block mb-6">
+          <span class="text-gray-700">NeonDream API key</span>
+          <input
+            type="text"
+            class="form-input w-full mt-1 rounded-md border-gray-30 p-2"
+            v-model="state.neonDreamApiToken"
           />
         </label>
 
